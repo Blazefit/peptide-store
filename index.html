@@ -159,6 +159,14 @@
   @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+  /* Subscription status */
+  .status-active { background: rgba(52,211,153,0.15); color: var(--green); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .status-paused { background: rgba(251,191,36,0.15); color: var(--yellow); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .status-cancelled { background: rgba(248,113,113,0.15); color: var(--red); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .payment-ok { color: var(--green); }
+  .payment-due { color: var(--yellow); }
+  .payment-overdue { color: var(--red); }
+
   /* Responsive */
   @media (max-width: 768px) {
     header { flex-direction: column; gap: 12px; padding: 16px; }
@@ -309,7 +317,10 @@
     <div id="tab-clients" class="tab-panel">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="font-size:1.2rem;">Client Management</h2>
-        <button class="btn btn-primary btn-sm" onclick="openAddClient()">+ Add Client</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="openAddSub()">+ Add Subscription</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddClient()">+ Add Client</button>
+        </div>
       </div>
       <div class="kpi-grid" id="clientKpis"></div>
       <div class="controls">
@@ -345,6 +356,31 @@
               <tbody id="clientDetailOrders"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+      <!-- Subscriptions Section -->
+      <div style="margin-top:32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 style="font-size:1.1rem;">Monthly Subscriptions</h2>
+        </div>
+        <div class="kpi-grid" id="subKpis"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Product</th>
+                <th>Monthly Price</th>
+                <th>Dose / Session</th>
+                <th>Frequency</th>
+                <th>Status</th>
+                <th>Started</th>
+                <th>Paid / Owed</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subsTableBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -527,6 +563,70 @@
   </div>
 </div>
 
+<!-- Add/Edit Subscription Modal -->
+<div class="modal-overlay" id="subModal">
+  <div class="modal">
+    <h2 id="subModalTitle">Add Subscription</h2>
+    <input type="hidden" id="subEditId">
+    <div class="form-group">
+      <label>Client</label>
+      <select id="subClient"></select>
+    </div>
+    <div class="form-group">
+      <label>Product</label>
+      <select id="subProduct"></select>
+    </div>
+    <div class="form-group"><label>Monthly Price ($)</label><input id="subPrice" type="number" step="0.01" min="0" placeholder="e.g. 150.00"></div>
+    <div class="form-group"><label>Dose per Session</label><input id="subDose" placeholder="e.g. 2.5mg, 200mcg"></div>
+    <div class="form-group">
+      <label>Frequency</label>
+      <select id="subFrequency">
+        <option value="weekly">Weekly (4x/month)</option>
+        <option value="biweekly">Bi-weekly (2x/month)</option>
+        <option value="monthly">Monthly (1x/month)</option>
+        <option value="2x-week">2x per week (8x/month)</option>
+        <option value="3x-week">3x per week (12x/month)</option>
+        <option value="daily">Daily</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Start Date</label><input id="subStartDate" type="date"></div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="subStatus">
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Notes</label><input id="subNotes" placeholder="e.g. dose schedule, special instructions..."></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('subModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSub()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record Subscription Payment Modal -->
+<div class="modal-overlay" id="subPayModal">
+  <div class="modal">
+    <h2>Record Payment</h2>
+    <input type="hidden" id="paySubId">
+    <p style="font-size:0.85rem; color:var(--text2); margin-bottom:16px;" id="paySubInfo"></p>
+    <div class="form-group"><label>Amount ($)</label><input id="payAmount" type="number" step="0.01" min="0"></div>
+    <div class="form-group"><label>Date</label><input id="payDate" type="date"></div>
+    <div class="form-group">
+      <label>Month Covered</label>
+      <input id="payMonth" type="month">
+    </div>
+    <div class="form-group"><label>Notes</label><input id="payNotes" placeholder="e.g. cash, Venmo, partial..."></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('subPayModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSubPayment()">Record Payment</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toasts"></div>
 
 <script>
@@ -537,6 +637,8 @@ const STORAGE_KEY = 'peptide_store_data';
 const ORDERS_KEY = 'peptide_store_orders';
 const CLIENTS_KEY = 'peptide_store_clients';
 const USAGE_KEY = 'peptide_store_usage';
+const SUBS_KEY = 'peptide_store_subscriptions';
+const SUB_PAYMENTS_KEY = 'peptide_store_sub_payments';
 
 const DEFAULT_PRODUCTS = [
   { id: 1, name: "Tesamorelin", sku: "TSM-20", dosage: "20mg", category: "growth", stock: 10, cost: 49.92, price: 89.99 },
@@ -592,11 +694,17 @@ function loadClients() { return JSON.parse(localStorage.getItem(CLIENTS_KEY) || 
 function saveClients(data) { localStorage.setItem(CLIENTS_KEY, JSON.stringify(data)); }
 function loadUsage() { return JSON.parse(localStorage.getItem(USAGE_KEY) || '[]'); }
 function saveUsage(data) { localStorage.setItem(USAGE_KEY, JSON.stringify(data)); }
+function loadSubs() { return JSON.parse(localStorage.getItem(SUBS_KEY) || '[]'); }
+function saveSubs(data) { localStorage.setItem(SUBS_KEY, JSON.stringify(data)); }
+function loadSubPayments() { return JSON.parse(localStorage.getItem(SUB_PAYMENTS_KEY) || '[]'); }
+function saveSubPayments(data) { localStorage.setItem(SUB_PAYMENTS_KEY, JSON.stringify(data)); }
 
 let products = loadProducts();
 let orders = loadOrders();
 let clients = loadClients();
 let usageLogs = loadUsage();
+let subscriptions = loadSubs();
+let subPayments = loadSubPayments();
 let cart = [];
 
 // ===========================
@@ -1060,12 +1168,14 @@ function renderAnalytics() {
 // ===========================
 function exportAllData() {
   const data = {
-    version: 2,
+    version: 3,
     exportDate: new Date().toISOString(),
     products: products,
     orders: orders,
     clients: clients,
-    usageLogs: usageLogs
+    usageLogs: usageLogs,
+    subscriptions: subscriptions,
+    subPayments: subPayments
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -1083,19 +1193,23 @@ function importAllData(event) {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.products || !Array.isArray(data.products)) { toast('Invalid backup file'); return; }
-      if (!confirm(`Import ${data.products.length} products, ${(data.orders || []).length} orders, ${(data.clients || []).length} clients, and ${(data.usageLogs || []).length} usage logs from backup dated ${data.exportDate || 'unknown'}? This will replace all current data.`)) return;
+      if (!confirm(`Import ${data.products.length} products, ${(data.orders || []).length} orders, ${(data.clients || []).length} clients, ${(data.usageLogs || []).length} usage logs, and ${(data.subscriptions || []).length} subscriptions from backup dated ${data.exportDate || 'unknown'}? This will replace all current data.`)) return;
       products = data.products;
       orders = data.orders || [];
       clients = data.clients || [];
       usageLogs = data.usageLogs || [];
+      subscriptions = data.subscriptions || [];
+      subPayments = data.subPayments || [];
       saveProducts(products);
       saveOrders(orders);
       saveClients(clients);
       saveUsage(usageLogs);
+      saveSubs(subscriptions);
+      saveSubPayments(subPayments);
       renderStorefront();
       renderPricing();
       renderCart();
-      toast(`Imported ${products.length} products, ${orders.length} orders, ${clients.length} clients, ${usageLogs.length} usage logs!`);
+      toast(`Imported ${products.length} products, ${orders.length} orders, ${clients.length} clients, ${subscriptions.length} subscriptions!`);
     } catch (err) {
       toast('Error reading backup file: ' + err.message);
     }
@@ -1126,14 +1240,16 @@ function renderClients() {
     const clientOrders = orders.filter(o => o.clientId === c.id);
     return s + clientOrders.reduce((ss, o) => ss + o.revenue, 0);
   }, 0);
-  const avgSpend = totalClients > 0 ? totalClientSpend / totalClients : 0;
-  const repeatClients = clients.filter(c => orders.filter(o => o.clientId === c.id).length > 1).length;
+  const totalSubRevenue = subPayments.reduce((s, p) => s + p.amount, 0);
+  const avgSpend = totalClients > 0 ? (totalClientSpend + totalSubRevenue) / totalClients : 0;
+  const activeSubs = subscriptions.filter(s => s.status === 'active').length;
 
   document.getElementById('clientKpis').innerHTML = `
     <div class="kpi-card"><div class="label">Total Clients</div><div class="value">${totalClients}</div></div>
-    <div class="kpi-card"><div class="label">Total Client Revenue</div><div class="value green">${fmt(totalClientSpend)}</div></div>
-    <div class="kpi-card"><div class="label">Avg Spend / Client</div><div class="value accent">${fmt(avgSpend)}</div></div>
-    <div class="kpi-card"><div class="label">Repeat Clients</div><div class="value">${repeatClients}</div></div>
+    <div class="kpi-card"><div class="label">Vial Sales Revenue</div><div class="value green">${fmt(totalClientSpend)}</div></div>
+    <div class="kpi-card"><div class="label">Subscription Revenue</div><div class="value green">${fmt(totalSubRevenue)}</div></div>
+    <div class="kpi-card"><div class="label">Avg Revenue / Client</div><div class="value accent">${fmt(avgSpend)}</div></div>
+    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs}</div></div>
   `;
 
   document.getElementById('clientsTableBody').innerHTML = filtered.map(c => {
@@ -1159,6 +1275,9 @@ function renderClients() {
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text2);padding:32px;">No clients yet. Add one to start tracking purchases.</td></tr>';
+
+  // Render subscriptions section
+  renderSubscriptions();
 }
 
 function openAddClient() {
@@ -1222,22 +1341,44 @@ function viewClientDetail(id) {
   const clientOrders = orders.filter(o => o.clientId === id);
   const totalSpent = clientOrders.reduce((s, o) => s + o.revenue, 0);
   const totalItems = clientOrders.reduce((s, o) => s + o.itemCount, 0);
+  const clientSubs = subscriptions.filter(s => s.clientId === id);
+  const clientSubPayments = subPayments.filter(p => clientSubs.some(s => s.id === p.subId));
+  const totalSubPaid = clientSubPayments.reduce((s, p) => s + p.amount, 0);
 
   document.getElementById('clientDetailName').textContent = c.name + (c.notes ? ' — ' + c.notes : '');
   document.getElementById('clientDetailKpis').innerHTML = `
-    <div class="kpi-card"><div class="label">Total Spent</div><div class="value green">${fmt(totalSpent)}</div></div>
-    <div class="kpi-card"><div class="label">Orders</div><div class="value">${clientOrders.length}</div></div>
+    <div class="kpi-card"><div class="label">Vial Purchases</div><div class="value green">${fmt(totalSpent)}</div><div class="sub">${clientOrders.length} orders</div></div>
+    <div class="kpi-card"><div class="label">Subscription Payments</div><div class="value green">${fmt(totalSubPaid)}</div><div class="sub">${clientSubs.filter(s=>s.status==='active').length} active subs</div></div>
+    <div class="kpi-card"><div class="label">Total Revenue</div><div class="value accent">${fmt(totalSpent + totalSubPaid)}</div></div>
     <div class="kpi-card"><div class="label">Items Purchased</div><div class="value">${totalItems}</div></div>
-    <div class="kpi-card"><div class="label">Avg Order Value</div><div class="value accent">${clientOrders.length > 0 ? fmt(totalSpent / clientOrders.length) : '$0.00'}</div></div>
   `;
 
-  document.getElementById('clientDetailOrders').innerHTML = clientOrders.slice().reverse().map(o => `
+  // Build combined history: orders + sub payments
+  let historyHtml = '';
+
+  // Subscription info
+  if (clientSubs.length > 0) {
+    historyHtml += clientSubs.map(sub => {
+      const product = products.find(p => p.id === sub.productId);
+      const payments = subPayments.filter(p => p.subId === sub.id).sort((a, b) => b.date.localeCompare(a.date));
+      const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
+      return `<tr style="background:var(--surface2);">
+        <td colspan="2" style="font-size:0.85rem;"><span class="status-${sub.status}" style="margin-right:8px;">${sub.status}</span> <strong>Subscription:</strong> ${product ? product.name : '?'} — ${sub.dose} ${freqLabels[sub.frequency] || sub.frequency} @ ${fmt(sub.price)}/mo</td>
+        <td class="tx-green">${fmt(totalPaid)} paid</td>
+      </tr>` + payments.map(p => `<tr><td style="padding-left:32px;color:var(--text2)">${p.date}</td><td>Payment (${p.month})${p.notes ? ' — ' + p.notes : ''}</td><td class="tx-green">${fmt(p.amount)}</td></tr>`).join('');
+    }).join('');
+  }
+
+  // Orders
+  historyHtml += clientOrders.slice().reverse().map(o => `
     <tr>
       <td>${o.date} ${o.time || ''}</td>
       <td>${o.items.map(i => `${i.name} (${i.dosage}) x${i.qty}`).join(', ')}</td>
       <td class="tx-green">${fmt(o.revenue)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:16px;">No purchases yet</td></tr>';
+  `).join('');
+
+  document.getElementById('clientDetailOrders').innerHTML = historyHtml || '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:16px;">No activity yet</td></tr>';
 
   document.getElementById('clientDetailPanel').style.display = 'block';
   document.getElementById('clientDetailPanel').scrollIntoView({ behavior: 'smooth' });
@@ -1394,6 +1535,190 @@ function exportUsageLogs() {
   a.download = `peptide-usage-log-${todayStr()}.csv`;
   a.click();
   toast('Usage log exported!');
+}
+
+// ===========================
+// SUBSCRIPTIONS
+// ===========================
+const freqLabels = { weekly: 'Weekly', biweekly: 'Bi-weekly', monthly: 'Monthly', '2x-week': '2x/week', '3x-week': '3x/week', daily: 'Daily', custom: 'Custom' };
+const freqPerMonth = { weekly: 4, biweekly: 2, monthly: 1, '2x-week': 8, '3x-week': 12, daily: 30, custom: 0 };
+
+function currentMonth() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function monthsSince(startDate) {
+  const start = new Date(startDate + '-01');
+  const now = new Date();
+  return (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
+}
+
+function renderSubscriptions() {
+  const activeSubs = subscriptions.filter(s => s.status === 'active');
+  const monthlyRevenue = activeSubs.reduce((s, sub) => s + sub.price, 0);
+  const totalCollected = subPayments.reduce((s, p) => s + p.amount, 0);
+  const cm = currentMonth();
+  const paidThisMonth = subPayments.filter(p => p.month === cm).reduce((s, p) => s + p.amount, 0);
+  const dueThisMonth = activeSubs.reduce((s, sub) => s + sub.price, 0);
+  const outstanding = dueThisMonth - paidThisMonth;
+
+  document.getElementById('subKpis').innerHTML = `
+    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs.length}</div></div>
+    <div class="kpi-card"><div class="label">Monthly Recurring Revenue</div><div class="value green">${fmt(monthlyRevenue)}</div></div>
+    <div class="kpi-card"><div class="label">Collected This Month</div><div class="value green">${fmt(paidThisMonth)}</div><div class="sub">of ${fmt(dueThisMonth)} due</div></div>
+    <div class="kpi-card"><div class="label">Outstanding This Month</div><div class="value ${outstanding > 0 ? 'red' : 'green'}">${fmt(Math.max(0, outstanding))}</div></div>
+    <div class="kpi-card"><div class="label">All-Time Collected</div><div class="value accent">${fmt(totalCollected)}</div></div>
+  `;
+
+  document.getElementById('subsTableBody').innerHTML = subscriptions.map(sub => {
+    const client = clients.find(c => c.id === sub.clientId);
+    const product = products.find(p => p.id === sub.productId);
+    const clientName = client ? client.name : 'Unknown';
+    const productName = product ? `${product.name} (${product.dosage})` : 'Unknown';
+
+    // Payment status for current month
+    const cm = currentMonth();
+    const monthPayments = subPayments.filter(p => p.subId === sub.id && p.month === cm);
+    const monthPaid = monthPayments.reduce((s, p) => s + p.amount, 0);
+    const paidStatus = sub.status !== 'active' ? '' :
+      monthPaid >= sub.price ? '<span class="payment-ok">Paid</span>' :
+      monthPaid > 0 ? `<span class="payment-due">Partial (${fmt(monthPaid)})</span>` :
+      '<span class="payment-overdue">Unpaid</span>';
+
+    // Total paid vs total owed
+    const totalPaid = subPayments.filter(p => p.subId === sub.id).reduce((s, p) => s + p.amount, 0);
+
+    return `<tr>
+      <td><strong>${clientName}</strong></td>
+      <td>${productName}</td>
+      <td><strong>${fmt(sub.price)}</strong>/mo</td>
+      <td>${sub.dose}</td>
+      <td>${freqLabels[sub.frequency] || sub.frequency}</td>
+      <td><span class="status-${sub.status}">${sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}</span></td>
+      <td>${sub.startDate}</td>
+      <td>${paidStatus}<br><span style="font-size:0.75rem;color:var(--text2)">Total: ${fmt(totalPaid)}</span></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-green btn-sm" onclick="openRecordPayment(${sub.id})" ${sub.status !== 'active' ? 'disabled style="opacity:0.4"' : ''}>Pay</button>
+        <button class="btn btn-outline btn-sm" onclick="openEditSub(${sub.id})">Edit</button>
+        <button class="btn btn-outline btn-sm" onclick="viewSubPayments(${sub.id})">Log</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:32px;">No subscriptions yet. Use "+ Add Subscription" to set up monthly plans for clients.</td></tr>';
+}
+
+function openAddSub() {
+  if (clients.length === 0) { toast('Add a client first before creating a subscription'); return; }
+  document.getElementById('subModalTitle').textContent = 'Add Subscription';
+  document.getElementById('subEditId').value = '';
+  document.getElementById('subClient').innerHTML = clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('subProduct').innerHTML = products.map(p => `<option value="${p.id}">${p.name} (${p.dosage})</option>`).join('');
+  document.getElementById('subPrice').value = '';
+  document.getElementById('subDose').value = '';
+  document.getElementById('subFrequency').value = 'weekly';
+  document.getElementById('subStartDate').value = todayStr();
+  document.getElementById('subStatus').value = 'active';
+  document.getElementById('subNotes').value = '';
+  document.getElementById('subModal').classList.add('open');
+}
+
+function openEditSub(id) {
+  const sub = subscriptions.find(s => s.id === id);
+  document.getElementById('subModalTitle').textContent = 'Edit Subscription';
+  document.getElementById('subEditId').value = sub.id;
+  document.getElementById('subClient').innerHTML = clients.map(c => `<option value="${c.id}" ${c.id === sub.clientId ? 'selected' : ''}>${c.name}</option>`).join('');
+  document.getElementById('subProduct').innerHTML = products.map(p => `<option value="${p.id}" ${p.id === sub.productId ? 'selected' : ''}>${p.name} (${p.dosage})</option>`).join('');
+  document.getElementById('subPrice').value = sub.price;
+  document.getElementById('subDose').value = sub.dose;
+  document.getElementById('subFrequency').value = sub.frequency;
+  document.getElementById('subStartDate').value = sub.startDate;
+  document.getElementById('subStatus').value = sub.status;
+  document.getElementById('subNotes').value = sub.notes || '';
+  document.getElementById('subModal').classList.add('open');
+}
+
+function saveSub() {
+  const id = document.getElementById('subEditId').value;
+  const data = {
+    clientId: parseInt(document.getElementById('subClient').value),
+    productId: parseInt(document.getElementById('subProduct').value),
+    price: parseFloat(document.getElementById('subPrice').value) || 0,
+    dose: document.getElementById('subDose').value.trim(),
+    frequency: document.getElementById('subFrequency').value,
+    startDate: document.getElementById('subStartDate').value,
+    status: document.getElementById('subStatus').value,
+    notes: document.getElementById('subNotes').value.trim(),
+  };
+  if (data.price <= 0) { toast('Monthly price is required'); return; }
+  if (!data.dose) { toast('Dose per session is required'); return; }
+
+  if (id) {
+    const sub = subscriptions.find(s => s.id === parseInt(id));
+    Object.assign(sub, data);
+  } else {
+    data.id = Math.max(0, ...subscriptions.map(s => s.id)) + 1;
+    subscriptions.push(data);
+  }
+  saveSubs(subscriptions);
+  document.getElementById('subModal').classList.remove('open');
+  renderClients();
+  toast(id ? 'Subscription updated!' : 'Subscription created!');
+}
+
+function openRecordPayment(subId) {
+  const sub = subscriptions.find(s => s.id === subId);
+  const client = clients.find(c => c.id === sub.clientId);
+  const product = products.find(p => p.id === sub.productId);
+  document.getElementById('paySubId').value = subId;
+  document.getElementById('paySubInfo').textContent = `${client ? client.name : 'Unknown'} — ${product ? product.name : 'Unknown'} — ${fmt(sub.price)}/month`;
+  document.getElementById('payAmount').value = sub.price;
+  document.getElementById('payDate').value = todayStr();
+  document.getElementById('payMonth').value = currentMonth();
+  document.getElementById('payNotes').value = '';
+  document.getElementById('subPayModal').classList.add('open');
+}
+
+function saveSubPayment() {
+  const subId = parseInt(document.getElementById('paySubId').value);
+  const amount = parseFloat(document.getElementById('payAmount').value) || 0;
+  const date = document.getElementById('payDate').value;
+  const month = document.getElementById('payMonth').value;
+  const notes = document.getElementById('payNotes').value.trim();
+  if (amount <= 0) { toast('Amount is required'); return; }
+
+  const payment = {
+    id: Math.max(0, ...subPayments.map(p => p.id)) + 1,
+    subId,
+    amount,
+    date,
+    month,
+    notes
+  };
+  subPayments.push(payment);
+  saveSubPayments(subPayments);
+  document.getElementById('subPayModal').classList.remove('open');
+  renderClients();
+  toast(`Payment of ${fmt(amount)} recorded!`);
+}
+
+function viewSubPayments(subId) {
+  const sub = subscriptions.find(s => s.id === subId);
+  const client = clients.find(c => c.id === sub.clientId);
+  const product = products.find(p => p.id === sub.productId);
+  const payments = subPayments.filter(p => p.subId === subId).sort((a, b) => b.date.localeCompare(a.date));
+  const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
+
+  let msg = `Subscription: ${client ? client.name : '?'} — ${product ? product.name : '?'} (${fmt(sub.price)}/mo)\n`;
+  msg += `Total Paid: ${fmt(totalPaid)}\n\n`;
+  if (payments.length === 0) {
+    msg += 'No payments recorded yet.';
+  } else {
+    msg += 'Payment History:\n';
+    payments.forEach(p => {
+      msg += `  ${p.date} | ${p.month} | ${fmt(p.amount)}${p.notes ? ' | ' + p.notes : ''}\n`;
+    });
+  }
+  alert(msg);
 }
 
 // ===========================
