@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peptide Supply Co. — Storefront</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #23233a;
+    --border: #2e2e4a;
+    --accent: #7c5cfc;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e2f0;
+    --text2: #9393b0;
+    --white: #ffffff;
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Layout */
+  .app { display: grid; grid-template-columns: 1fr; gap: 0; }
+  header { background: linear-gradient(135deg, #1e1040 0%, #0f0f13 100%); border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-tabs { display: flex; gap: 4px; background: var(--surface); border-radius: 8px; padding: 4px; }
+  .nav-tab { padding: 8px 20px; border-radius: 6px; border: none; background: transparent; color: var(--text2); cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+  .nav-tab.active { background: var(--accent); color: var(--white); }
+  .nav-tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
+
+  main { padding: 24px 32px; max-width: 1600px; margin: 0 auto; width: 100%; }
+
+  /* Tab panels */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .kpi-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text2); margin-bottom: 4px; }
+  .kpi-card .value { font-size: 1.6rem; font-weight: 700; }
+  .kpi-card .value.green { color: var(--green); }
+  .kpi-card .value.red { color: var(--red); }
+  .kpi-card .value.accent { color: var(--accent2); }
+  .kpi-card .sub { font-size: 0.8rem; color: var(--text2); margin-top: 4px; }
+
+  /* Controls bar */
+  .controls { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .search-box { flex: 1; min-width: 240px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9rem; outline: none; transition: border 0.2s; }
+  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--text2); }
+  select.filter-select { padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9rem; cursor: pointer; outline: none; }
+  select.filter-select:focus { border-color: var(--accent); }
+
+  /* Product Grid */
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: all 0.2s; position: relative; overflow: hidden; }
+  .product-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,92,252,0.1); }
+  .product-card .badge { position: absolute; top: 12px; right: 12px; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+  .badge.in-stock { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge.low-stock { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .badge.out-of-stock { background: rgba(248,113,113,0.15); color: var(--red); }
+  .product-card .name { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
+  .product-card .sku { font-size: 0.75rem; color: var(--text2); margin-bottom: 12px; }
+  .product-card .dosage-tag { display: inline-block; background: var(--surface2); padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; color: var(--accent2); margin-bottom: 12px; }
+  .product-card .price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .product-card .sale-price { font-size: 1.3rem; font-weight: 700; color: var(--green); }
+  .product-card .cost-price { font-size: 0.85rem; color: var(--text2); }
+  .product-card .margin-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; }
+  .margin-high { background: rgba(52,211,153,0.1); color: var(--green); }
+  .margin-mid { background: rgba(251,191,36,0.1); color: var(--yellow); }
+  .margin-low { background: rgba(248,113,113,0.1); color: var(--red); }
+  .product-card .stock-info { font-size: 0.8rem; color: var(--text2); margin-bottom: 14px; }
+  .product-card .actions { display: flex; gap: 8px; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: var(--accent); color: var(--white); }
+  .btn-primary:hover { background: #6a4ae0; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+  .btn-danger { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .btn-danger:hover { background: rgba(248,113,113,0.25); }
+  .btn-green { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+  .btn-green:hover { background: rgba(52,211,153,0.25); }
+  .btn-full { width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; max-width: 520px; width: 90%; max-height: 85vh; overflow-y: auto; }
+  .modal h2 { font-size: 1.2rem; margin-bottom: 20px; }
+  .modal .form-group { margin-bottom: 16px; }
+  .modal label { display: block; font-size: 0.8rem; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .modal input, .modal select { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9rem; outline: none; }
+  .modal input:focus, .modal select:focus { border-color: var(--accent); }
+  .modal .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text2); background: var(--surface2); border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { color: var(--text); }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; white-space: nowrap; }
+  tr:hover td { background: rgba(124,92,252,0.03); }
+  .tx-green { color: var(--green); }
+  .tx-red { color: var(--red); }
+
+  /* Cart sidebar */
+  .cart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+  .cart-panel h3 { font-size: 1rem; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item .info { flex: 1; }
+  .cart-item .info .ci-name { font-size: 0.9rem; font-weight: 500; }
+  .cart-item .info .ci-detail { font-size: 0.75rem; color: var(--text2); }
+  .cart-item .ci-qty { display: flex; align-items: center; gap: 8px; }
+  .cart-item .ci-qty button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
+  .cart-item .ci-qty span { min-width: 20px; text-align: center; font-size: 0.9rem; }
+  .cart-item .ci-total { min-width: 70px; text-align: right; font-weight: 600; font-size: 0.9rem; }
+  .cart-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .cart-summary .row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
+  .cart-summary .row.total { font-weight: 700; font-size: 1.1rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .empty-cart { text-align: center; padding: 32px; color: var(--text2); font-size: 0.9rem; }
+
+  /* Category tags */
+  .category-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cat-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
+  .cat-growth { background: rgba(124,92,252,0.15); color: var(--accent2); }
+  .cat-recovery { background: rgba(52,211,153,0.15); color: var(--green); }
+  .cat-weight { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .cat-neuro { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .cat-skin { background: rgba(244,114,182,0.15); color: #f472b6; }
+  .cat-immune { background: rgba(248,113,113,0.15); color: var(--red); }
+  .cat-longevity { background: rgba(45,212,191,0.15); color: #2dd4bf; }
+  .cat-other { background: rgba(148,148,176,0.15); color: var(--text2); }
+
+  /* Charts area */
+  .chart-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+  .chart-container h3 { font-size: 1rem; margin-bottom: 16px; }
+  .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { min-width: 140px; font-size: 0.8rem; color: var(--text2); text-align: right; }
+  .bar-track { flex: 1; height: 24px; background: var(--bg); border-radius: 4px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; display: flex; align-items: center; padding-left: 8px; font-size: 0.7rem; font-weight: 600; color: var(--white); }
+  .bar-value { min-width: 70px; font-size: 0.8rem; text-align: right; }
+
+  /* Notification toast */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 12px 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; opacity: 0; animation-fill-mode: forwards; }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    header { flex-direction: column; gap: 12px; padding: 16px; }
+    main { padding: 16px; }
+    .product-grid { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>Peptide Supply Co.</h1>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="storefront">Storefront</button>
+      <button class="nav-tab" data-tab="pricing">Pricing Manager</button>
+      <button class="nav-tab" data-tab="orders">Order History</button>
+      <button class="nav-tab" data-tab="analytics">Analytics</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ STOREFRONT TAB ============ -->
+    <div id="tab-storefront" class="tab-panel active">
+      <div style="display:grid; grid-template-columns: 1fr 380px; gap: 24px;">
+        <div>
+          <div class="controls">
+            <input type="text" class="search-box" id="searchProducts" placeholder="Search peptides...">
+            <select class="filter-select" id="filterCategory">
+              <option value="all">All Categories</option>
+              <option value="growth">Growth Hormone</option>
+              <option value="recovery">Recovery</option>
+              <option value="weight">Weight Management</option>
+              <option value="neuro">Neuroprotection</option>
+              <option value="skin">Skin & Hair</option>
+              <option value="immune">Immune Support</option>
+              <option value="longevity">Longevity</option>
+              <option value="other">Other / Supplies</option>
+            </select>
+            <select class="filter-select" id="filterStock">
+              <option value="all">All Stock</option>
+              <option value="in">In Stock</option>
+              <option value="low">Low Stock (&le;5)</option>
+              <option value="out">Out of Stock</option>
+            </select>
+            <select class="filter-select" id="sortProducts">
+              <option value="name">Sort: Name</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="margin">Highest Margin</option>
+              <option value="stock">Stock Level</option>
+            </select>
+          </div>
+          <div class="product-grid" id="productGrid"></div>
+        </div>
+
+        <!-- Cart -->
+        <div>
+          <div class="cart-panel" id="cartPanel">
+            <h3>Shopping Cart <span id="cartCount" style="font-size:0.8rem; color:var(--text2);">(0 items)</span></h3>
+            <div id="cartItems"><div class="empty-cart">Cart is empty</div></div>
+            <div class="cart-summary" id="cartSummary" style="display:none;">
+              <div class="row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+              <div class="row"><span>Your Cost (COGS)</span><span id="cartCost" style="color:var(--text2);">$0.00</span></div>
+              <div class="row total"><span>Profit</span><span id="cartProfit" class="tx-green">$0.00</span></div>
+              <button class="btn btn-primary btn-full" style="margin-top: 14px;" onclick="completeSale()">Complete Sale</button>
+              <button class="btn btn-outline btn-full" style="margin-top: 8px;" onclick="clearCart()">Clear Cart</button>
+            </div>
+          </div>
+          <div class="cart-panel">
+            <h3>Quick Stats</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Today's Sales</span><span id="qsTodaySales" class="tx-green">$0.00</span></div>
+              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Today's Profit</span><span id="qsTodayProfit" class="tx-green">$0.00</span></div>
+              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Items Sold Today</span><span id="qsTodayItems">0</span></div>
+              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Total Inventory Value</span><span id="qsInvValue" class="accent">$0.00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PRICING MANAGER TAB ============ -->
+    <div id="tab-pricing" class="tab-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="font-size:1.2rem;">Pricing & Inventory Manager</h2>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="applyGlobalMarkup()">Apply Global Markup %</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddProduct()">+ Add Product</button>
+        </div>
+      </div>
+      <div class="controls">
+        <input type="text" class="search-box" id="searchPricing" placeholder="Search products...">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>SKU</th>
+              <th>Dosage</th>
+              <th>Category</th>
+              <th>Stock</th>
+              <th>Purchase Cost</th>
+              <th>Sale Price</th>
+              <th>Margin %</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pricingTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ ORDER HISTORY TAB ============ -->
+    <div id="tab-orders" class="tab-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="font-size:1.2rem;">Order History</h2>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="exportOrders()">Export CSV</button>
+          <button class="btn btn-danger btn-sm" onclick="clearAllOrders()">Clear History</button>
+        </div>
+      </div>
+      <div class="kpi-grid" id="orderKpis"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Revenue</th>
+              <th>COGS</th>
+              <th>Profit</th>
+              <th>Margin</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ ANALYTICS TAB ============ -->
+    <div id="tab-analytics" class="tab-panel">
+      <h2 style="font-size:1.2rem; margin-bottom:20px;">Business Analytics</h2>
+      <div class="kpi-grid" id="analyticsKpis"></div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="chart-container">
+          <h3>Top Sellers by Revenue</h3>
+          <div class="bar-chart" id="topSellersChart"></div>
+        </div>
+        <div class="chart-container">
+          <h3>Highest Margin Products</h3>
+          <div class="bar-chart" id="marginChart"></div>
+        </div>
+        <div class="chart-container">
+          <h3>Revenue by Category</h3>
+          <div class="bar-chart" id="categoryChart"></div>
+        </div>
+        <div class="chart-container">
+          <h3>Inventory Value by Category</h3>
+          <div class="bar-chart" id="inventoryChart"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2 id="modalTitle">Edit Product</h2>
+    <input type="hidden" id="editId">
+    <div class="form-group"><label>Product Name</label><input id="editName"></div>
+    <div class="form-group"><label>SKU</label><input id="editSku"></div>
+    <div class="form-group"><label>Dosage</label><input id="editDosage"></div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="editCategory">
+        <option value="growth">Growth Hormone</option>
+        <option value="recovery">Recovery</option>
+        <option value="weight">Weight Management</option>
+        <option value="neuro">Neuroprotection</option>
+        <option value="skin">Skin & Hair</option>
+        <option value="immune">Immune Support</option>
+        <option value="longevity">Longevity</option>
+        <option value="other">Other / Supplies</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Stock (Vials)</label><input id="editStock" type="number" min="0"></div>
+    <div class="form-group"><label>Purchase Cost ($/vial)</label><input id="editCost" type="number" step="0.01" min="0"></div>
+    <div class="form-group"><label>Sale Price ($/vial)</label><input id="editPrice" type="number" step="0.01" min="0"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Global Markup Modal -->
+<div class="modal-overlay" id="markupModal">
+  <div class="modal">
+    <h2>Apply Global Markup</h2>
+    <p style="font-size:0.85rem; color:var(--text2); margin-bottom:16px;">Set sale price as a percentage markup over purchase cost for all products.</p>
+    <div class="form-group"><label>Markup Percentage (%)</label><input id="markupPercent" type="number" value="100" min="0" step="5"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('markupModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="doGlobalMarkup()">Apply to All</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ===========================
+// DATA STORE
+// ===========================
+const STORAGE_KEY = 'peptide_store_data';
+const ORDERS_KEY = 'peptide_store_orders';
+
+const DEFAULT_PRODUCTS = [
+  { id: 1, name: "Tesamorelin", sku: "TSM-20", dosage: "20mg", category: "growth", stock: 10, cost: 49.92, price: 89.99 },
+  { id: 2, name: "Somatropin (HGH)", sku: "HGH-36", dosage: "36IU", category: "growth", stock: 10, cost: 25.80, price: 54.99 },
+  { id: 3, name: "SS-31", sku: "2S50", dosage: "50mg", category: "longevity", stock: 10, cost: 27.50, price: 54.99 },
+  { id: 4, name: "Adamax", sku: "AD5", dosage: "5mg", category: "neuro", stock: 10, cost: 22.56, price: 44.99 },
+  { id: 5, name: "KLOW", sku: "KL80", dosage: "80mg", category: "weight", stock: 20, cost: 22.00, price: 44.99 },
+  { id: 6, name: "Pinealon", sku: "PIN-20", dosage: "20mg", category: "neuro", stock: 10, cost: 18.72, price: 37.99 },
+  { id: 7, name: "Thymosin Alpha-1", sku: "TA1-10", dosage: "10mg", category: "immune", stock: 10, cost: 17.40, price: 34.99 },
+  { id: 8, name: "Retatrutide", sku: "RETA-10", dosage: "10mg", category: "weight", stock: 20, cost: 17.22, price: 34.99 },
+  { id: 9, name: "GLOW", sku: "BBG70", dosage: "70mg", category: "skin", stock: 10, cost: 16.30, price: 32.99 },
+  { id: 10, name: "Tesamorelin", sku: "TSM-10", dosage: "10mg", category: "growth", stock: 40, cost: 16.00, price: 32.99 },
+  { id: 11, name: "MOTS-c", sku: "MOTS-40", dosage: "40mg", category: "longevity", stock: 20, cost: 15.00, price: 29.99 },
+  { id: 12, name: "BPC-157 + TB-500", sku: "COMBO-20", dosage: "20mg", category: "recovery", stock: 10, cost: 15.00, price: 29.99 },
+  { id: 13, name: "NAD+", sku: "NJ1000", dosage: "1000mg", category: "longevity", stock: 20, cost: 14.40, price: 29.99 },
+  { id: 14, name: "Vitamin B12", sku: "B1210", dosage: "10mg/mL", category: "other", stock: 20, cost: 11.60, price: 24.99 },
+  { id: 15, name: "TB-500", sku: "TB5", dosage: "5mg", category: "recovery", stock: 10, cost: 11.28, price: 22.99 },
+  { id: 16, name: "SLU-PP-322", sku: "SLU5", dosage: "5mg", category: "longevity", stock: 10, cost: 11.00, price: 22.99 },
+  { id: 17, name: "Somatropin (HGH)", sku: "HGH-24", dosage: "24IU", category: "growth", stock: 30, cost: 10.80, price: 22.99 },
+  { id: 18, name: "Cerebrolysin", sku: "C60", dosage: "60mg", category: "neuro", stock: 6, cost: 10.63, price: 21.99 },
+  { id: 19, name: "Retatrutide", sku: "RETA-5", dosage: "5mg", category: "weight", stock: 20, cost: 11.28, price: 22.99 },
+  { id: 20, name: "AHK-Cu", sku: "AU100", dosage: "100mg", category: "skin", stock: 10, cost: 9.60, price: 19.99 },
+  { id: 21, name: "Somatropin (HGH)", sku: "HGH-15", dosage: "15IU", category: "growth", stock: 10, cost: 9.28, price: 19.99 },
+  { id: 22, name: "NAD+", sku: "NJ500", dosage: "500mg", category: "longevity", stock: 10, cost: 9.00, price: 18.99 },
+  { id: 23, name: "Pinealon", sku: "PIN-10", dosage: "10mg", category: "neuro", stock: 10, cost: 9.00, price: 18.99 },
+  { id: 24, name: "LL-37", sku: "LL375", dosage: "5mg", category: "immune", stock: 10, cost: 8.82, price: 17.99 },
+  { id: 25, name: "Glutathione", sku: "GTT-1500", dosage: "1500mg", category: "longevity", stock: 10, cost: 8.35, price: 17.99 },
+  { id: 26, name: "Retatrutide", sku: "RETA-20", dosage: "20mg", category: "weight", stock: 30, cost: 8.00, price: 17.99 },
+  { id: 27, name: "CJC-1295 (no DAC)", sku: "CJC5", dosage: "5mg", category: "growth", stock: 10, cost: 6.80, price: 14.99 },
+  { id: 28, name: "PT-141", sku: "P41", dosage: "10mg", category: "other", stock: 10, cost: 6.20, price: 13.99 },
+  { id: 29, name: "Selank", sku: "SK11", dosage: "11mg", category: "neuro", stock: 10, cost: 6.00, price: 12.99 },
+  { id: 30, name: "Ipamorelin", sku: "IP10", dosage: "10mg", category: "growth", stock: 10, cost: 6.00, price: 12.99 },
+  { id: 31, name: "Melatonin", sku: "MT10", dosage: "10mg", category: "longevity", stock: 10, cost: 6.96, price: 14.99 },
+  { id: 32, name: "Dermorphin", sku: "DR5", dosage: "5mg", category: "recovery", stock: 10, cost: 5.40, price: 11.99 },
+  { id: 33, name: "KPV", sku: "KPV10", dosage: "10mg", category: "immune", stock: 10, cost: 4.80, price: 10.99 },
+  { id: 34, name: "MT-2", sku: "ML10", dosage: "10mg", category: "skin", stock: 10, cost: 4.18, price: 9.99 },
+  { id: 35, name: "Semax", sku: "XA5", dosage: "5mg", category: "neuro", stock: 10, cost: 3.70, price: 8.99 },
+  { id: 36, name: "GHK-Cu", sku: "CU50", dosage: "50mg", category: "skin", stock: 40, cost: 3.20, price: 7.99 },
+  { id: 37, name: "DSIP", sku: "DS5", dosage: "5mg", category: "neuro", stock: 20, cost: 3.20, price: 7.99 },
+  { id: 38, name: "Epithalon", sku: "ET10", dosage: "10mg", category: "longevity", stock: 20, cost: 3.00, price: 7.99 },
+  { id: 39, name: "BAC Water", sku: "BAC10", dosage: "10mL", category: "other", stock: 2, cost: 8.00, price: 12.99 },
+];
+
+function loadProducts() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) return JSON.parse(saved);
+  return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+}
+function saveProducts(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function loadOrders() { return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]'); }
+function saveOrders(data) { localStorage.setItem(ORDERS_KEY, JSON.stringify(data)); }
+
+let products = loadProducts();
+let orders = loadOrders();
+let cart = [];
+
+// ===========================
+// HELPERS
+// ===========================
+const fmt = n => '$' + n.toFixed(2);
+const margin = (price, cost) => cost > 0 ? ((price - cost) / price * 100) : 0;
+const markup = (price, cost) => cost > 0 ? ((price - cost) / cost * 100) : 0;
+
+const catLabels = { growth: 'Growth Hormone', recovery: 'Recovery', weight: 'Weight Management', neuro: 'Neuroprotection', skin: 'Skin & Hair', immune: 'Immune Support', longevity: 'Longevity', other: 'Other / Supplies' };
+const catClass = { growth: 'cat-growth', recovery: 'cat-recovery', weight: 'cat-weight', neuro: 'cat-neuro', skin: 'cat-skin', immune: 'cat-immune', longevity: 'cat-longevity', other: 'cat-other' };
+
+function stockBadge(qty) {
+  if (qty <= 0) return '<span class="badge out-of-stock">Out of Stock</span>';
+  if (qty <= 5) return '<span class="badge low-stock">Low Stock</span>';
+  return '<span class="badge in-stock">In Stock</span>';
+}
+
+function marginClass(m) {
+  if (m >= 40) return 'margin-high';
+  if (m >= 20) return 'margin-mid';
+  return 'margin-low';
+}
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// ===========================
+// TABS
+// ===========================
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'analytics') renderAnalytics();
+    if (tab.dataset.tab === 'orders') renderOrders();
+    if (tab.dataset.tab === 'pricing') renderPricing();
+  });
+});
+
+// ===========================
+// STOREFRONT RENDERING
+// ===========================
+function renderStorefront() {
+  const search = document.getElementById('searchProducts').value.toLowerCase();
+  const catFilter = document.getElementById('filterCategory').value;
+  const stockFilter = document.getElementById('filterStock').value;
+  const sortBy = document.getElementById('sortProducts').value;
+
+  let filtered = products.filter(p => {
+    if (search && !p.name.toLowerCase().includes(search) && !p.sku.toLowerCase().includes(search) && !p.dosage.toLowerCase().includes(search)) return false;
+    if (catFilter !== 'all' && p.category !== catFilter) return false;
+    if (stockFilter === 'in' && p.stock <= 0) return false;
+    if (stockFilter === 'low' && (p.stock > 5 || p.stock <= 0)) return false;
+    if (stockFilter === 'out' && p.stock > 0) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortBy === 'name') return a.name.localeCompare(b.name);
+    if (sortBy === 'price-asc') return a.price - b.price;
+    if (sortBy === 'price-desc') return b.price - a.price;
+    if (sortBy === 'margin') return margin(b.price, b.cost) - margin(a.price, a.cost);
+    if (sortBy === 'stock') return b.stock - a.stock;
+    return 0;
+  });
+
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = filtered.map(p => {
+    const m = margin(p.price, p.cost);
+    return `
+    <div class="product-card">
+      ${stockBadge(p.stock)}
+      <div class="name">${p.name}</div>
+      <div class="sku">${p.sku}</div>
+      <span class="dosage-tag">${p.dosage}</span>
+      <span class="cat-pill ${catClass[p.category] || 'cat-other'}" style="margin-left:6px;">${catLabels[p.category] || p.category}</span>
+      <div class="price-row" style="margin-top:12px;">
+        <span class="sale-price">${fmt(p.price)}</span>
+        <span class="margin-tag ${marginClass(m)}">${m.toFixed(0)}% margin</span>
+      </div>
+      <div class="cost-price">Cost: ${fmt(p.cost)}/vial &middot; Profit: ${fmt(p.price - p.cost)}/vial</div>
+      <div class="stock-info">${p.stock} vials in stock</div>
+      <div class="actions">
+        <button class="btn btn-primary btn-sm" onclick="addToCart(${p.id})" ${p.stock <= 0 ? 'disabled style="opacity:0.4"' : ''}>Add to Cart</button>
+        <button class="btn btn-outline btn-sm" onclick="openEdit(${p.id})">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Quick stats
+  const today = todayStr();
+  const todayOrders = orders.filter(o => o.date === today);
+  const todayRev = todayOrders.reduce((s, o) => s + o.revenue, 0);
+  const todayProf = todayOrders.reduce((s, o) => s + o.profit, 0);
+  const todayItems = todayOrders.reduce((s, o) => s + o.itemCount, 0);
+  const invValue = products.reduce((s, p) => s + p.cost * p.stock, 0);
+
+  document.getElementById('qsTodaySales').textContent = fmt(todayRev);
+  document.getElementById('qsTodayProfit').textContent = fmt(todayProf);
+  document.getElementById('qsTodayItems').textContent = todayItems;
+  document.getElementById('qsInvValue').textContent = fmt(invValue);
+}
+
+// ===========================
+// CART
+// ===========================
+function addToCart(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p || p.stock <= 0) return;
+  const existing = cart.find(c => c.id === productId);
+  if (existing) {
+    if (existing.qty >= p.stock) { toast('Not enough stock!'); return; }
+    existing.qty++;
+  } else {
+    cart.push({ id: productId, qty: 1 });
+  }
+  toast(`Added ${p.name} (${p.dosage}) to cart`);
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const summary = document.getElementById('cartSummary');
+
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="empty-cart">Cart is empty</div>';
+    summary.style.display = 'none';
+    document.getElementById('cartCount').textContent = '(0 items)';
+    return;
+  }
+
+  let subtotal = 0, totalCost = 0, totalItems = 0;
+  container.innerHTML = cart.map(c => {
+    const p = products.find(x => x.id === c.id);
+    const lineTotal = p.price * c.qty;
+    const lineCost = p.cost * c.qty;
+    subtotal += lineTotal;
+    totalCost += lineCost;
+    totalItems += c.qty;
+    return `
+    <div class="cart-item">
+      <div class="info">
+        <div class="ci-name">${p.name} (${p.dosage})</div>
+        <div class="ci-detail">${fmt(p.price)} each</div>
+      </div>
+      <div class="ci-qty">
+        <button onclick="changeQty(${p.id}, -1)">-</button>
+        <span>${c.qty}</span>
+        <button onclick="changeQty(${p.id}, 1)">+</button>
+      </div>
+      <div class="ci-total">${fmt(lineTotal)}</div>
+    </div>`;
+  }).join('');
+
+  summary.style.display = 'block';
+  document.getElementById('cartSubtotal').textContent = fmt(subtotal);
+  document.getElementById('cartCost').textContent = fmt(totalCost);
+  document.getElementById('cartProfit').textContent = fmt(subtotal - totalCost);
+  document.getElementById('cartCount').textContent = `(${totalItems} items)`;
+}
+
+function changeQty(productId, delta) {
+  const p = products.find(x => x.id === productId);
+  const item = cart.find(c => c.id === productId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) { cart = cart.filter(c => c.id !== productId); }
+  else if (item.qty > p.stock) { item.qty = p.stock; toast('Not enough stock!'); }
+  renderCart();
+}
+
+function clearCart() { cart = []; renderCart(); }
+
+function completeSale() {
+  if (cart.length === 0) return;
+  let revenue = 0, cogs = 0, itemCount = 0;
+  const lineItems = [];
+
+  cart.forEach(c => {
+    const p = products.find(x => x.id === c.id);
+    const lineRev = p.price * c.qty;
+    const lineCost = p.cost * c.qty;
+    revenue += lineRev;
+    cogs += lineCost;
+    itemCount += c.qty;
+    p.stock -= c.qty;
+    lineItems.push({ name: p.name, dosage: p.dosage, sku: p.sku, qty: c.qty, price: p.price, cost: p.cost });
+  });
+
+  const order = {
+    id: orders.length + 1,
+    date: todayStr(),
+    time: new Date().toLocaleTimeString(),
+    items: lineItems,
+    itemCount,
+    revenue,
+    cogs,
+    profit: revenue - cogs,
+    margin: margin(revenue, cogs)
+  };
+
+  orders.push(order);
+  saveOrders(orders);
+  saveProducts(products);
+  cart = [];
+  renderCart();
+  renderStorefront();
+  toast(`Sale completed! Order #${order.id} — ${fmt(revenue)} revenue, ${fmt(order.profit)} profit`);
+}
+
+// ===========================
+// PRICING MANAGER
+// ===========================
+function renderPricing() {
+  const search = document.getElementById('searchPricing').value.toLowerCase();
+  const filtered = products.filter(p => !search || p.name.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search));
+
+  document.getElementById('pricingTableBody').innerHTML = filtered.map(p => {
+    const m = margin(p.price, p.cost);
+    return `<tr>
+      <td><strong>${p.name}</strong></td>
+      <td style="color:var(--text2)">${p.sku}</td>
+      <td>${p.dosage}</td>
+      <td><span class="cat-pill ${catClass[p.category]}">${catLabels[p.category]}</span></td>
+      <td>${p.stock}</td>
+      <td>${fmt(p.cost)}</td>
+      <td><strong>${fmt(p.price)}</strong></td>
+      <td><span class="margin-tag ${marginClass(m)}">${m.toFixed(1)}%</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="openEdit(${p.id})">Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function applyGlobalMarkup() {
+  document.getElementById('markupModal').classList.add('open');
+}
+function doGlobalMarkup() {
+  const pct = parseFloat(document.getElementById('markupPercent').value);
+  if (isNaN(pct) || pct < 0) return;
+  products.forEach(p => { p.price = Math.round(p.cost * (1 + pct / 100) * 100) / 100; });
+  saveProducts(products);
+  document.getElementById('markupModal').classList.remove('open');
+  renderPricing();
+  renderStorefront();
+  toast(`Applied ${pct}% markup to all products`);
+}
+
+// ===========================
+// EDIT / ADD PRODUCT MODAL
+// ===========================
+function openEdit(productId) {
+  const p = products.find(x => x.id === productId);
+  document.getElementById('modalTitle').textContent = 'Edit Product';
+  document.getElementById('editId').value = p.id;
+  document.getElementById('editName').value = p.name;
+  document.getElementById('editSku').value = p.sku;
+  document.getElementById('editDosage').value = p.dosage;
+  document.getElementById('editCategory').value = p.category;
+  document.getElementById('editStock').value = p.stock;
+  document.getElementById('editCost').value = p.cost;
+  document.getElementById('editPrice').value = p.price;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function openAddProduct() {
+  document.getElementById('modalTitle').textContent = 'Add New Product';
+  document.getElementById('editId').value = '';
+  document.getElementById('editName').value = '';
+  document.getElementById('editSku').value = '';
+  document.getElementById('editDosage').value = '';
+  document.getElementById('editCategory').value = 'other';
+  document.getElementById('editStock').value = '';
+  document.getElementById('editCost').value = '';
+  document.getElementById('editPrice').value = '';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+
+function saveProduct() {
+  const id = document.getElementById('editId').value;
+  const data = {
+    name: document.getElementById('editName').value.trim(),
+    sku: document.getElementById('editSku').value.trim(),
+    dosage: document.getElementById('editDosage').value.trim(),
+    category: document.getElementById('editCategory').value,
+    stock: parseInt(document.getElementById('editStock').value) || 0,
+    cost: parseFloat(document.getElementById('editCost').value) || 0,
+    price: parseFloat(document.getElementById('editPrice').value) || 0,
+  };
+  if (!data.name) { toast('Name is required'); return; }
+
+  if (id) {
+    const p = products.find(x => x.id === parseInt(id));
+    Object.assign(p, data);
+  } else {
+    data.id = Math.max(0, ...products.map(p => p.id)) + 1;
+    products.push(data);
+  }
+  saveProducts(products);
+  closeModal();
+  renderStorefront();
+  renderPricing();
+  toast(id ? 'Product updated!' : 'Product added!');
+}
+
+// ===========================
+// ORDER HISTORY
+// ===========================
+function renderOrders() {
+  const totalRev = orders.reduce((s, o) => s + o.revenue, 0);
+  const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
+  const totalProfit = orders.reduce((s, o) => s + o.profit, 0);
+  const totalInvested = products.reduce((s, p) => s + p.cost * p.stock, 0);
+  const totalSoldCost = orders.reduce((s, o) => s + o.cogs, 0);
+  const originalInvestment = totalInvested + totalSoldCost; // current inv + what was already sold
+
+  document.getElementById('orderKpis').innerHTML = `
+    <div class="kpi-card"><div class="label">Total Revenue</div><div class="value green">${fmt(totalRev)}</div><div class="sub">${orders.length} orders</div></div>
+    <div class="kpi-card"><div class="label">Total COGS</div><div class="value red">${fmt(totalCogs)}</div><div class="sub">Cost of goods sold</div></div>
+    <div class="kpi-card"><div class="label">Total Profit</div><div class="value green">${fmt(totalProfit)}</div><div class="sub">${totalRev > 0 ? (totalProfit / totalRev * 100).toFixed(1) : 0}% avg margin</div></div>
+    <div class="kpi-card"><div class="label">Total Invested</div><div class="value accent">${fmt(originalInvestment)}</div><div class="sub">Inventory + sold goods</div></div>
+    <div class="kpi-card"><div class="label">ROI</div><div class="value ${totalProfit >= 0 ? 'green' : 'red'}">${originalInvestment > 0 ? (totalProfit / originalInvestment * 100).toFixed(1) : 0}%</div><div class="sub">Return on investment</div></div>
+    <div class="kpi-card"><div class="label">Money Recouped</div><div class="value accent">${fmt(totalRev)}</div><div class="sub">${originalInvestment > 0 ? (totalRev / originalInvestment * 100).toFixed(1) : 0}% of investment back</div></div>
+  `;
+
+  document.getElementById('ordersTableBody').innerHTML = orders.slice().reverse().map(o => `
+    <tr>
+      <td><strong>#${o.id}</strong></td>
+      <td>${o.date} ${o.time || ''}</td>
+      <td>${o.items.map(i => `${i.name} (${i.dosage}) x${i.qty}`).join('<br>')}</td>
+      <td class="tx-green">${fmt(o.revenue)}</td>
+      <td style="color:var(--text2)">${fmt(o.cogs)}</td>
+      <td class="tx-green">${fmt(o.profit)}</td>
+      <td><span class="margin-tag ${marginClass(o.margin)}">${o.margin.toFixed(1)}%</span></td>
+    </tr>
+  `).join('');
+}
+
+function clearAllOrders() {
+  if (!confirm('Clear all order history? This cannot be undone.')) return;
+  orders = [];
+  saveOrders(orders);
+  renderOrders();
+  toast('Order history cleared');
+}
+
+function exportOrders() {
+  if (orders.length === 0) { toast('No orders to export'); return; }
+  let csv = 'Order #,Date,Items,Revenue,COGS,Profit,Margin %\n';
+  orders.forEach(o => {
+    const items = o.items.map(i => `${i.name} ${i.dosage} x${i.qty}`).join('; ');
+    csv += `${o.id},${o.date},"${items}",${o.revenue.toFixed(2)},${o.cogs.toFixed(2)},${o.profit.toFixed(2)},${o.margin.toFixed(1)}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `peptide-orders-${todayStr()}.csv`;
+  a.click();
+  toast('CSV exported!');
+}
+
+// ===========================
+// ANALYTICS
+// ===========================
+function renderAnalytics() {
+  const totalRev = orders.reduce((s, o) => s + o.revenue, 0);
+  const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
+  const totalProfit = totalRev - totalCogs;
+  const invValue = products.reduce((s, p) => s + p.cost * p.stock, 0);
+  const retailValue = products.reduce((s, p) => s + p.price * p.stock, 0);
+  const totalVials = products.reduce((s, p) => s + p.stock, 0);
+  const totalSold = orders.reduce((s, o) => s + o.itemCount, 0);
+  const avgOrderValue = orders.length > 0 ? totalRev / orders.length : 0;
+
+  document.getElementById('analyticsKpis').innerHTML = `
+    <div class="kpi-card"><div class="label">Lifetime Revenue</div><div class="value green">${fmt(totalRev)}</div></div>
+    <div class="kpi-card"><div class="label">Lifetime Profit</div><div class="value green">${fmt(totalProfit)}</div></div>
+    <div class="kpi-card"><div class="label">Avg Order Value</div><div class="value accent">${fmt(avgOrderValue)}</div></div>
+    <div class="kpi-card"><div class="label">Total Items Sold</div><div class="value">${totalSold}</div></div>
+    <div class="kpi-card"><div class="label">Current Inventory (Cost)</div><div class="value accent">${fmt(invValue)}</div></div>
+    <div class="kpi-card"><div class="label">Current Inventory (Retail)</div><div class="value green">${fmt(retailValue)}</div></div>
+    <div class="kpi-card"><div class="label">Potential Profit (unsold)</div><div class="value green">${fmt(retailValue - invValue)}</div></div>
+    <div class="kpi-card"><div class="label">Vials Remaining</div><div class="value">${totalVials}</div></div>
+  `;
+
+  // Top sellers by revenue
+  const revByProduct = {};
+  orders.forEach(o => o.items.forEach(i => {
+    const key = `${i.name} (${i.dosage})`;
+    revByProduct[key] = (revByProduct[key] || 0) + i.price * i.qty;
+  }));
+  const topSellers = Object.entries(revByProduct).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxRev = topSellers.length > 0 ? topSellers[0][1] : 1;
+  document.getElementById('topSellersChart').innerHTML = topSellers.length === 0 ? '<p style="color:var(--text2);font-size:0.85rem;">No sales data yet</p>' : topSellers.map(([name, rev]) =>
+    `<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill" style="width:${rev/maxRev*100}%;background:var(--accent);">${fmt(rev)}</div></div></div>`
+  ).join('');
+
+  // Highest margin products
+  const marginProducts = products.filter(p => p.price > 0 && p.cost > 0).map(p => ({name: `${p.name} (${p.dosage})`, m: margin(p.price, p.cost)})).sort((a,b) => b.m - a.m).slice(0, 8);
+  document.getElementById('marginChart').innerHTML = marginProducts.map(p =>
+    `<div class="bar-row"><div class="bar-label">${p.name}</div><div class="bar-track"><div class="bar-fill" style="width:${p.m}%;background:var(--green);">${p.m.toFixed(1)}%</div></div></div>`
+  ).join('');
+
+  // Revenue by category
+  const revByCat = {};
+  orders.forEach(o => o.items.forEach(i => {
+    const prod = products.find(p => p.sku === i.sku);
+    const cat = prod ? prod.category : 'other';
+    revByCat[cat] = (revByCat[cat] || 0) + i.price * i.qty;
+  }));
+  const catEntries = Object.entries(revByCat).sort((a, b) => b[1] - a[1]);
+  const maxCatRev = catEntries.length > 0 ? catEntries[0][1] : 1;
+  document.getElementById('categoryChart').innerHTML = catEntries.length === 0 ? '<p style="color:var(--text2);font-size:0.85rem;">No sales data yet</p>' : catEntries.map(([cat, rev]) =>
+    `<div class="bar-row"><div class="bar-label">${catLabels[cat] || cat}</div><div class="bar-track"><div class="bar-fill" style="width:${rev/maxCatRev*100}%;background:var(--accent2);">${fmt(rev)}</div></div></div>`
+  ).join('');
+
+  // Inventory value by category
+  const invByCat = {};
+  products.forEach(p => { invByCat[p.category] = (invByCat[p.category] || 0) + p.cost * p.stock; });
+  const invEntries = Object.entries(invByCat).sort((a, b) => b[1] - a[1]);
+  const maxInv = invEntries[0] ? invEntries[0][1] : 1;
+  document.getElementById('inventoryChart').innerHTML = invEntries.map(([cat, val]) =>
+    `<div class="bar-row"><div class="bar-label">${catLabels[cat] || cat}</div><div class="bar-track"><div class="bar-fill" style="width:${val/maxInv*100}%;background:var(--yellow);">${fmt(val)}</div></div></div>`
+  ).join('');
+}
+
+// ===========================
+// EVENT LISTENERS
+// ===========================
+document.getElementById('searchProducts').addEventListener('input', renderStorefront);
+document.getElementById('filterCategory').addEventListener('change', renderStorefront);
+document.getElementById('filterStock').addEventListener('change', renderStorefront);
+document.getElementById('sortProducts').addEventListener('change', renderStorefront);
+document.getElementById('searchPricing').addEventListener('input', renderPricing);
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// Keyboard shortcut: Escape closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+// ===========================
+// INIT
+// ===========================
+renderStorefront();
+renderCart();
+</script>
+</body>
+</html>
