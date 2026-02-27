@@ -337,6 +337,56 @@
           <tbody id="ordersTableBody"></tbody>
         </table>
       </div>
+
+      <!-- Subscription Payments History (collapsible) -->
+      <div style="margin-top:28px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px;" onclick="toggleSubPayHistory()">
+          <h3 style="font-size:1rem; margin:0;">Subscription Payments</h3>
+          <span id="subPayToggleIcon" style="font-size:1.2rem; transition:transform 0.2s;">▸</span>
+        </div>
+        <div id="subPayHistoryPanel" style="display:none; margin-top:12px;">
+          <div class="kpi-grid" id="subPayHistoryKpis"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Product</th>
+                  <th>Period</th>
+                  <th>Amount</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="subPayHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Payments Combined (collapsible) -->
+      <div style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px;" onclick="toggleAllPayHistory()">
+          <h3 style="font-size:1rem; margin:0;">All Payments Timeline</h3>
+          <span id="allPayToggleIcon" style="font-size:1.2rem; transition:transform 0.2s;">▸</span>
+        </div>
+        <div id="allPayHistoryPanel" style="display:none; margin-top:12px;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Client / Details</th>
+                  <th>Amount</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="allPayHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ============ CLIENTS TAB ============ -->
@@ -1285,6 +1335,107 @@ function exportOrders() {
   a.download = `peptide-orders-${todayStr()}.csv`;
   a.click();
   toast('CSV exported!');
+}
+
+// ===========================
+// PAYMENT HISTORY PANELS
+// ===========================
+function toggleSubPayHistory() {
+  const panel = document.getElementById('subPayHistoryPanel');
+  const icon = document.getElementById('subPayToggleIcon');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  icon.textContent = isOpen ? '▸' : '▾';
+  if (!isOpen) renderSubPayHistory();
+}
+
+function toggleAllPayHistory() {
+  const panel = document.getElementById('allPayHistoryPanel');
+  const icon = document.getElementById('allPayToggleIcon');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  icon.textContent = isOpen ? '▸' : '▾';
+  if (!isOpen) renderAllPayHistory();
+}
+
+function renderSubPayHistory() {
+  const totalCollected = subPayments.reduce((s, p) => s + p.amount, 0);
+  const thisMonth = currentMonth();
+  const thisMonthTotal = subPayments.filter(p => p.month === thisMonth).reduce((s, p) => s + p.amount, 0);
+
+  document.getElementById('subPayHistoryKpis').innerHTML = `
+    <div class="kpi-card"><div class="label">Total Subscription Payments</div><div class="value green">${fmt(totalCollected)}</div><div class="sub">${subPayments.length} payments</div></div>
+    <div class="kpi-card"><div class="label">This Month</div><div class="value accent">${fmt(thisMonthTotal)}</div></div>
+  `;
+
+  const sorted = subPayments.slice().sort((a, b) => b.date.localeCompare(a.date));
+  document.getElementById('subPayHistoryBody').innerHTML = sorted.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px;">No subscription payments recorded yet.</td></tr>'
+    : sorted.map(p => {
+      const sub = subscriptions.find(s => s.id === p.subId);
+      const client = sub ? clients.find(c => c.id === sub.clientId) : null;
+      const product = sub ? products.find(pr => pr.id === sub.productId) : null;
+      const period = p.weekOf ? `Week of ${p.weekOf}` : (p.month || '—');
+      return `<tr>
+        <td>${p.date}</td>
+        <td><strong>${client ? client.name : 'Unknown'}</strong></td>
+        <td>${product ? `${product.name} (${product.dosage})` : 'Unknown'}</td>
+        <td>${period}</td>
+        <td class="tx-green">${fmt(p.amount)}</td>
+        <td style="color:var(--text2);font-size:0.85rem;">${p.notes || '—'}</td>
+      </tr>`;
+    }).join('');
+}
+
+function renderAllPayHistory() {
+  // Combine orders and sub payments into one timeline
+  const allPayments = [];
+
+  // Add orders as payments
+  orders.forEach(o => {
+    allPayments.push({
+      date: o.date,
+      type: 'sale',
+      label: `Order #${o.id}`,
+      details: o.items.map(i => `${i.name} x${i.qty}`).join(', '),
+      amount: o.revenue,
+      notes: `Profit: ${fmt(o.profit)}`
+    });
+  });
+
+  // Add subscription payments
+  subPayments.forEach(p => {
+    const sub = subscriptions.find(s => s.id === p.subId);
+    const client = sub ? clients.find(c => c.id === sub.clientId) : null;
+    const product = sub ? products.find(pr => pr.id === sub.productId) : null;
+    const period = p.weekOf ? `Wk of ${p.weekOf}` : (p.month || '');
+    allPayments.push({
+      date: p.date,
+      type: 'subscription',
+      label: client ? client.name : 'Unknown',
+      details: product ? `${product.name} — ${period}` : period,
+      amount: p.amount,
+      notes: p.notes || ''
+    });
+  });
+
+  // Sort newest first
+  allPayments.sort((a, b) => b.date.localeCompare(a.date));
+
+  document.getElementById('allPayHistoryBody').innerHTML = allPayments.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:24px;">No payments recorded yet.</td></tr>'
+    : allPayments.map(p => {
+      const typeTag = p.type === 'sale'
+        ? '<span style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;">Sale</span>'
+        : '<span style="background:var(--green);color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;">Subscription</span>';
+      return `<tr>
+        <td>${p.date}</td>
+        <td>${typeTag}</td>
+        <td><strong>${p.label}</strong><br><span style="font-size:0.8rem;color:var(--text2)">${p.details}</span></td>
+        <td class="tx-green">${fmt(p.amount)}</td>
+        <td style="color:var(--text2);font-size:0.85rem;">${p.notes || '—'}</td>
+      </tr>`;
+    }).join('');
 }
 
 // ===========================
