@@ -2034,12 +2034,28 @@ saveUsage = function(data) { _origSaveUsage(data); scheduleSync(); };
 saveSubs = function(data) { _origSaveSubs(data); scheduleSync(); };
 saveSubPayments = function(data) { _origSaveSubPayments(data); scheduleSync(); };
 
-// Auto-connect on page load if config is saved
+// Hardcoded Firebase config — auto-connects on every load
+const HARDCODED_FB_CONFIG = {
+  apiKey: "AIzaSyAT_BrGpsS0b3eFj7D5Lx8sWiI_wj0m6Ec",
+  authDomain: "peptidestore-43464.firebaseapp.com",
+  databaseURL: "https://peptidestore-43464-default-rtdb.firebaseio.com",
+  projectId: "peptidestore-43464",
+  storageBucket: "peptidestore-43464.firebasestorage.app",
+  messagingSenderId: "728311693415",
+  appId: "1:728311693415:web:790fe10b3b789e7d6e14c2",
+  measurementId: "G-Y5DW59DG4G"
+};
+
+// Auto-connect on page load
 function autoConnectFirebase() {
-  const saved = localStorage.getItem(FB_CONFIG_KEY);
-  if (saved) {
+  // Use hardcoded config, fallback to saved config
+  const config = HARDCODED_FB_CONFIG || (() => {
+    const saved = localStorage.getItem(FB_CONFIG_KEY);
+    return saved ? JSON.parse(saved) : null;
+  })();
+  if (config) {
     try {
-      const config = JSON.parse(saved);
+      localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(config));
       initFirebase(config);
     } catch(e) {
       console.error('Failed to auto-connect Firebase:', e);
