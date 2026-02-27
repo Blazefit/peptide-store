@@ -1901,6 +1901,7 @@ const FB_CONFIG_KEY = 'peptide_store_fb_config';
 let fbDb = null;
 let fbConnected = false;
 let syncDebounceTimer = null;
+let _localChangePending = false; // blocks incoming cloud data while we're pushing
 
 function syncLog(msg) {
   const log = document.getElementById('syncLog');
@@ -1995,6 +1996,11 @@ function initFirebase(config) {
 
     // Listen for real-time changes from other devices
     fbDb.ref('store').on('value', (snapshot) => {
+      // Skip incoming cloud data if we have a local change waiting to push
+      if (_localChangePending) {
+        syncLog('Skipping incoming cloud data (local change pending)');
+        return;
+      }
       const data = snapshot.val();
       if (!data) {
         // No data in cloud yet — push current local data
@@ -2007,14 +2013,16 @@ function initFirebase(config) {
       const localHash = JSON.stringify({ products, orders, clients, usageLogs, subscriptions, subPayments });
       if (cloudHash !== localHash) {
         syncLog('Received update from cloud, syncing...');
-        if (data.products) { products = data.products; saveProducts(products); }
-        if (data.orders) { orders = data.orders; saveOrders(orders); }
-        if (data.clients) { clients = data.clients; saveClients(clients); }
-        if (data.usageLogs) { usageLogs = data.usageLogs; saveUsage(usageLogs); }
-        if (data.subscriptions) { subscriptions = data.subscriptions; saveSubs(subscriptions); }
-        if (data.subPayments) { subPayments = data.subPayments; saveSubPayments(subPayments); }
+        if (data.products) { products = data.products; _origSaveProducts(products); }
+        if (data.orders) { orders = data.orders; _origSaveOrders(orders); }
+        if (data.clients) { clients = data.clients; _origSaveClients(clients); }
+        if (data.usageLogs) { usageLogs = data.usageLogs; _origSaveUsage(usageLogs); }
+        if (data.subscriptions) { subscriptions = data.subscriptions; _origSaveSubs(subscriptions); }
+        if (data.subPayments) { subPayments = data.subPayments; _origSaveSubPayments(subPayments); }
         renderStorefront();
         renderCart();
+        renderOrders();
+        renderAnalytics();
         renderSyncStatus();
         syncLog('<span style="color:var(--green)">Data synced from cloud</span>');
         updateSyncBadge('connected', 'Cloud Synced');
@@ -2094,6 +2102,7 @@ function disconnectFirebase() {
 function scheduleSync() {
   if (!fbConnected || !fbDb) return;
   clearTimeout(syncDebounceTimer);
+  _localChangePending = true; // Block incoming cloud data until push completes
   updateSyncBadge('syncing', 'Saving...');
   syncDebounceTimer = setTimeout(() => {
     fbDb.ref('store').set({
@@ -2105,8 +2114,10 @@ function scheduleSync() {
       subPayments,
       lastUpdated: new Date().toISOString()
     }).then(() => {
+      _localChangePending = false;
       updateSyncBadge('connected', 'Cloud Synced');
     }).catch(err => {
+      _localChangePending = false;
       updateSyncBadge('connected', 'Sync Error');
       syncLog('<span style="color:var(--red)">Auto-sync error: ' + err.message + '</span>');
     });
