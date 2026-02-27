@@ -387,7 +387,7 @@
       <!-- Subscriptions Section -->
       <div style="margin-top:32px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h2 style="font-size:1.1rem;">Monthly Subscriptions</h2>
+          <h2 style="font-size:1.1rem;">Subscriptions</h2>
         </div>
         <div class="kpi-grid" id="subKpis"></div>
         <div class="table-wrap">
@@ -731,10 +731,14 @@
     <input type="hidden" id="paySubId">
     <p style="font-size:0.85rem; color:var(--text2); margin-bottom:16px;" id="paySubInfo"></p>
     <div class="form-group"><label>Amount ($)</label><input id="payAmount" type="number" step="0.01" min="0"></div>
-    <div class="form-group"><label>Date</label><input id="payDate" type="date"></div>
-    <div class="form-group">
+    <div class="form-group"><label>Date Paid</label><input id="payDate" type="date"></div>
+    <div class="form-group" id="payPeriodMonthGroup">
       <label>Month Covered</label>
       <input id="payMonth" type="month">
+    </div>
+    <div class="form-group" id="payPeriodWeekGroup" style="display:none;">
+      <label>Week of</label>
+      <input id="payWeek" type="date">
     </div>
     <div class="form-group"><label>Notes</label><input id="payNotes" placeholder="e.g. cash, Venmo, partial..."></div>
     <div class="btn-row">
@@ -1836,9 +1840,9 @@ function renderSubscriptions() {
 
   document.getElementById('subKpis').innerHTML = `
     <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs.length}</div><div class="sub">${weeklyCount} weekly, ${monthlyCount} monthly</div></div>
-    <div class="kpi-card"><div class="label">Monthly Recurring Revenue</div><div class="value green">${fmt(mrr)}</div><div class="sub">Normalized to monthly</div></div>
-    <div class="kpi-card"><div class="label">Collected This Month</div><div class="value green">${fmt(paidThisMonth)}</div><div class="sub">of ${fmt(dueThisMonth)} due</div></div>
-    <div class="kpi-card"><div class="label">Outstanding This Month</div><div class="value ${outstanding > 0 ? 'red' : 'green'}">${fmt(Math.max(0, outstanding))}</div></div>
+    <div class="kpi-card"><div class="label">Recurring Revenue (MRR)</div><div class="value green">${fmt(mrr)}</div><div class="sub">Normalized to monthly</div></div>
+    <div class="kpi-card"><div class="label">Collected This Period</div><div class="value green">${fmt(paidThisMonth)}</div><div class="sub">of ${fmt(dueThisMonth)} due</div></div>
+    <div class="kpi-card"><div class="label">Outstanding</div><div class="value ${outstanding > 0 ? 'red' : 'green'}">${fmt(Math.max(0, outstanding))}</div></div>
     <div class="kpi-card"><div class="label">All-Time Collected</div><div class="value accent">${fmt(totalCollected)}</div></div>
   `;
 
@@ -1948,30 +1952,52 @@ function openRecordPayment(subId) {
   const sub = subscriptions.find(s => s.id === subId);
   const client = clients.find(c => c.id === sub.clientId);
   const product = products.find(p => p.id === sub.productId);
+  const isWeekly = (sub.billing || 'monthly') === 'weekly';
   document.getElementById('paySubId').value = subId;
-  const billingLabel = (sub.billing || 'monthly') === 'weekly' ? 'week' : 'month';
+  const billingLabel = isWeekly ? 'week' : 'month';
   document.getElementById('paySubInfo').textContent = `${client ? client.name : 'Unknown'} — ${product ? product.name : 'Unknown'} — ${fmt(sub.price)}/${billingLabel}`;
   document.getElementById('payAmount').value = sub.price;
   document.getElementById('payDate').value = todayStr();
-  document.getElementById('payMonth').value = currentMonth();
+  // Show week or month period based on billing cycle
+  if (isWeekly) {
+    document.getElementById('payPeriodMonthGroup').style.display = 'none';
+    document.getElementById('payPeriodWeekGroup').style.display = 'block';
+    // Default to start of current week (Monday)
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    document.getElementById('payWeek').value = monday.toISOString().split('T')[0];
+  } else {
+    document.getElementById('payPeriodMonthGroup').style.display = 'block';
+    document.getElementById('payPeriodWeekGroup').style.display = 'none';
+    document.getElementById('payMonth').value = currentMonth();
+  }
   document.getElementById('payNotes').value = '';
   document.getElementById('subPayModal').classList.add('open');
 }
 
 function saveSubPayment() {
   const subId = parseInt(document.getElementById('paySubId').value);
+  const sub = subscriptions.find(s => s.id === subId);
+  const isWeekly = sub && (sub.billing || 'monthly') === 'weekly';
   const amount = parseFloat(document.getElementById('payAmount').value) || 0;
   const date = document.getElementById('payDate').value;
-  const month = document.getElementById('payMonth').value;
+  const month = isWeekly ? null : document.getElementById('payMonth').value;
+  const weekOf = isWeekly ? document.getElementById('payWeek').value : null;
   const notes = document.getElementById('payNotes').value.trim();
   if (amount <= 0) { toast('Amount is required'); return; }
+
+  // For weekly subs, derive the "month" from the weekOf date for KPI compatibility
+  const periodMonth = isWeekly && weekOf ? weekOf.substring(0, 7) : month;
 
   const payment = {
     id: Math.max(0, ...subPayments.map(p => p.id)) + 1,
     subId,
     amount,
     date,
-    month,
+    month: periodMonth,
+    weekOf: weekOf,
     notes
   };
   subPayments.push(payment);
@@ -1988,14 +2014,17 @@ function viewSubPayments(subId) {
   const payments = subPayments.filter(p => p.subId === subId).sort((a, b) => b.date.localeCompare(a.date));
   const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
 
-  let msg = `Subscription: ${client ? client.name : '?'} — ${product ? product.name : '?'} (${fmt(sub.price)}/mo)\n`;
+  const isWeekly = (sub.billing || 'monthly') === 'weekly';
+  const billingLabel = isWeekly ? 'wk' : 'mo';
+  let msg = `Subscription: ${client ? client.name : '?'} — ${product ? product.name : '?'} (${fmt(sub.price)}/${billingLabel})\n`;
   msg += `Total Paid: ${fmt(totalPaid)}\n\n`;
   if (payments.length === 0) {
     msg += 'No payments recorded yet.';
   } else {
     msg += 'Payment History:\n';
     payments.forEach(p => {
-      msg += `  ${p.date} | ${p.month} | ${fmt(p.amount)}${p.notes ? ' | ' + p.notes : ''}\n`;
+      const period = p.weekOf ? `Week of ${p.weekOf}` : (p.month || '—');
+      msg += `  ${p.date} | ${period} | ${fmt(p.amount)}${p.notes ? ' | ' + p.notes : ''}\n`;
     });
   }
   alert(msg);
