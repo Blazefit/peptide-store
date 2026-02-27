@@ -382,7 +382,7 @@
               <tr>
                 <th>Client</th>
                 <th>Product</th>
-                <th>Monthly Price</th>
+                <th>Price</th>
                 <th>Dose / Session</th>
                 <th>Frequency</th>
                 <th>Status</th>
@@ -665,7 +665,14 @@
       <label>Product</label>
       <select id="subProduct"></select>
     </div>
-    <div class="form-group"><label>Monthly Price ($)</label><input id="subPrice" type="number" step="0.01" min="0" placeholder="e.g. 150.00"></div>
+    <div class="form-group">
+      <label>Billing Cycle</label>
+      <select id="subBilling">
+        <option value="monthly">Monthly</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Price ($)</label><input id="subPrice" type="number" step="0.01" min="0" placeholder="e.g. 150.00"></div>
     <div class="form-group"><label>Dose per Session</label><input id="subDose" placeholder="e.g. 2.5mg, 200mcg"></div>
     <div class="form-group">
       <label>Frequency</label>
@@ -1280,7 +1287,7 @@ function renderAnalytics() {
 
   // ---- Subscription Analytics ----
   const activeSubs = subscriptions.filter(s => s.status === 'active');
-  const mrr = activeSubs.reduce((s, sub) => s + (sub.monthlyPrice || 0), 0);
+  const mrr = activeSubs.reduce((s, sub) => s + subMonthlyEquiv(sub), 0);
   const arr = mrr * 12;
 
   // Total collected from subscription payments
@@ -1536,7 +1543,7 @@ function viewClientDetail(id) {
       const payments = subPayments.filter(p => p.subId === sub.id).sort((a, b) => b.date.localeCompare(a.date));
       const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
       return `<tr style="background:var(--surface2);">
-        <td colspan="2" style="font-size:0.85rem;"><span class="status-${sub.status}" style="margin-right:8px;">${sub.status}</span> <strong>Subscription:</strong> ${product ? product.name : '?'} — ${sub.dose} ${freqLabels[sub.frequency] || sub.frequency} @ ${fmt(sub.price)}/mo</td>
+        <td colspan="2" style="font-size:0.85rem;"><span class="status-${sub.status}" style="margin-right:8px;">${sub.status}</span> <strong>Subscription:</strong> ${product ? product.name : '?'} — ${sub.dose} ${freqLabels[sub.frequency] || sub.frequency} @ ${fmt(sub.price)}/${(sub.billing || 'monthly') === 'weekly' ? 'wk' : 'mo'}</td>
         <td class="tx-green">${fmt(totalPaid)} paid</td>
       </tr>` + payments.map(p => `<tr><td style="padding-left:32px;color:var(--text2)">${p.date}</td><td>Payment (${p.month})${p.notes ? ' — ' + p.notes : ''}</td><td class="tx-green">${fmt(p.amount)}</td></tr>`).join('');
     }).join('');
@@ -1727,18 +1734,25 @@ function monthsSince(startDate) {
   return (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
 }
 
+function subMonthlyEquiv(sub) {
+  // Convert any subscription price to monthly equivalent
+  return (sub.billing || 'monthly') === 'weekly' ? sub.price * 4.33 : sub.price;
+}
+
 function renderSubscriptions() {
   const activeSubs = subscriptions.filter(s => s.status === 'active');
-  const monthlyRevenue = activeSubs.reduce((s, sub) => s + sub.price, 0);
+  const mrr = activeSubs.reduce((s, sub) => s + subMonthlyEquiv(sub), 0);
   const totalCollected = subPayments.reduce((s, p) => s + p.amount, 0);
   const cm = currentMonth();
   const paidThisMonth = subPayments.filter(p => p.month === cm).reduce((s, p) => s + p.amount, 0);
-  const dueThisMonth = activeSubs.reduce((s, sub) => s + sub.price, 0);
+  const dueThisMonth = activeSubs.reduce((s, sub) => s + subMonthlyEquiv(sub), 0);
   const outstanding = dueThisMonth - paidThisMonth;
+  const weeklyCount = activeSubs.filter(s => (s.billing || 'monthly') === 'weekly').length;
+  const monthlyCount = activeSubs.length - weeklyCount;
 
   document.getElementById('subKpis').innerHTML = `
-    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs.length}</div></div>
-    <div class="kpi-card"><div class="label">Monthly Recurring Revenue</div><div class="value green">${fmt(monthlyRevenue)}</div></div>
+    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs.length}</div><div class="sub">${weeklyCount} weekly, ${monthlyCount} monthly</div></div>
+    <div class="kpi-card"><div class="label">Monthly Recurring Revenue</div><div class="value green">${fmt(mrr)}</div><div class="sub">Normalized to monthly</div></div>
     <div class="kpi-card"><div class="label">Collected This Month</div><div class="value green">${fmt(paidThisMonth)}</div><div class="sub">of ${fmt(dueThisMonth)} due</div></div>
     <div class="kpi-card"><div class="label">Outstanding This Month</div><div class="value ${outstanding > 0 ? 'red' : 'green'}">${fmt(Math.max(0, outstanding))}</div></div>
     <div class="kpi-card"><div class="label">All-Time Collected</div><div class="value accent">${fmt(totalCollected)}</div></div>
@@ -1765,7 +1779,7 @@ function renderSubscriptions() {
     return `<tr>
       <td><strong>${clientName}</strong></td>
       <td>${productName}</td>
-      <td><strong>${fmt(sub.price)}</strong>/mo</td>
+      <td><strong>${fmt(sub.price)}</strong>/${(sub.billing || 'monthly') === 'weekly' ? 'wk' : 'mo'}</td>
       <td>${sub.dose}</td>
       <td>${freqLabels[sub.frequency] || sub.frequency}</td>
       <td><span class="status-${sub.status}">${sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}</span></td>
@@ -1786,6 +1800,7 @@ function openAddSub() {
   document.getElementById('subEditId').value = '';
   document.getElementById('subClient').innerHTML = clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
   document.getElementById('subProduct').innerHTML = products.map(p => `<option value="${p.id}">${p.name} (${p.dosage})</option>`).join('');
+  document.getElementById('subBilling').value = 'monthly';
   document.getElementById('subPrice').value = '';
   document.getElementById('subDose').value = '';
   document.getElementById('subFrequency').value = 'weekly';
@@ -1801,6 +1816,7 @@ function openEditSub(id) {
   document.getElementById('subEditId').value = sub.id;
   document.getElementById('subClient').innerHTML = clients.map(c => `<option value="${c.id}" ${c.id === sub.clientId ? 'selected' : ''}>${c.name}</option>`).join('');
   document.getElementById('subProduct').innerHTML = products.map(p => `<option value="${p.id}" ${p.id === sub.productId ? 'selected' : ''}>${p.name} (${p.dosage})</option>`).join('');
+  document.getElementById('subBilling').value = sub.billing || 'monthly';
   document.getElementById('subPrice').value = sub.price;
   document.getElementById('subDose').value = sub.dose;
   document.getElementById('subFrequency').value = sub.frequency;
@@ -1815,6 +1831,7 @@ function saveSub() {
   const data = {
     clientId: parseInt(document.getElementById('subClient').value),
     productId: parseInt(document.getElementById('subProduct').value),
+    billing: document.getElementById('subBilling').value,
     price: parseFloat(document.getElementById('subPrice').value) || 0,
     dose: document.getElementById('subDose').value.trim(),
     frequency: document.getElementById('subFrequency').value,
@@ -1822,7 +1839,7 @@ function saveSub() {
     status: document.getElementById('subStatus').value,
     notes: document.getElementById('subNotes').value.trim(),
   };
-  if (data.price <= 0) { toast('Monthly price is required'); return; }
+  if (data.price <= 0) { toast('Price is required'); return; }
   if (!data.dose) { toast('Dose per session is required'); return; }
 
   if (id) {
@@ -1843,7 +1860,8 @@ function openRecordPayment(subId) {
   const client = clients.find(c => c.id === sub.clientId);
   const product = products.find(p => p.id === sub.productId);
   document.getElementById('paySubId').value = subId;
-  document.getElementById('paySubInfo').textContent = `${client ? client.name : 'Unknown'} — ${product ? product.name : 'Unknown'} — ${fmt(sub.price)}/month`;
+  const billingLabel = (sub.billing || 'monthly') === 'weekly' ? 'week' : 'month';
+  document.getElementById('paySubInfo').textContent = `${client ? client.name : 'Unknown'} — ${product ? product.name : 'Unknown'} — ${fmt(sub.price)}/${billingLabel}`;
   document.getElementById('payAmount').value = sub.price;
   document.getElementById('payDate').value = todayStr();
   document.getElementById('payMonth').value = currentMonth();
