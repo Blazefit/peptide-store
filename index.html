@@ -317,6 +317,7 @@
               <th>COGS</th>
               <th>Profit</th>
               <th>Margin</th>
+              <th style="width:50px"></th>
             </tr>
           </thead>
           <tbody id="ordersTableBody"></tbody>
@@ -474,6 +475,18 @@
         <div class="chart-container">
           <h3>Inventory Value by Category</h3>
           <div class="bar-chart" id="inventoryChart"></div>
+        </div>
+      </div>
+      <h2 style="font-size:1.2rem; margin:30px 0 20px;">Subscription Analytics</h2>
+      <div class="kpi-grid" id="subAnalyticsKpis"></div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="chart-container">
+          <h3>Revenue by Subscription Client</h3>
+          <div class="bar-chart" id="subClientChart"></div>
+        </div>
+        <div class="chart-container">
+          <h3>Most Subscribed Products</h3>
+          <div class="bar-chart" id="subProductChart"></div>
         </div>
       </div>
     </div>
@@ -1150,8 +1163,30 @@ function renderOrders() {
       <td style="color:var(--text2)">${fmt(o.cogs)}</td>
       <td class="tx-green">${fmt(o.profit)}</td>
       <td><span class="margin-tag ${marginClass(o.margin)}">${o.margin.toFixed(1)}%</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteSingleOrder(${o.id})" title="Delete this order">✕</button></td>
     </tr>
   `).join('');
+}
+
+function deleteSingleOrder(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  const itemsList = order.items.map(i => `${i.name} x${i.qty}`).join(', ');
+  if (!confirm(`Delete order #${orderId}?\n${itemsList}\nRevenue: $${order.revenue.toFixed(2)}\n\nStock will be restored.`)) return;
+  // Restore stock for each item in the order
+  order.items.forEach(item => {
+    const product = products.find(p => p.name === item.name && p.dosage === item.dosage);
+    if (product) {
+      product.stock += item.qty;
+    }
+  });
+  saveProducts(products);
+  orders = orders.filter(o => o.id !== orderId);
+  saveOrders(orders);
+  renderOrders();
+  renderStorefront();
+  renderPricing();
+  toast(`Order #${orderId} deleted & stock restored`);
 }
 
 function clearAllOrders() {
@@ -1240,6 +1275,63 @@ function renderAnalytics() {
   document.getElementById('inventoryChart').innerHTML = invEntries.map(([cat, val]) =>
     `<div class="bar-row"><div class="bar-label">${catLabels[cat] || cat}</div><div class="bar-track"><div class="bar-fill" style="width:${val/maxInv*100}%;background:var(--yellow);">${fmt(val)}</div></div></div>`
   ).join('');
+
+  // ---- Subscription Analytics ----
+  const activeSubs = subscriptions.filter(s => s.status === 'active');
+  const mrr = activeSubs.reduce((s, sub) => s + (sub.monthlyPrice || 0), 0);
+  const arr = mrr * 12;
+
+  // Total collected from subscription payments
+  const totalSubCollected = subPayments.reduce((s, p) => s + (p.amount || 0), 0);
+  // Total expected (all active subs * months they've been active, roughly)
+  const totalSubExpected = subPayments.length > 0 ? subPayments.reduce((s, p) => s + (p.expected || p.amount || 0), 0) : 0;
+  const collectionRate = totalSubExpected > 0 ? (totalSubCollected / totalSubExpected * 100) : 0;
+
+  // Unique subscription clients
+  const subClientIds = [...new Set(subscriptions.map(s => s.clientId))];
+  const subClientCount = subClientIds.length;
+  const activeSubClientCount = [...new Set(activeSubs.map(s => s.clientId))].length;
+
+  document.getElementById('subAnalyticsKpis').innerHTML = `
+    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value accent">${activeSubs.length}</div><div class="sub">${subscriptions.length} total</div></div>
+    <div class="kpi-card"><div class="label">Monthly Recurring (MRR)</div><div class="value green">${fmt(mrr)}</div><div class="sub">ARR: ${fmt(arr)}</div></div>
+    <div class="kpi-card"><div class="label">Total Collected</div><div class="value green">${fmt(totalSubCollected)}</div><div class="sub">${subPayments.length} payments</div></div>
+    <div class="kpi-card"><div class="label">Collection Rate</div><div class="value ${collectionRate >= 80 ? 'green' : collectionRate >= 50 ? 'accent' : 'red'}">${collectionRate.toFixed(1)}%</div></div>
+    <div class="kpi-card"><div class="label">Subscription Clients</div><div class="value">${activeSubClientCount}</div><div class="sub">${subClientCount} total</div></div>
+    <div class="kpi-card"><div class="label">Avg Revenue/Client</div><div class="value accent">${fmt(activeSubClientCount > 0 ? mrr / activeSubClientCount : 0)}</div><div class="sub">per month</div></div>
+  `;
+
+  // Revenue by subscription client
+  const revBySubClient = {};
+  subPayments.forEach(p => {
+    const sub = subscriptions.find(s => s.id === p.subId);
+    if (!sub) return;
+    const client = clients.find(c => c.id === sub.clientId);
+    const name = client ? client.name : 'Unknown';
+    revBySubClient[name] = (revBySubClient[name] || 0) + (p.amount || 0);
+  });
+  const subClientEntries = Object.entries(revBySubClient).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxSubClient = subClientEntries.length > 0 ? subClientEntries[0][1] : 1;
+  document.getElementById('subClientChart').innerHTML = subClientEntries.length === 0
+    ? '<p style="color:var(--text2);font-size:0.85rem;">No subscription payment data yet</p>'
+    : subClientEntries.map(([name, rev]) =>
+      `<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill" style="width:${rev/maxSubClient*100}%;background:var(--accent);">${fmt(rev)}</div></div></div>`
+    ).join('');
+
+  // Most subscribed products
+  const subsByProduct = {};
+  subscriptions.forEach(sub => {
+    const prod = products.find(p => p.sku === sub.productSku);
+    const name = prod ? `${prod.name} (${prod.dosage})` : sub.productSku;
+    subsByProduct[name] = (subsByProduct[name] || 0) + 1;
+  });
+  const subProdEntries = Object.entries(subsByProduct).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxSubProd = subProdEntries.length > 0 ? subProdEntries[0][1] : 1;
+  document.getElementById('subProductChart').innerHTML = subProdEntries.length === 0
+    ? '<p style="color:var(--text2);font-size:0.85rem;">No subscriptions yet</p>'
+    : subProdEntries.map(([name, count]) =>
+      `<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill" style="width:${count/maxSubProd*100}%;background:var(--green);">${count} sub${count > 1 ? 's' : ''}</div></div></div>`
+    ).join('');
 }
 
 // ===========================
