@@ -1901,7 +1901,9 @@ const FB_CONFIG_KEY = 'peptide_store_fb_config';
 let fbDb = null;
 let fbConnected = false;
 let syncDebounceTimer = null;
-let _localChangePending = false; // blocks incoming cloud data while we're pushing
+let _listenerRef = null;  // reference to the active Firebase listener
+let _listenerCallback = null;
+let _pauseListener = false; // true = ignore incoming cloud data
 
 function syncLog(msg) {
   const log = document.getElementById('syncLog');
@@ -1995,23 +1997,18 @@ function initFirebase(config) {
     renderSyncStatus();
 
     // Listen for real-time changes from other devices
-    fbDb.ref('store').on('value', (snapshot) => {
-      // Skip incoming cloud data if we have a local change waiting to push
-      if (_localChangePending) {
-        syncLog('Skipping incoming cloud data (local change pending)');
-        return;
-      }
+    _listenerCallback = (snapshot) => {
+      if (_pauseListener) return; // local change in progress, ignore cloud
       const data = snapshot.val();
       if (!data) {
-        // No data in cloud yet — push current local data
         syncLog('No cloud data found. Pushing local data...');
         firebasePush();
         return;
       }
       // Only update if data actually changed (avoid loops)
-      const cloudHash = JSON.stringify(data);
-      const localHash = JSON.stringify({ products, orders, clients, usageLogs, subscriptions, subPayments });
-      if (cloudHash !== localHash) {
+      const cloudStr = JSON.stringify({ p: data.products, o: data.orders, c: data.clients, u: data.usageLogs, s: data.subscriptions, sp: data.subPayments });
+      const localStr = JSON.stringify({ p: products, o: orders, c: clients, u: usageLogs, s: subscriptions, sp: subPayments });
+      if (cloudStr !== localStr) {
         syncLog('Received update from cloud, syncing...');
         if (data.products) { products = data.products; _origSaveProducts(products); }
         if (data.orders) { orders = data.orders; _origSaveOrders(orders); }
@@ -2027,7 +2024,9 @@ function initFirebase(config) {
         syncLog('<span style="color:var(--green)">Data synced from cloud</span>');
         updateSyncBadge('connected', 'Cloud Synced');
       }
-    });
+    };
+    _listenerRef = fbDb.ref('store');
+    _listenerRef.on('value', _listenerCallback);
 
     syncLog('Listening for real-time updates from other devices');
   } catch (err) {
@@ -2086,7 +2085,9 @@ function firebasePull() {
 function disconnectFirebase() {
   if (!confirm('Disconnect from Firebase? Your local data will remain but won\'t sync.')) return;
   localStorage.removeItem(FB_CONFIG_KEY);
-  if (fbDb) fbDb.ref('store').off();
+  if (_listenerRef && _listenerCallback) _listenerRef.off('value', _listenerCallback);
+  _listenerRef = null;
+  _listenerCallback = null;
   fbDb = null;
   fbConnected = false;
   if (firebase.apps.length) firebase.app().delete();
@@ -2098,14 +2099,15 @@ function disconnectFirebase() {
   toast('Disconnected from Firebase');
 }
 
-// Debounced auto-sync: pushes to Firebase after any data change
+// Push local data to Firebase. Pauses listener to prevent race conditions.
 function scheduleSync() {
   if (!fbConnected || !fbDb) return;
   clearTimeout(syncDebounceTimer);
-  _localChangePending = true; // Block incoming cloud data until push completes
+  _pauseListener = true; // Immediately block incoming cloud data
   updateSyncBadge('syncing', 'Saving...');
+  // Short debounce to batch rapid changes, but still fast
   syncDebounceTimer = setTimeout(() => {
-    fbDb.ref('store').set({
+    const payload = {
       products,
       orders,
       clients,
@@ -2113,15 +2115,17 @@ function scheduleSync() {
       subscriptions,
       subPayments,
       lastUpdated: new Date().toISOString()
-    }).then(() => {
-      _localChangePending = false;
+    };
+    fbDb.ref('store').set(payload).then(() => {
       updateSyncBadge('connected', 'Cloud Synced');
+      // Resume listener AFTER push is confirmed
+      setTimeout(() => { _pauseListener = false; }, 500);
     }).catch(err => {
-      _localChangePending = false;
       updateSyncBadge('connected', 'Sync Error');
       syncLog('<span style="color:var(--red)">Auto-sync error: ' + err.message + '</span>');
+      _pauseListener = false;
     });
-  }, 1500); // 1.5s debounce
+  }, 300); // 300ms debounce (fast but batches rapid saves)
 }
 
 // Override save functions to trigger auto-sync
