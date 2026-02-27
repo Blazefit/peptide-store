@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Peptide Supply Co. — Storefront</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root {
     --bg: #0f0f13;
@@ -159,6 +161,14 @@
   @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+  /* Sync indicator */
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .sync-dot.connected { background: var(--green); }
+  .sync-dot.disconnected { background: var(--red); }
+  .sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .sync-badge { position: fixed; bottom: 24px; left: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.75rem; z-index: 100; display: flex; align-items: center; gap: 6px; }
+
   /* Subscription status */
   .status-active { background: rgba(52,211,153,0.15); color: var(--green); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
   .status-paused { background: rgba(251,191,36,0.15); color: var(--yellow); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
@@ -188,6 +198,7 @@
       <button class="nav-tab" data-tab="clients">Clients</button>
       <button class="nav-tab" data-tab="usage">Usage Tracker</button>
       <button class="nav-tab" data-tab="analytics">Analytics</button>
+      <button class="nav-tab" data-tab="sync">Sync</button>
     </div>
   </header>
 
@@ -466,6 +477,71 @@
         </div>
       </div>
     </div>
+
+    <!-- ============ SYNC TAB ============ -->
+    <div id="tab-sync" class="tab-panel">
+      <h2 style="font-size:1.2rem; margin-bottom:20px;">Cloud Sync Settings</h2>
+
+      <div class="kpi-grid" id="syncStatus"></div>
+
+      <!-- Firebase Setup -->
+      <div class="cart-panel" id="firebaseSetupPanel">
+        <h3>Firebase Setup</h3>
+        <div id="syncConnected" style="display:none;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:var(--green);"></div>
+            <span style="color:var(--green);font-weight:600;">Connected to Firebase</span>
+          </div>
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;">Your data automatically syncs across all devices using this Firebase project.</p>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary btn-sm" onclick="firebasePush()">Push All Data Now</button>
+            <button class="btn btn-outline btn-sm" onclick="firebasePull()">Pull Data from Cloud</button>
+            <button class="btn btn-danger btn-sm" onclick="disconnectFirebase()">Disconnect</button>
+          </div>
+        </div>
+
+        <div id="syncSetup">
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;">Connect to Firebase to sync your data across multiple PCs. Quick one-time setup:</p>
+
+          <div class="chart-container" style="margin-bottom:20px;">
+            <h3>Setup Instructions (2 minutes)</h3>
+            <ol style="font-size:0.85rem;color:var(--text2);line-height:1.8;padding-left:20px;">
+              <li>Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent2);">console.firebase.google.com</a> and sign in with Google</li>
+              <li>Click <strong>"Create a project"</strong> (or "Add project"), name it anything (e.g. "peptide-store"), click through defaults</li>
+              <li>In your project, click the <strong>gear icon → Project settings</strong></li>
+              <li>Scroll down to "Your apps" and click the <strong>Web icon (&lt;/&gt;)</strong> to add a web app</li>
+              <li>Give it a nickname (anything), <strong>don't</strong> check Firebase Hosting, click Register</li>
+              <li>You'll see a <strong>firebaseConfig</strong> code block — copy the entire config object</li>
+              <li>In the left sidebar, click <strong>"Build" → "Realtime Database"</strong></li>
+              <li>Click <strong>"Create Database"</strong>, choose any location, select <strong>"Start in test mode"</strong>, click Enable</li>
+              <li>Paste the config below and click Connect!</li>
+            </ol>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label style="display:block;font-size:0.8rem;color:var(--text2);margin-bottom:6px;text-transform:uppercase;">Firebase Config (paste the JSON object)</label>
+            <textarea id="firebaseConfigInput" rows="8" style="width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:monospace;font-size:0.8rem;resize:vertical;outline:none;" placeholder='{
+  apiKey: "AIza...",
+  authDomain: "your-project.firebaseapp.com",
+  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123:web:abc123"
+}'></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="connectFirebase()">Connect to Firebase</button>
+        </div>
+      </div>
+
+      <!-- Sync Log -->
+      <div class="cart-panel" style="margin-top:20px;">
+        <h3>Sync Log</h3>
+        <div id="syncLog" style="max-height:300px;overflow-y:auto;font-size:0.8rem;color:var(--text2);font-family:monospace;">
+          <p>No sync activity yet.</p>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -627,6 +703,8 @@
   </div>
 </div>
 
+<div class="sync-badge" id="syncBadge"><span class="sync-dot disconnected"></span> <span id="syncBadgeText">Local Only</span></div>
+
 <div class="toast-container" id="toasts"></div>
 
 <script>
@@ -687,17 +765,17 @@ function loadProducts() {
   if (saved) return JSON.parse(saved);
   return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
 }
-function saveProducts(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+var saveProducts = function(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); };
 function loadOrders() { return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]'); }
-function saveOrders(data) { localStorage.setItem(ORDERS_KEY, JSON.stringify(data)); }
+var saveOrders = function(data) { localStorage.setItem(ORDERS_KEY, JSON.stringify(data)); };
 function loadClients() { return JSON.parse(localStorage.getItem(CLIENTS_KEY) || '[]'); }
-function saveClients(data) { localStorage.setItem(CLIENTS_KEY, JSON.stringify(data)); }
+var saveClients = function(data) { localStorage.setItem(CLIENTS_KEY, JSON.stringify(data)); };
 function loadUsage() { return JSON.parse(localStorage.getItem(USAGE_KEY) || '[]'); }
-function saveUsage(data) { localStorage.setItem(USAGE_KEY, JSON.stringify(data)); }
+var saveUsage = function(data) { localStorage.setItem(USAGE_KEY, JSON.stringify(data)); };
 function loadSubs() { return JSON.parse(localStorage.getItem(SUBS_KEY) || '[]'); }
-function saveSubs(data) { localStorage.setItem(SUBS_KEY, JSON.stringify(data)); }
+var saveSubs = function(data) { localStorage.setItem(SUBS_KEY, JSON.stringify(data)); };
 function loadSubPayments() { return JSON.parse(localStorage.getItem(SUB_PAYMENTS_KEY) || '[]'); }
-function saveSubPayments(data) { localStorage.setItem(SUB_PAYMENTS_KEY, JSON.stringify(data)); }
+var saveSubPayments = function(data) { localStorage.setItem(SUB_PAYMENTS_KEY, JSON.stringify(data)); };
 
 let products = loadProducts();
 let orders = loadOrders();
@@ -753,6 +831,7 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     if (tab.dataset.tab === 'pricing') renderPricing();
     if (tab.dataset.tab === 'clients') renderClients();
     if (tab.dataset.tab === 'usage') renderUsage();
+    if (tab.dataset.tab === 'sync') renderSyncStatus();
   });
 });
 
@@ -1722,6 +1801,253 @@ function viewSubPayments(subId) {
 }
 
 // ===========================
+// FIREBASE CLOUD SYNC
+// ===========================
+const FB_CONFIG_KEY = 'peptide_store_fb_config';
+let fbDb = null;
+let fbConnected = false;
+let syncDebounceTimer = null;
+
+function syncLog(msg) {
+  const log = document.getElementById('syncLog');
+  if (!log) return;
+  const time = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.style.marginBottom = '4px';
+  entry.innerHTML = `<span style="color:var(--text2)">[${time}]</span> ${msg}`;
+  log.prepend(entry);
+  // Remove "No sync activity" placeholder
+  const placeholder = log.querySelector('p');
+  if (placeholder) placeholder.remove();
+}
+
+function updateSyncBadge(status, text) {
+  const dot = document.querySelector('#syncBadge .sync-dot');
+  const label = document.getElementById('syncBadgeText');
+  dot.className = 'sync-dot ' + status;
+  label.textContent = text;
+}
+
+function renderSyncStatus() {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.innerHTML = fbConnected ? `
+    <div class="kpi-card"><div class="label">Status</div><div class="value green" style="font-size:1.2rem;">Connected</div></div>
+    <div class="kpi-card"><div class="label">Products</div><div class="value">${products.length}</div></div>
+    <div class="kpi-card"><div class="label">Orders</div><div class="value">${orders.length}</div></div>
+    <div class="kpi-card"><div class="label">Clients</div><div class="value">${clients.length}</div></div>
+    <div class="kpi-card"><div class="label">Subscriptions</div><div class="value">${subscriptions.length}</div></div>
+  ` : `
+    <div class="kpi-card"><div class="label">Status</div><div class="value red" style="font-size:1.2rem;">Not Connected</div><div class="sub">Data saved locally only</div></div>
+  `;
+}
+
+function parseFirebaseConfig(raw) {
+  try {
+    // Try direct JSON parse first
+    return JSON.parse(raw);
+  } catch(e) {
+    // Handle JS object format (unquoted keys)
+    try {
+      const cleaned = raw
+        .replace(/\/\/.*$/gm, '')          // remove comments
+        .replace(/,\s*}/g, '}')            // trailing commas
+        .replace(/(\w+)\s*:/g, '"$1":')    // quote keys
+        .replace(/'/g, '"');               // single to double quotes
+      return JSON.parse(cleaned);
+    } catch(e2) {
+      // Try to extract from full snippet (const firebaseConfig = {...})
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (match) return parseFirebaseConfig(match[0]);
+      throw new Error('Could not parse Firebase config. Make sure you paste the config object.');
+    }
+  }
+}
+
+function connectFirebase() {
+  const raw = document.getElementById('firebaseConfigInput').value.trim();
+  if (!raw) { toast('Please paste your Firebase config'); return; }
+
+  try {
+    const config = parseFirebaseConfig(raw);
+    if (!config.databaseURL) { toast('Config is missing databaseURL. Make sure you created a Realtime Database.'); return; }
+
+    // Save config for future loads
+    localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(config));
+
+    initFirebase(config);
+    toast('Connected to Firebase!');
+  } catch (err) {
+    toast('Error: ' + err.message);
+    syncLog('<span style="color:var(--red)">Connection failed: ' + err.message + '</span>');
+  }
+}
+
+function initFirebase(config) {
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    }
+    fbDb = firebase.database();
+    fbConnected = true;
+
+    updateSyncBadge('connected', 'Cloud Synced');
+    syncLog('<span style="color:var(--green)">Connected to Firebase</span>');
+
+    // Update UI
+    document.getElementById('syncConnected').style.display = 'block';
+    document.getElementById('syncSetup').style.display = 'none';
+    renderSyncStatus();
+
+    // Listen for real-time changes from other devices
+    fbDb.ref('store').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        // No data in cloud yet — push current local data
+        syncLog('No cloud data found. Pushing local data...');
+        firebasePush();
+        return;
+      }
+      // Only update if data actually changed (avoid loops)
+      const cloudHash = JSON.stringify(data);
+      const localHash = JSON.stringify({ products, orders, clients, usageLogs, subscriptions, subPayments });
+      if (cloudHash !== localHash) {
+        syncLog('Received update from cloud, syncing...');
+        if (data.products) { products = data.products; saveProducts(products); }
+        if (data.orders) { orders = data.orders; saveOrders(orders); }
+        if (data.clients) { clients = data.clients; saveClients(clients); }
+        if (data.usageLogs) { usageLogs = data.usageLogs; saveUsage(usageLogs); }
+        if (data.subscriptions) { subscriptions = data.subscriptions; saveSubs(subscriptions); }
+        if (data.subPayments) { subPayments = data.subPayments; saveSubPayments(subPayments); }
+        renderStorefront();
+        renderCart();
+        renderSyncStatus();
+        syncLog('<span style="color:var(--green)">Data synced from cloud</span>');
+        updateSyncBadge('connected', 'Cloud Synced');
+      }
+    });
+
+    syncLog('Listening for real-time updates from other devices');
+  } catch (err) {
+    syncLog('<span style="color:var(--red)">Firebase init error: ' + err.message + '</span>');
+    toast('Firebase error: ' + err.message);
+  }
+}
+
+function firebasePush() {
+  if (!fbDb) { toast('Not connected to Firebase'); return; }
+  updateSyncBadge('syncing', 'Syncing...');
+  fbDb.ref('store').set({
+    products,
+    orders,
+    clients,
+    usageLogs,
+    subscriptions,
+    subPayments,
+    lastUpdated: new Date().toISOString()
+  }).then(() => {
+    updateSyncBadge('connected', 'Cloud Synced');
+    syncLog('<span style="color:var(--green)">All data pushed to cloud</span>');
+    renderSyncStatus();
+    toast('Data pushed to cloud!');
+  }).catch(err => {
+    updateSyncBadge('connected', 'Sync Error');
+    syncLog('<span style="color:var(--red)">Push error: ' + err.message + '</span>');
+    toast('Sync error: ' + err.message);
+  });
+}
+
+function firebasePull() {
+  if (!fbDb) { toast('Not connected to Firebase'); return; }
+  updateSyncBadge('syncing', 'Pulling...');
+  fbDb.ref('store').once('value').then(snapshot => {
+    const data = snapshot.val();
+    if (!data) { toast('No data in cloud yet'); updateSyncBadge('connected', 'Cloud Synced'); return; }
+    if (data.products) { products = data.products; saveProducts(products); }
+    if (data.orders) { orders = data.orders; saveOrders(orders); }
+    if (data.clients) { clients = data.clients; saveClients(clients); }
+    if (data.usageLogs) { usageLogs = data.usageLogs; saveUsage(usageLogs); }
+    if (data.subscriptions) { subscriptions = data.subscriptions; saveSubs(subscriptions); }
+    if (data.subPayments) { subPayments = data.subPayments; saveSubPayments(subPayments); }
+    renderStorefront();
+    renderCart();
+    renderSyncStatus();
+    updateSyncBadge('connected', 'Cloud Synced');
+    syncLog('<span style="color:var(--green)">Data pulled from cloud</span>');
+    toast('Data pulled from cloud!');
+  }).catch(err => {
+    updateSyncBadge('connected', 'Pull Error');
+    syncLog('<span style="color:var(--red)">Pull error: ' + err.message + '</span>');
+  });
+}
+
+function disconnectFirebase() {
+  if (!confirm('Disconnect from Firebase? Your local data will remain but won\'t sync.')) return;
+  localStorage.removeItem(FB_CONFIG_KEY);
+  if (fbDb) fbDb.ref('store').off();
+  fbDb = null;
+  fbConnected = false;
+  if (firebase.apps.length) firebase.app().delete();
+  updateSyncBadge('disconnected', 'Local Only');
+  document.getElementById('syncConnected').style.display = 'none';
+  document.getElementById('syncSetup').style.display = 'block';
+  renderSyncStatus();
+  syncLog('Disconnected from Firebase');
+  toast('Disconnected from Firebase');
+}
+
+// Debounced auto-sync: pushes to Firebase after any data change
+function scheduleSync() {
+  if (!fbConnected || !fbDb) return;
+  clearTimeout(syncDebounceTimer);
+  updateSyncBadge('syncing', 'Saving...');
+  syncDebounceTimer = setTimeout(() => {
+    fbDb.ref('store').set({
+      products,
+      orders,
+      clients,
+      usageLogs,
+      subscriptions,
+      subPayments,
+      lastUpdated: new Date().toISOString()
+    }).then(() => {
+      updateSyncBadge('connected', 'Cloud Synced');
+    }).catch(err => {
+      updateSyncBadge('connected', 'Sync Error');
+      syncLog('<span style="color:var(--red)">Auto-sync error: ' + err.message + '</span>');
+    });
+  }, 1500); // 1.5s debounce
+}
+
+// Override save functions to trigger auto-sync
+const _origSaveProducts = saveProducts;
+const _origSaveOrders = saveOrders;
+const _origSaveClients = saveClients;
+const _origSaveUsage = saveUsage;
+const _origSaveSubs = saveSubs;
+const _origSaveSubPayments = saveSubPayments;
+
+saveProducts = function(data) { _origSaveProducts(data); scheduleSync(); };
+saveOrders = function(data) { _origSaveOrders(data); scheduleSync(); };
+saveClients = function(data) { _origSaveClients(data); scheduleSync(); };
+saveUsage = function(data) { _origSaveUsage(data); scheduleSync(); };
+saveSubs = function(data) { _origSaveSubs(data); scheduleSync(); };
+saveSubPayments = function(data) { _origSaveSubPayments(data); scheduleSync(); };
+
+// Auto-connect on page load if config is saved
+function autoConnectFirebase() {
+  const saved = localStorage.getItem(FB_CONFIG_KEY);
+  if (saved) {
+    try {
+      const config = JSON.parse(saved);
+      initFirebase(config);
+    } catch(e) {
+      console.error('Failed to auto-connect Firebase:', e);
+    }
+  }
+}
+
+// ===========================
 // EVENT LISTENERS
 // ===========================
 document.getElementById('searchProducts').addEventListener('input', renderStorefront);
@@ -1749,6 +2075,7 @@ document.addEventListener('keydown', e => {
 // ===========================
 renderStorefront();
 renderCart();
+autoConnectFirebase();
 </script>
 </body>
 </html>
