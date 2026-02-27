@@ -1186,6 +1186,7 @@ function deleteSingleOrder(orderId) {
   renderOrders();
   renderStorefront();
   renderPricing();
+  renderAnalytics();
   toast(`Order #${orderId} deleted & stock restored`);
 }
 
@@ -1194,6 +1195,7 @@ function clearAllOrders() {
   orders = [];
   saveOrders(orders);
   renderOrders();
+  renderAnalytics();
   toast('Order history cleared');
 }
 
