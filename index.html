@@ -275,6 +275,20 @@
       <div class="kpi-grid" id="pricingKpis"></div>
       <div class="controls">
         <input type="text" class="search-box" id="searchPricing" placeholder="Search products...">
+        <select class="search-box" id="sortPricing" style="max-width:220px;">
+          <option value="name-asc">Name (A → Z)</option>
+          <option value="name-desc">Name (Z → A)</option>
+          <option value="category">Category</option>
+          <option value="dosage">Dosage</option>
+          <option value="stock-desc">Stock (High → Low)</option>
+          <option value="stock-asc">Stock (Low → High)</option>
+          <option value="cost-desc">Cost (High → Low)</option>
+          <option value="cost-asc">Cost (Low → High)</option>
+          <option value="price-desc">Price (High → Low)</option>
+          <option value="price-asc">Price (Low → High)</option>
+          <option value="margin-desc">Margin (High → Low)</option>
+          <option value="margin-asc">Margin (Low → High)</option>
+        </select>
       </div>
       <div class="table-wrap">
         <table>
@@ -1057,7 +1071,26 @@ function renderPricing() {
   `;
 
   const search = document.getElementById('searchPricing').value.toLowerCase();
+  const sortBy = document.getElementById('sortPricing').value;
   const filtered = products.filter(p => !search || p.name.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search));
+
+  filtered.sort((a, b) => {
+    switch(sortBy) {
+      case 'name-asc': return a.name.localeCompare(b.name);
+      case 'name-desc': return b.name.localeCompare(a.name);
+      case 'category': return (catLabels[a.category] || a.category).localeCompare(catLabels[b.category] || b.category) || a.name.localeCompare(b.name);
+      case 'dosage': return a.dosage.localeCompare(b.dosage, undefined, {numeric: true}) || a.name.localeCompare(b.name);
+      case 'stock-desc': return b.stock - a.stock;
+      case 'stock-asc': return a.stock - b.stock;
+      case 'cost-desc': return b.cost - a.cost;
+      case 'cost-asc': return a.cost - b.cost;
+      case 'price-desc': return b.price - a.price;
+      case 'price-asc': return a.price - b.price;
+      case 'margin-desc': return margin(b.price, b.cost) - margin(a.price, a.cost);
+      case 'margin-asc': return margin(a.price, a.cost) - margin(b.price, b.cost);
+      default: return a.name.localeCompare(b.name);
+    }
+  });
 
   document.getElementById('pricingTableBody').innerHTML = filtered.map(p => {
     const m = margin(p.price, p.cost);
@@ -2215,6 +2248,7 @@ document.getElementById('filterCategory').addEventListener('change', renderStore
 document.getElementById('filterStock').addEventListener('change', renderStorefront);
 document.getElementById('sortProducts').addEventListener('change', renderStorefront);
 document.getElementById('searchPricing').addEventListener('input', renderPricing);
+document.getElementById('sortPricing').addEventListener('change', renderPricing);
 document.getElementById('searchClients').addEventListener('input', renderClients);
 document.getElementById('searchUsage').addEventListener('input', renderUsage);
 document.getElementById('usagePersonFilter').addEventListener('change', renderUsage);
