@@ -1901,7 +1901,6 @@ const FB_CONFIG_KEY = 'peptide_store_fb_config';
 let fbDb = null;
 let fbConnected = false;
 let syncDebounceTimer = null;
-let _listenerAttached = false;
 
 function syncLog(msg) {
   const log = document.getElementById('syncLog');
@@ -1994,53 +1993,14 @@ function initFirebase(config) {
     document.getElementById('syncSetup').style.display = 'none';
     renderSyncStatus();
 
-    // Attach real-time listener for changes from OTHER devices
-    attachListener();
+    // One-time pull on connect (no real-time listener)
+    firebasePull();
 
-    syncLog('Listening for real-time updates from other devices');
+    syncLog('Data loaded from cloud');
   } catch (err) {
     syncLog('<span style="color:var(--red)">Firebase init error: ' + err.message + '</span>');
     toast('Firebase error: ' + err.message);
   }
-}
-
-function onCloudData(snapshot) {
-  const data = snapshot.val();
-  if (!data) {
-    syncLog('No cloud data found. Pushing local data...');
-    firebasePush();
-    return;
-  }
-  const cloudStr = JSON.stringify({ p: data.products, o: data.orders, c: data.clients, u: data.usageLogs, s: data.subscriptions, sp: data.subPayments });
-  const localStr = JSON.stringify({ p: products, o: orders, c: clients, u: usageLogs, s: subscriptions, sp: subPayments });
-  if (cloudStr !== localStr) {
-    syncLog('Received update from cloud, syncing...');
-    if (data.products) { products = data.products; _origSaveProducts(products); }
-    if (data.orders) { orders = data.orders; _origSaveOrders(orders); }
-    if (data.clients) { clients = data.clients; _origSaveClients(clients); }
-    if (data.usageLogs) { usageLogs = data.usageLogs; _origSaveUsage(usageLogs); }
-    if (data.subscriptions) { subscriptions = data.subscriptions; _origSaveSubs(subscriptions); }
-    if (data.subPayments) { subPayments = data.subPayments; _origSaveSubPayments(subPayments); }
-    renderStorefront();
-    renderCart();
-    renderOrders();
-    renderAnalytics();
-    renderSyncStatus();
-    syncLog('<span style="color:var(--green)">Data synced from cloud</span>');
-    updateSyncBadge('connected', 'Cloud Synced');
-  }
-}
-
-function attachListener() {
-  if (!fbDb || _listenerAttached) return;
-  fbDb.ref('store').on('value', onCloudData);
-  _listenerAttached = true;
-}
-
-function detachListener() {
-  if (!fbDb || !_listenerAttached) return;
-  fbDb.ref('store').off('value', onCloudData);
-  _listenerAttached = false;
 }
 
 function firebasePush() {
@@ -2072,14 +2032,16 @@ function firebasePull() {
   fbDb.ref('store').once('value').then(snapshot => {
     const data = snapshot.val();
     if (!data) { toast('No data in cloud yet'); updateSyncBadge('connected', 'Cloud Synced'); return; }
-    if (data.products) { products = data.products; saveProducts(products); }
-    if (data.orders) { orders = data.orders; saveOrders(orders); }
-    if (data.clients) { clients = data.clients; saveClients(clients); }
-    if (data.usageLogs) { usageLogs = data.usageLogs; saveUsage(usageLogs); }
-    if (data.subscriptions) { subscriptions = data.subscriptions; saveSubs(subscriptions); }
-    if (data.subPayments) { subPayments = data.subPayments; saveSubPayments(subPayments); }
+    if (data.products) { products = data.products; _origSaveProducts(products); }
+    if (data.orders) { orders = data.orders; _origSaveOrders(orders); }
+    if (data.clients) { clients = data.clients; _origSaveClients(clients); }
+    if (data.usageLogs) { usageLogs = data.usageLogs; _origSaveUsage(usageLogs); }
+    if (data.subscriptions) { subscriptions = data.subscriptions; _origSaveSubs(subscriptions); }
+    if (data.subPayments) { subPayments = data.subPayments; _origSaveSubPayments(subPayments); }
     renderStorefront();
     renderCart();
+    renderOrders();
+    renderAnalytics();
     renderSyncStatus();
     updateSyncBadge('connected', 'Cloud Synced');
     syncLog('<span style="color:var(--green)">Data pulled from cloud</span>');
@@ -2093,7 +2055,6 @@ function firebasePull() {
 function disconnectFirebase() {
   if (!confirm('Disconnect from Firebase? Your local data will remain but won\'t sync.')) return;
   localStorage.removeItem(FB_CONFIG_KEY);
-  detachListener();
   fbDb = null;
   fbConnected = false;
   if (firebase.apps.length) firebase.app().delete();
@@ -2105,14 +2066,11 @@ function disconnectFirebase() {
   toast('Disconnected from Firebase');
 }
 
-// Sync local data to Firebase. Detaches listener to prevent race conditions.
+// Sync local data to Firebase (simple push, no real-time listener)
 function scheduleSync() {
   if (!fbConnected || !fbDb) return;
   clearTimeout(syncDebounceTimer);
-  // IMMEDIATELY detach listener so cloud can't overwrite our local changes
-  detachListener();
   updateSyncBadge('syncing', 'Saving...');
-  // Small debounce to batch rapid saves (e.g. delete touches products + orders)
   syncDebounceTimer = setTimeout(() => {
     fbDb.ref('store').set({
       products,
@@ -2124,14 +2082,11 @@ function scheduleSync() {
       lastUpdated: new Date().toISOString()
     }).then(() => {
       updateSyncBadge('connected', 'Cloud Synced');
-      // Reattach listener AFTER Firebase has our new data
-      setTimeout(() => { attachListener(); }, 500);
     }).catch(err => {
       updateSyncBadge('connected', 'Sync Error');
       syncLog('<span style="color:var(--red)">Auto-sync error: ' + err.message + '</span>');
-      attachListener(); // reattach even on error
     });
-  }, 200);
+  }, 300);
 }
 
 // Override save functions to trigger auto-sync
@@ -2199,6 +2154,13 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 // Keyboard shortcut: Escape closes modals
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+// Pull fresh data from Firebase when tab regains focus (cross-device sync)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && fbConnected && fbDb) {
+    firebasePull();
+  }
 });
 
 // ===========================
