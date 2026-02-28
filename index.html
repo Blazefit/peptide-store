@@ -358,6 +358,7 @@
                   <th>Period</th>
                   <th>Amount</th>
                   <th>Notes</th>
+                  <th style="width:50px"></th>
                 </tr>
               </thead>
               <tbody id="subPayHistoryBody"></tbody>
@@ -382,6 +383,7 @@
                   <th>Client / Details</th>
                   <th>Amount</th>
                   <th>Notes</th>
+                  <th style="width:50px"></th>
                 </tr>
               </thead>
               <tbody id="allPayHistoryBody"></tbody>
@@ -1321,6 +1323,8 @@ function deleteSingleOrder(orderId) {
   orders = orders.filter(o => o.id !== orderId);
   saveOrders(orders);
   renderOrders();
+  renderSubPayHistory();
+  renderAllPayHistory();
   renderStorefront();
   renderPricing();
   renderAnalytics();
@@ -1384,7 +1388,7 @@ function renderSubPayHistory() {
 
   const sorted = subPayments.slice().sort((a, b) => b.date.localeCompare(a.date));
   document.getElementById('subPayHistoryBody').innerHTML = sorted.length === 0
-    ? '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px;">No subscription payments recorded yet.</td></tr>'
+    ? '<tr><td colspan="7" style="text-align:center;color:var(--text2);padding:24px;">No subscription payments recorded yet.</td></tr>'
     : sorted.map(p => {
       const sub = subscriptions.find(s => s.id === p.subId);
       const client = sub ? clients.find(c => c.id === sub.clientId) : null;
@@ -1397,8 +1401,26 @@ function renderSubPayHistory() {
         <td>${period}</td>
         <td class="tx-green">${fmt(p.amount)}</td>
         <td style="color:var(--text2);font-size:0.85rem;">${p.notes || '—'}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteSubPayment(${p.id})" title="Delete this payment">✕</button></td>
       </tr>`;
     }).join('');
+}
+
+function deleteSubPayment(paymentId) {
+  const payment = subPayments.find(p => p.id === paymentId);
+  if (!payment) return;
+  const sub = subscriptions.find(s => s.id === payment.subId);
+  const client = sub ? clients.find(c => c.id === sub.clientId) : null;
+  const period = payment.weekOf ? `Week of ${payment.weekOf}` : (payment.month || '');
+  if (!confirm(`Delete subscription payment?\n\nClient: ${client ? client.name : 'Unknown'}\nDate: ${payment.date}\nPeriod: ${period}\nAmount: $${payment.amount.toFixed(2)}`)) return;
+  subPayments = subPayments.filter(p => p.id !== paymentId);
+  saveSubPayments(subPayments);
+  renderSubPayHistory();
+  renderAllPayHistory();
+  renderOrders();
+  renderClients();
+  renderAnalytics();
+  toast('Subscription payment deleted');
 }
 
 function renderAllPayHistory() {
@@ -1410,6 +1432,7 @@ function renderAllPayHistory() {
     allPayments.push({
       date: o.date,
       type: 'sale',
+      id: o.id,
       label: `Order #${o.id}`,
       details: o.items.map(i => `${i.name} x${i.qty}`).join(', '),
       amount: o.revenue,
@@ -1426,6 +1449,7 @@ function renderAllPayHistory() {
     allPayments.push({
       date: p.date,
       type: 'subscription',
+      id: p.id,
       label: client ? client.name : 'Unknown',
       details: product ? `${product.name} — ${period}` : period,
       amount: p.amount,
@@ -1437,17 +1461,21 @@ function renderAllPayHistory() {
   allPayments.sort((a, b) => b.date.localeCompare(a.date));
 
   document.getElementById('allPayHistoryBody').innerHTML = allPayments.length === 0
-    ? '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:24px;">No payments recorded yet.</td></tr>'
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px;">No payments recorded yet.</td></tr>'
     : allPayments.map(p => {
       const typeTag = p.type === 'sale'
         ? '<span style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;">Sale</span>'
         : '<span style="background:var(--green);color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;">Subscription</span>';
+      const deleteBtn = p.type === 'sale'
+        ? `<button class="btn btn-danger btn-sm" onclick="deleteSingleOrder(${p.id})" title="Delete this sale">✕</button>`
+        : `<button class="btn btn-danger btn-sm" onclick="deleteSubPayment(${p.id})" title="Delete this payment">✕</button>`;
       return `<tr>
         <td>${p.date}</td>
         <td>${typeTag}</td>
         <td><strong>${p.label}</strong><br><span style="font-size:0.8rem;color:var(--text2)">${p.details}</span></td>
         <td class="tx-green">${fmt(p.amount)}</td>
         <td style="color:var(--text2);font-size:0.85rem;">${p.notes || '—'}</td>
+        <td>${deleteBtn}</td>
       </tr>`;
     }).join('');
 }
@@ -1878,7 +1906,7 @@ function renderUsage() {
       <td><span class="dosage-tag">${routeLabels[u.route] || u.route}</span></td>
       <td style="color:var(--red)">${cost > 0 ? fmt(cost) : '—'}</td>
       <td style="font-size:0.8rem;max-width:200px;white-space:normal;color:var(--text2)">${u.notes || '-'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteUsageEntry(${u.id})">Del</button></td>
+      <td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="openEditUsageEntry(${u.id})">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteUsageEntry(${u.id})">✕</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:32px;">No usage logs yet. Click "+ Log Dose" to start tracking.</td></tr>';
 
@@ -1964,7 +1992,31 @@ function openAddUsageEntry() {
   document.getElementById('usageModal').classList.add('open');
 }
 
+function openEditUsageEntry(id) {
+  const entry = usageLogs.find(u => u.id === id);
+  if (!entry) return;
+  document.getElementById('usageModalTitle').textContent = 'Edit Dose';
+  document.getElementById('usageEditId').value = entry.id;
+  document.getElementById('usagePerson').value = entry.person;
+  document.getElementById('usageDose').value = entry.dose;
+  document.getElementById('usageRoute').value = entry.route;
+  document.getElementById('usageDate').value = entry.date;
+  document.getElementById('usageTime').value = entry.time || '';
+  document.getElementById('usageNotes').value = entry.notes || '';
+
+  // Populate product dropdown
+  const sel = document.getElementById('usageProduct');
+  sel.innerHTML = products.map(p => `<option value="${p.id}" ${p.id === entry.productId ? 'selected' : ''}>${p.name} (${p.dosage})</option>`).join('');
+
+  // Populate person datalist
+  const people = [...new Set(usageLogs.map(u => u.person))].sort();
+  document.getElementById('personList').innerHTML = people.map(p => `<option value="${p}">`).join('');
+
+  document.getElementById('usageModal').classList.add('open');
+}
+
 function saveUsageEntry() {
+  const editId = document.getElementById('usageEditId').value;
   const person = document.getElementById('usagePerson').value.trim();
   const productId = parseInt(document.getElementById('usageProduct').value);
   const product = products.find(p => p.id === productId);
@@ -1978,23 +2030,39 @@ function saveUsageEntry() {
   if (!dose) { toast('Dose amount is required'); return; }
   if (!date) { toast('Date is required'); return; }
 
-  const entry = {
-    id: Math.max(0, ...usageLogs.map(u => u.id)) + 1,
-    person,
-    productId,
-    productName: product ? `${product.name} (${product.dosage})` : 'Unknown',
-    dose,
-    route,
-    date,
-    time,
-    notes
-  };
+  if (editId) {
+    // Edit existing entry
+    const existing = usageLogs.find(u => u.id === parseInt(editId));
+    if (existing) {
+      existing.person = person;
+      existing.productId = productId;
+      existing.productName = product ? `${product.name} (${product.dosage})` : 'Unknown';
+      existing.dose = dose;
+      existing.route = route;
+      existing.date = date;
+      existing.time = time;
+      existing.notes = notes;
+    }
+  } else {
+    // Add new entry
+    const entry = {
+      id: Math.max(0, ...usageLogs.map(u => u.id)) + 1,
+      person,
+      productId,
+      productName: product ? `${product.name} (${product.dosage})` : 'Unknown',
+      dose,
+      route,
+      date,
+      time,
+      notes
+    };
+    usageLogs.push(entry);
+  }
 
-  usageLogs.push(entry);
   saveUsage(usageLogs);
   document.getElementById('usageModal').classList.remove('open');
   renderUsage();
-  toast(`Dose logged for ${person}`);
+  toast(editId ? `Dose entry updated` : `Dose logged for ${person}`);
 }
 
 function deleteUsageEntry(id) {
