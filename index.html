@@ -1826,19 +1826,40 @@ function viewClientDetail(id) {
 // ===========================
 // USAGE TRACKER
 // ===========================
-function parseNumeric(str) {
-  if (!str) return 0;
-  const match = String(str).match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : 0;
+function parseWithUnit(str) {
+  // Returns value normalized to a base unit (mg for mass, IU for units)
+  if (!str) return { value: 0, unit: '' };
+  const s = String(str).toLowerCase().trim();
+  const match = s.match(/([\d.]+)\s*(mcg|ug|µg|mg|g|iu|ml|units?)?/i);
+  if (!match) return { value: 0, unit: '' };
+  let value = parseFloat(match[1]);
+  const unit = (match[2] || '').toLowerCase();
+
+  // Normalize mass to mg
+  if (unit === 'mcg' || unit === 'ug' || unit === 'µg') {
+    return { value: value / 1000, unit: 'mg' };
+  } else if (unit === 'g') {
+    return { value: value * 1000, unit: 'mg' };
+  } else if (unit === 'mg') {
+    return { value, unit: 'mg' };
+  } else if (unit === 'iu' || unit === 'unit' || unit === 'units') {
+    return { value, unit: 'iu' };
+  } else if (unit === 'ml') {
+    return { value, unit: 'ml' };
+  }
+  // No recognized unit — return raw number with empty unit
+  return { value, unit: '' };
 }
 
 function calcDoseCost(entry) {
   const product = products.find(p => p.id === entry.productId);
   if (!product) return 0;
-  const vialTotal = parseNumeric(product.dosage);
-  const doseAmt = parseNumeric(entry.dose);
-  if (vialTotal <= 0 || doseAmt <= 0) return 0;
-  return product.cost * (doseAmt / vialTotal);
+  const vial = parseWithUnit(product.dosage);
+  const dose = parseWithUnit(entry.dose);
+  if (vial.value <= 0 || dose.value <= 0) return 0;
+  // If units match (or one/both have no unit), calculate ratio
+  if (vial.unit && dose.unit && vial.unit !== dose.unit) return 0; // incompatible units
+  return product.cost * (dose.value / vial.value);
 }
 
 function getWeekKey(dateStr) {
