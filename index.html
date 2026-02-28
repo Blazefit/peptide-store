@@ -167,7 +167,7 @@
   .sync-dot.disconnected { background: var(--red); }
   .sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .sync-badge { position: fixed; bottom: 24px; left: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.75rem; z-index: 100; display: flex; align-items: center; gap: 6px; }
+  .sync-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; }
 
   /* Subscription status */
   .status-active { background: rgba(52,211,153,0.15); color: var(--green); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
@@ -190,7 +190,10 @@
 
 <div class="app">
   <header>
-    <h1>Peptide Supply Co.</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <h1>Peptide Supply Co.</h1>
+      <div class="sync-badge" id="syncBadge"><span class="sync-dot disconnected"></span> <span id="syncBadgeText">Local Only</span></div>
+    </div>
     <div class="nav-tabs">
       <button class="nav-tab active" data-tab="storefront">Storefront</button>
       <button class="nav-tab" data-tab="pricing">Pricing Manager</button>
@@ -316,7 +319,6 @@
         <h2 style="font-size:1.2rem;">Order History</h2>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="exportOrders()">Export CSV</button>
-          <button class="btn btn-danger btn-sm" onclick="clearAllOrders()">Clear History</button>
         </div>
       </div>
       <div class="kpi-grid" id="orderKpis"></div>
@@ -498,6 +500,7 @@
               <th>Product</th>
               <th>Dose Amount</th>
               <th>Route</th>
+              <th>Cost</th>
               <th>Notes</th>
               <th>Actions</th>
             </tr>
@@ -505,6 +508,15 @@
           <tbody id="usageTableBody"></tbody>
         </table>
       </div>
+
+      <!-- Weekly Cost Breakdown -->
+      <div style="margin-top:24px;">
+        <div class="chart-container">
+          <h3>Weekly Cost Breakdown by Product</h3>
+          <div id="weeklyCostBreakdown"></div>
+        </div>
+      </div>
+
       <div id="usageSummaryPanel" style="margin-top:24px;">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
           <div class="chart-container">
@@ -802,8 +814,6 @@
     </div>
   </div>
 </div>
-
-<div class="sync-badge" id="syncBadge"><span class="sync-dot disconnected"></span> <span id="syncBadgeText">Local Only</span></div>
 
 <div class="toast-container" id="toasts"></div>
 
@@ -1261,15 +1271,19 @@ function deleteProduct() {
 // ORDER HISTORY
 // ===========================
 function renderOrders() {
-  const totalRev = orders.reduce((s, o) => s + o.revenue, 0);
+  const saleRev = orders.reduce((s, o) => s + o.revenue, 0);
+  const subRev = subPayments.reduce((s, p) => s + p.amount, 0);
+  const totalRev = saleRev + subRev;
   const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
-  const totalProfit = orders.reduce((s, o) => s + o.profit, 0);
+  const totalProfit = totalRev - totalCogs;
   const totalInvested = products.reduce((s, p) => s + p.cost * p.stock, 0);
   const totalSoldCost = orders.reduce((s, o) => s + o.cogs, 0);
-  const originalInvestment = totalInvested + totalSoldCost; // current inv + what was already sold
+  const originalInvestment = totalInvested + totalSoldCost;
 
   document.getElementById('orderKpis').innerHTML = `
-    <div class="kpi-card"><div class="label">Total Revenue</div><div class="value green">${fmt(totalRev)}</div><div class="sub">${orders.length} orders</div></div>
+    <div class="kpi-card"><div class="label">Total Revenue</div><div class="value green">${fmt(totalRev)}</div><div class="sub">${orders.length} sales + ${subPayments.length} sub payments</div></div>
+    <div class="kpi-card"><div class="label">Sale Revenue</div><div class="value green">${fmt(saleRev)}</div><div class="sub">${orders.length} orders</div></div>
+    <div class="kpi-card"><div class="label">Subscription Revenue</div><div class="value green">${fmt(subRev)}</div><div class="sub">${subPayments.length} payments</div></div>
     <div class="kpi-card"><div class="label">Total COGS</div><div class="value red">${fmt(totalCogs)}</div><div class="sub">Cost of goods sold</div></div>
     <div class="kpi-card"><div class="label">Total Profit</div><div class="value green">${fmt(totalProfit)}</div><div class="sub">${totalRev > 0 ? (totalProfit / totalRev * 100).toFixed(1) : 0}% avg margin</div></div>
     <div class="kpi-card"><div class="label">Total Invested</div><div class="value accent">${fmt(originalInvestment)}</div><div class="sub">Inventory + sold goods</div></div>
@@ -1784,6 +1798,29 @@ function viewClientDetail(id) {
 // ===========================
 // USAGE TRACKER
 // ===========================
+function parseNumeric(str) {
+  if (!str) return 0;
+  const match = String(str).match(/[\d.]+/);
+  return match ? parseFloat(match[0]) : 0;
+}
+
+function calcDoseCost(entry) {
+  const product = products.find(p => p.id === entry.productId);
+  if (!product) return 0;
+  const vialTotal = parseNumeric(product.dosage);
+  const doseAmt = parseNumeric(entry.dose);
+  if (vialTotal <= 0 || doseAmt <= 0) return 0;
+  return product.cost * (doseAmt / vialTotal);
+}
+
+function getWeekKey(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return monday.toISOString().split('T')[0];
+}
+
 function renderUsage() {
   const personFilter = document.getElementById('usagePersonFilter').value;
   const productFilter = document.getElementById('usageProductFilter').value;
@@ -1816,28 +1853,34 @@ function renderUsage() {
   const uniqueProducts = new Set(usageLogs.map(u => u.productName)).size;
   const today = todayStr();
   const todayDoses = usageLogs.filter(u => u.date === today).length;
+  const totalInjectionCost = usageLogs.reduce((s, u) => s + calcDoseCost(u), 0);
+  const todayCost = usageLogs.filter(u => u.date === today).reduce((s, u) => s + calcDoseCost(u), 0);
+  const avgCostPerDose = totalDoses > 0 ? totalInjectionCost / totalDoses : 0;
 
   document.getElementById('usageKpis').innerHTML = `
     <div class="kpi-card"><div class="label">Total Doses Logged</div><div class="value">${totalDoses}</div></div>
+    <div class="kpi-card"><div class="label">Total Injection Cost</div><div class="value red">${fmt(totalInjectionCost)}</div><div class="sub">Avg ${fmt(avgCostPerDose)}/dose</div></div>
+    <div class="kpi-card"><div class="label">Today's Doses</div><div class="value green">${todayDoses}</div><div class="sub">${fmt(todayCost)} cost today</div></div>
     <div class="kpi-card"><div class="label">People Tracked</div><div class="value">${uniquePeople}</div></div>
     <div class="kpi-card"><div class="label">Products Used</div><div class="value accent">${uniqueProducts}</div></div>
-    <div class="kpi-card"><div class="label">Doses Today</div><div class="value green">${todayDoses}</div></div>
   `;
 
   const routeLabels = { subcutaneous: 'SubQ', intramuscular: 'IM', intravenous: 'IV', intranasal: 'Nasal', oral: 'Oral', topical: 'Topical', sublingual: 'Sublingual', other: 'Other' };
 
-  document.getElementById('usageTableBody').innerHTML = filtered.map(u => `
-    <tr>
+  document.getElementById('usageTableBody').innerHTML = filtered.map(u => {
+    const cost = calcDoseCost(u);
+    return `<tr>
       <td>${u.date}</td>
       <td>${u.time || '-'}</td>
       <td><strong>${u.person}</strong></td>
       <td>${u.productName}</td>
       <td>${u.dose}</td>
       <td><span class="dosage-tag">${routeLabels[u.route] || u.route}</span></td>
+      <td style="color:var(--red)">${cost > 0 ? fmt(cost) : '—'}</td>
       <td style="font-size:0.8rem;max-width:200px;white-space:normal;color:var(--text2)">${u.notes || '-'}</td>
       <td><button class="btn btn-danger btn-sm" onclick="deleteUsageEntry(${u.id})">Del</button></td>
-    </tr>
-  `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:32px;">No usage logs yet. Click "+ Log Dose" to start tracking.</td></tr>';
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:32px;">No usage logs yet. Click "+ Log Dose" to start tracking.</td></tr>';
 
   // Charts
   const dosesByPerson = {};
@@ -1855,6 +1898,48 @@ function renderUsage() {
   document.getElementById('usageByProductChart').innerHTML = productEntries.length === 0 ? '<p style="color:var(--text2);font-size:0.85rem;">No data yet</p>' : productEntries.map(([name, count]) =>
     `<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill" style="width:${count/maxProduct*100}%;background:var(--green);">${count} doses</div></div></div>`
   ).join('');
+
+  // Weekly cost breakdown by product
+  const weeklyProductCosts = {};
+  usageLogs.forEach(u => {
+    const weekKey = getWeekKey(u.date);
+    const cost = calcDoseCost(u);
+    if (!weeklyProductCosts[weekKey]) weeklyProductCosts[weekKey] = {};
+    if (!weeklyProductCosts[weekKey][u.productName]) weeklyProductCosts[weekKey][u.productName] = { cost: 0, doses: 0 };
+    weeklyProductCosts[weekKey][u.productName].cost += cost;
+    weeklyProductCosts[weekKey][u.productName].doses += 1;
+  });
+
+  const weekKeys = Object.keys(weeklyProductCosts).sort().reverse().slice(0, 8);
+  const allProductNames = [...new Set(usageLogs.map(u => u.productName))].sort();
+  const productColors = ['var(--accent)', 'var(--green)', 'var(--yellow)', 'var(--red)', 'var(--accent2)', '#22d3ee', '#f472b6', '#a3e635'];
+
+  if (weekKeys.length === 0) {
+    document.getElementById('weeklyCostBreakdown').innerHTML = '<p style="color:var(--text2);font-size:0.85rem;">No data yet. Log doses to see weekly cost breakdown.</p>';
+  } else {
+    let tableHtml = '<table style="width:100%;"><thead><tr><th style="text-align:left;">Week Of</th>';
+    allProductNames.forEach(name => { tableHtml += `<th style="text-align:right;font-size:0.75rem;">${name}</th>`; });
+    tableHtml += '<th style="text-align:right;">Total</th></tr></thead><tbody>';
+
+    weekKeys.forEach(wk => {
+      const data = weeklyProductCosts[wk];
+      let weekTotal = 0;
+      tableHtml += `<tr><td style="font-size:0.85rem;">${wk}</td>`;
+      allProductNames.forEach(name => {
+        const entry = data[name];
+        if (entry) {
+          weekTotal += entry.cost;
+          tableHtml += `<td style="text-align:right;font-size:0.85rem;color:var(--text2)">${fmt(entry.cost)}<br><span style="font-size:0.7rem;">${entry.doses} dose${entry.doses > 1 ? 's' : ''}</span></td>`;
+        } else {
+          tableHtml += '<td style="text-align:right;color:var(--border);">—</td>';
+        }
+      });
+      tableHtml += `<td style="text-align:right;font-weight:600;color:var(--red);">${fmt(weekTotal)}</td></tr>`;
+    });
+
+    tableHtml += '</tbody></table>';
+    document.getElementById('weeklyCostBreakdown').innerHTML = tableHtml;
+  }
 }
 
 function openAddUsageEntry() {
@@ -2008,17 +2093,24 @@ function renderSubscriptions() {
     const clientName = client ? client.name : 'Unknown';
     const productName = product ? `${product.name} (${product.dosage})` : 'Unknown';
 
-    // Payment status for current month
-    const cm = currentMonth();
-    const monthPayments = subPayments.filter(p => p.subId === sub.id && p.month === cm);
-    const monthPaid = monthPayments.reduce((s, p) => s + p.amount, 0);
-    const paidStatus = sub.status !== 'active' ? '' :
-      monthPaid >= sub.price ? '<span class="payment-ok">Paid</span>' :
-      monthPaid > 0 ? `<span class="payment-due">Partial (${fmt(monthPaid)})</span>` :
-      '<span class="payment-overdue">Unpaid</span>';
-
-    // Total paid vs total owed
+    // Payment status — show next due date if available
     const totalPaid = subPayments.filter(p => p.subId === sub.id).reduce((s, p) => s + p.amount, 0);
+    let paidStatus = '';
+    if (sub.status === 'active') {
+      if (sub.lastPaidPeriod) {
+        paidStatus = `<span class="payment-ok">✓ ${sub.lastPaidPeriod}</span>`;
+        if (sub.nextDueDate) {
+          paidStatus += `<br><span style="font-size:0.75rem;color:var(--yellow);">Next due: ${sub.nextDueDate}</span>`;
+        }
+      } else {
+        const cm = currentMonth();
+        const monthPayments = subPayments.filter(p => p.subId === sub.id && p.month === cm);
+        const monthPaid = monthPayments.reduce((s, p) => s + p.amount, 0);
+        paidStatus = monthPaid >= sub.price ? '<span class="payment-ok">Paid</span>' :
+          monthPaid > 0 ? `<span class="payment-due">Partial (${fmt(monthPaid)})</span>` :
+          '<span class="payment-overdue">Unpaid</span>';
+      }
+    }
 
     return `<tr>
       <td><strong>${clientName}</strong></td>
@@ -2033,6 +2125,7 @@ function renderSubscriptions() {
         <button class="btn btn-green btn-sm" onclick="openRecordPayment(${sub.id})" ${sub.status !== 'active' ? 'disabled style="opacity:0.4"' : ''}>Pay</button>
         <button class="btn btn-outline btn-sm" onclick="openEditSub(${sub.id})">Edit</button>
         <button class="btn btn-outline btn-sm" onclick="viewSubPayments(${sub.id})">Log</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSub(${sub.id})" title="Delete subscription">✕</button>
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--text2);padding:32px;">No subscriptions yet. Use "+ Add Subscription" to set up monthly plans for clients.</td></tr>';
@@ -2104,6 +2197,25 @@ function saveSub() {
   toast(id ? 'Subscription updated!' : 'Subscription created!');
 }
 
+function deleteSub(id) {
+  const sub = subscriptions.find(s => s.id === id);
+  if (!sub) return;
+  const client = clients.find(c => c.id === sub.clientId);
+  const product = products.find(p => p.id === sub.productId);
+  const clientName = client ? client.name : 'Unknown';
+  const productName = product ? product.name : 'Unknown';
+  const payments = subPayments.filter(p => p.subId === id);
+  const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
+  if (!confirm(`Delete subscription?\n\nClient: ${clientName}\nProduct: ${productName}\nPrice: $${sub.price}/${(sub.billing || 'monthly') === 'weekly' ? 'wk' : 'mo'}\n\n${payments.length} payment(s) totaling $${totalPaid.toFixed(2)} will also be removed.\n\nThis cannot be undone.`)) return;
+  subscriptions = subscriptions.filter(s => s.id !== id);
+  subPayments = subPayments.filter(p => p.subId !== id);
+  saveSubs(subscriptions);
+  saveSubPayments(subPayments);
+  renderClients();
+  renderAnalytics();
+  toast(`Subscription for ${clientName} deleted`);
+}
+
 function togglePayPeriod() {
   const type = document.getElementById('payPeriodType').value;
   document.getElementById('payPeriodMonthGroup').style.display = type === 'month' ? 'block' : 'none';
@@ -2160,8 +2272,37 @@ function saveSubPayment() {
   };
   subPayments.push(payment);
   saveSubPayments(subPayments);
+
+  // Auto-advance: calculate and store next due date on the subscription
+  if (sub) {
+    const isWeekly = (sub.billing || 'monthly') === 'weekly';
+    const paidDate = new Date(date + 'T00:00:00');
+    let nextDue;
+    if (isWeekly) {
+      // Next due = paid date + 7 days (or next occurrence of due day)
+      nextDue = new Date(paidDate);
+      nextDue.setDate(nextDue.getDate() + 7);
+      if (sub.dueDay && DAY_NAMES.includes(sub.dueDay)) {
+        const targetDay = DAY_NAMES.indexOf(sub.dueDay) + 1; // 1=Mon...7=Sun
+        const jsDay = targetDay === 7 ? 0 : targetDay; // JS: 0=Sun
+        while (nextDue.getDay() !== jsDay) nextDue.setDate(nextDue.getDate() + 1);
+      }
+    } else {
+      // Monthly: next due = same day next month
+      nextDue = new Date(paidDate);
+      nextDue.setMonth(nextDue.getMonth() + 1);
+      const dueDayNum = parseInt(sub.dueDay) || 1;
+      nextDue.setDate(Math.min(dueDayNum, new Date(nextDue.getFullYear(), nextDue.getMonth() + 1, 0).getDate()));
+    }
+    sub.nextDueDate = nextDue.toISOString().split('T')[0];
+    sub.lastPaidDate = date;
+    sub.lastPaidPeriod = periodType === 'week' ? `Week of ${weekOf}` : periodMonth;
+    saveSubs(subscriptions);
+  }
+
   document.getElementById('subPayModal').classList.remove('open');
   renderClients();
+  renderOrders();
   toast(`Payment of ${fmt(amount)} recorded!`);
 }
 
