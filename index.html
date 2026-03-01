@@ -195,7 +195,7 @@
     /* Controls */
     .controls { gap: 8px; }
     .controls > * { flex: 1 1 100%; min-width: 0; }
-    .search-box { min-width: 0; width: 100%; }
+    .search-box { min-width: 0; width: 100%; max-width: none !important; }
 
     /* Tables */
     td, th { padding: 8px 10px; font-size: 0.8rem; }
@@ -208,6 +208,17 @@
 
     /* Page section headers */
     .section-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+
+    /* Button groups — wrap on mobile */
+    .btn-group { flex-wrap: wrap; gap: 6px !important; width: 100%; }
+    .btn-group .btn { flex: 0 1 auto; }
+    .btn-group .btn-primary { flex: 1 1 100%; }
+
+    /* Collapsible section headers */
+    .collapsible-header { flex-wrap: wrap; padding: 10px 12px !important; gap: 8px; }
+
+    /* Sub-section headers */
+    .sub-header { flex-direction: column; align-items: flex-start !important; gap: 8px; }
 
     /* Bar chart labels */
     .bar-label { min-width: 100px; font-size: 0.7rem; }
@@ -239,6 +250,9 @@
     /* Buttons */
     .btn { padding: 7px 12px; font-size: 0.8rem; }
     .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+    /* Sync Firebase buttons */
+    .sync-buttons { flex-wrap: wrap; }
   }
 
   @media (max-width: 480px) {
@@ -331,7 +345,7 @@
     <div id="tab-pricing" class="tab-panel">
       <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="font-size:1.2rem;">Pricing & Inventory Manager</h2>
-        <div style="display:flex;gap:10px;">
+        <div class="btn-group" style="display:flex;gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="exportAllData()">Export Data</button>
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">Import Data</button>
           <input type="file" id="importFile" accept=".json" style="display:none" onchange="importAllData(event)">
@@ -381,7 +395,7 @@
     <div id="tab-orders" class="tab-panel">
       <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="font-size:1.2rem;">Order History</h2>
-        <div style="display:flex;gap:10px;">
+        <div class="btn-group" style="display:flex;gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="exportOrders()">Export CSV</button>
         </div>
       </div>
@@ -406,7 +420,7 @@
 
       <!-- Subscription Payments History (collapsible) -->
       <div style="margin-top:28px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px;" onclick="toggleSubPayHistory()">
+        <div class="collapsible-header" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px;" onclick="toggleSubPayHistory()">
           <h3 style="font-size:1rem; margin:0;">Subscription Payments</h3>
           <span id="subPayToggleIcon" style="font-size:1.2rem; transition:transform 0.2s;">▸</span>
         </div>
@@ -433,7 +447,7 @@
 
       <!-- All Payments Combined (collapsible) -->
       <div style="margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px;" onclick="toggleAllPayHistory()">
+        <div class="collapsible-header" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px;" onclick="toggleAllPayHistory()">
           <h3 style="font-size:1rem; margin:0;">All Payments Timeline</h3>
           <span id="allPayToggleIcon" style="font-size:1.2rem; transition:transform 0.2s;">▸</span>
         </div>
@@ -461,7 +475,7 @@
     <div id="tab-clients" class="tab-panel">
       <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="font-size:1.2rem;">Client Management</h2>
-        <div style="display:flex;gap:10px;">
+        <div class="btn-group" style="display:flex;gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="openAddSub()">+ Add Subscription</button>
           <button class="btn btn-primary btn-sm" onclick="openAddClient()">+ Add Client</button>
         </div>
@@ -504,7 +518,7 @@
       </div>
       <!-- Subscriptions Section -->
       <div style="margin-top:32px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="sub-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <h2 style="font-size:1.1rem;">Subscriptions</h2>
         </div>
         <div class="kpi-grid" id="subKpis"></div>
@@ -533,7 +547,7 @@
     <div id="tab-usage" class="tab-panel">
       <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="font-size:1.2rem;">Personal Usage Tracker</h2>
-        <div style="display:flex;gap:10px;">
+        <div class="btn-group" style="display:flex;gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="exportUsageLogs()">Export Log</button>
           <button class="btn btn-primary btn-sm" onclick="openAddUsageEntry()">+ Log Dose</button>
         </div>
@@ -660,7 +674,7 @@
             <span style="color:var(--green);font-weight:600;">Connected to Firebase</span>
           </div>
           <p style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;">Your data automatically syncs across all devices using this Firebase project.</p>
-          <div style="display:flex;gap:10px;">
+          <div class="sync-buttons" style="display:flex;gap:10px;">
             <button class="btn btn-primary btn-sm" onclick="firebasePush()">Push All Data Now</button>
             <button class="btn btn-outline btn-sm" onclick="firebasePull()">Pull Data from Cloud</button>
             <button class="btn btn-danger btn-sm" onclick="disconnectFirebase()">Disconnect</button>
