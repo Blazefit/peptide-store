@@ -130,6 +130,15 @@
   .cart-item .ci-qty span { min-width: 20px; text-align: center; font-size: 0.9rem; }
   .cart-item .ci-total { min-width: 70px; text-align: right; font-weight: 600; font-size: 0.9rem; }
   .cart-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .tip-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .tip-section label { font-size: 0.8rem; color: var(--text2); margin-bottom: 6px; display: block; }
+  .tip-presets { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .tip-presets button { flex: 1; min-width: 48px; padding: 5px 4px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-size: 0.75rem; transition: all 0.15s; }
+  .tip-presets button:hover { border-color: var(--accent); }
+  .tip-presets button.active { background: rgba(124,92,252,0.15); border-color: var(--accent); color: var(--accent); }
+  .tip-custom-row { display: flex; gap: 6px; align-items: center; }
+  .tip-custom-row span { font-size: 0.85rem; color: var(--text2); }
+  .tip-custom-row input { flex: 1; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; max-width: 90px; }
   .cart-summary .row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
   .cart-summary .row.total { font-weight: 700; font-size: 1.1rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
   .empty-cart { text-align: center; padding: 32px; color: var(--text2); font-size: 0.9rem; }
@@ -362,7 +371,23 @@
             <h3>Shopping Cart <span id="cartCount" style="font-size:0.8rem; color:var(--text2);">(0 items)</span></h3>
             <div id="cartItems"><div class="empty-cart">Cart is empty</div></div>
             <div class="cart-summary" id="cartSummary" style="display:none;">
-              <div class="row total"><span>Total</span><span id="cartSubtotal">$0.00</span></div>
+              <div class="row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+              <div class="tip-section">
+                <label>Add Tip</label>
+                <div class="tip-presets">
+                  <button onclick="setTipPercent(0)" class="active" id="tipNone">None</button>
+                  <button onclick="setTipPercent(10)" id="tip10">10%</button>
+                  <button onclick="setTipPercent(15)" id="tip15">15%</button>
+                  <button onclick="setTipPercent(20)" id="tip20">20%</button>
+                  <button onclick="setTipPercent(-1)" id="tipCustomBtn">Custom</button>
+                </div>
+                <div class="tip-custom-row" id="tipCustomRow" style="display:none;">
+                  <span>$</span>
+                  <input type="number" id="tipCustomInput" min="0" step="0.01" placeholder="0.00" oninput="onTipCustomInput()">
+                </div>
+                <div class="row" id="tipDisplay" style="display:none;margin-top:6px;font-size:0.85rem;"><span>Tip</span><span id="tipAmount">$0.00</span></div>
+              </div>
+              <div class="row total" style="margin-top:8px;"><span>Total</span><span id="cartTotal">$0.00</span></div>
               <button class="btn btn-primary btn-full" style="margin-top: 14px;" onclick="completeSale()">Complete Sale</button>
               <button class="btn btn-outline btn-full" style="margin-top: 8px;" onclick="clearCart()">Clear Cart</button>
             </div>
@@ -438,6 +463,7 @@
               <th>Date</th>
               <th>Items</th>
               <th>Revenue</th>
+              <th>Tip</th>
               <th>COGS</th>
               <th>Profit</th>
               <th>Margin</th>
@@ -1299,6 +1325,71 @@ function renderStorefront() {
 }
 
 // ===========================
+// TIP
+// ===========================
+let currentTipPercent = 0; // 0 = none, -1 = custom, else 10/15/20
+let currentTipAmount = 0;
+
+function setTipPercent(pct) {
+  currentTipPercent = pct;
+  document.querySelectorAll('.tip-presets button').forEach(b => b.classList.remove('active'));
+  const customRow = document.getElementById('tipCustomRow');
+  if (pct === 0) {
+    document.getElementById('tipNone').classList.add('active');
+    currentTipAmount = 0;
+    customRow.style.display = 'none';
+  } else if (pct === -1) {
+    document.getElementById('tipCustomBtn').classList.add('active');
+    customRow.style.display = 'flex';
+    const val = parseFloat(document.getElementById('tipCustomInput').value) || 0;
+    currentTipAmount = Math.max(0, val);
+  } else {
+    document.getElementById('tip' + pct).classList.add('active');
+    customRow.style.display = 'none';
+    const subtotal = getCartSubtotal();
+    currentTipAmount = Math.round(subtotal * pct) / 100;
+  }
+  updateTipDisplay();
+}
+
+function onTipCustomInput() {
+  const val = parseFloat(document.getElementById('tipCustomInput').value) || 0;
+  currentTipAmount = Math.max(0, val);
+  updateTipDisplay();
+}
+
+function getCartSubtotal() {
+  return cart.reduce((s, c) => {
+    const p = products.find(x => x.id === c.id);
+    return s + (p ? p.price * c.qty : 0);
+  }, 0);
+}
+
+function updateTipDisplay() {
+  const tipDisplay = document.getElementById('tipDisplay');
+  const tipAmountEl = document.getElementById('tipAmount');
+  const cartTotalEl = document.getElementById('cartTotal');
+  const subtotal = getCartSubtotal();
+  if (currentTipAmount > 0) {
+    tipDisplay.style.display = 'flex';
+    tipAmountEl.textContent = fmt(currentTipAmount);
+  } else {
+    tipDisplay.style.display = 'none';
+  }
+  cartTotalEl.textContent = fmt(subtotal + currentTipAmount);
+}
+
+function resetTip() {
+  currentTipPercent = 0;
+  currentTipAmount = 0;
+  document.querySelectorAll('.tip-presets button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tipNone').classList.add('active');
+  document.getElementById('tipCustomRow').style.display = 'none';
+  document.getElementById('tipCustomInput').value = '';
+  document.getElementById('tipDisplay').style.display = 'none';
+}
+
+// ===========================
 // CART
 // ===========================
 function addToCart(productId) {
@@ -1323,6 +1414,7 @@ function renderCart() {
     container.innerHTML = '<div class="empty-cart">Cart is empty</div>';
     summary.style.display = 'none';
     document.getElementById('cartCount').textContent = '(0 items)';
+    resetTip();
     updatePosCartOffset();
     return;
   }
@@ -1351,6 +1443,11 @@ function renderCart() {
   summary.style.display = 'block';
   document.getElementById('cartSubtotal').textContent = fmt(subtotal);
   document.getElementById('cartCount').textContent = `(${totalItems} items)`;
+  // Recalculate tip if using a percentage
+  if (currentTipPercent > 0) {
+    currentTipAmount = Math.round(subtotal * currentTipPercent) / 100;
+  }
+  updateTipDisplay();
   updatePosCartOffset();
 }
 
@@ -1394,16 +1491,20 @@ function completeSale() {
     lineItems.push({ name: p.name, dosage: p.dosage, sku: p.sku, qty: c.qty, price: p.price, cost: p.cost });
   });
 
+  const tip = currentTipAmount > 0 ? currentTipAmount : 0;
+  const totalRevenue = revenue + tip;
+
   const order = {
     id: orders.length + 1,
     date: todayStr(),
     time: new Date().toLocaleTimeString(),
     items: lineItems,
     itemCount,
-    revenue,
+    revenue: totalRevenue,
     cogs,
-    profit: revenue - cogs,
-    margin: margin(revenue, cogs),
+    profit: totalRevenue - cogs,
+    margin: margin(totalRevenue, cogs),
+    tip: tip,
     clientId: clientId
   };
 
@@ -1413,7 +1514,8 @@ function completeSale() {
   cart = [];
   renderCart();
   renderStorefront();
-  toast(isPosMode() ? 'Sale completed! Thank you for your purchase.' : `Sale completed! Order #${order.id} — ${fmt(revenue)} revenue, ${fmt(order.profit)} profit`);
+  const tipMsg = tip > 0 ? ` (incl. ${fmt(tip)} tip)` : '';
+  toast(isPosMode() ? 'Sale completed! Thank you for your purchase.' : `Sale completed! Order #${order.id} — ${fmt(totalRevenue)} revenue${tipMsg}, ${fmt(order.profit)} profit`);
 }
 
 // ===========================
@@ -1573,6 +1675,7 @@ function deleteProduct() {
 // ===========================
 function renderOrders() {
   const saleRev = orders.reduce((s, o) => s + o.revenue, 0);
+  const totalTips = orders.reduce((s, o) => s + (o.tip || 0), 0);
   const subRev = subPayments.reduce((s, p) => s + p.amount, 0);
   const totalRev = saleRev + subRev;
   const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
@@ -1584,6 +1687,7 @@ function renderOrders() {
   document.getElementById('orderKpis').innerHTML = `
     <div class="kpi-card"><div class="label">Total Revenue</div><div class="value green">${fmt(totalRev)}</div><div class="sub">${orders.length} sales + ${subPayments.length} sub payments</div></div>
     <div class="kpi-card"><div class="label">Sale Revenue</div><div class="value green">${fmt(saleRev)}</div><div class="sub">${orders.length} orders</div></div>
+    <div class="kpi-card"><div class="label">Tips Earned</div><div class="value green">${fmt(totalTips)}</div><div class="sub">Included in revenue</div></div>
     <div class="kpi-card"><div class="label">Subscription Revenue</div><div class="value green">${fmt(subRev)}</div><div class="sub">${subPayments.length} payments</div></div>
     <div class="kpi-card"><div class="label">Total COGS</div><div class="value red">${fmt(totalCogs)}</div><div class="sub">Cost of goods sold</div></div>
     <div class="kpi-card"><div class="label">Total Profit</div><div class="value green">${fmt(totalProfit)}</div><div class="sub">${totalRev > 0 ? (totalProfit / totalRev * 100).toFixed(1) : 0}% avg margin</div></div>
@@ -1598,6 +1702,7 @@ function renderOrders() {
       <td>${o.date} ${o.time || ''}</td>
       <td>${o.items.map(i => `${i.name} (${i.dosage}) x${i.qty}`).join('<br>')}</td>
       <td class="tx-green">${fmt(o.revenue)}</td>
+      <td style="color:var(--accent2)">${o.tip ? fmt(o.tip) : '—'}</td>
       <td style="color:var(--text2)">${fmt(o.cogs)}</td>
       <td class="tx-green">${fmt(o.profit)}</td>
       <td><span class="margin-tag ${marginClass(o.margin)}">${o.margin.toFixed(1)}%</span></td>
@@ -1641,10 +1746,10 @@ function clearAllOrders() {
 
 function exportOrders() {
   if (orders.length === 0) { toast('No orders to export'); return; }
-  let csv = 'Order #,Date,Items,Revenue,COGS,Profit,Margin %\n';
+  let csv = 'Order #,Date,Items,Revenue,Tip,COGS,Profit,Margin %\n';
   orders.forEach(o => {
     const items = o.items.map(i => `${i.name} ${i.dosage} x${i.qty}`).join('; ');
-    csv += `${o.id},${o.date},"${items}",${o.revenue.toFixed(2)},${o.cogs.toFixed(2)},${o.profit.toFixed(2)},${o.margin.toFixed(1)}\n`;
+    csv += `${o.id},${o.date},"${items}",${o.revenue.toFixed(2)},${(o.tip || 0).toFixed(2)},${o.cogs.toFixed(2)},${o.profit.toFixed(2)},${o.margin.toFixed(1)}\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
