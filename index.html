@@ -178,6 +178,21 @@
   .payment-due { color: var(--yellow); }
   .payment-overdue { color: var(--red); }
 
+  /* POS Mode */
+  .pos-toggle-btn { transition: all 0.2s; }
+  body.pos-mode .pos-toggle-btn { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); color: var(--green); }
+  body.pos-mode .nav-tabs { display: none !important; }
+  body.pos-mode #syncBadge { display: none !important; }
+  body.pos-mode .pos-admin-only { display: none !important; }
+  body.pos-mode #tab-pricing,
+  body.pos-mode #tab-orders,
+  body.pos-mode #tab-clients,
+  body.pos-mode #tab-usage,
+  body.pos-mode #tab-analytics,
+  body.pos-mode #tab-sync { display: none !important; }
+  body.pos-mode #tab-storefront { display: block !important; }
+  body.pos-mode header { justify-content: space-between; }
+
   /* Responsive */
   @media (max-width: 768px) {
     .app { max-width: 100vw; overflow-x: hidden; }
@@ -258,6 +273,11 @@
 
     /* Sync Firebase buttons */
     .sync-buttons { flex-wrap: wrap; }
+
+    /* POS mode: keep header row even on mobile */
+    body.pos-mode header { flex-direction: row; padding: 12px 16px; }
+    body.pos-mode header h1 { font-size: 1.1rem; }
+    .pos-toggle-btn span:last-child { display: none; }
   }
 
   @media (max-width: 480px) {
@@ -276,6 +296,9 @@
     <div style="display:flex;align-items:center;gap:12px;">
       <h1>Peptide Supply Co.</h1>
       <div class="sync-badge" id="syncBadge"><span class="sync-dot disconnected"></span> <span id="syncBadgeText">Local Only</span></div>
+      <button class="btn btn-outline btn-sm pos-toggle-btn" id="posToggleBtn" onclick="handlePosToggle()" title="Toggle POS Mode" style="padding:5px 10px;font-size:0.8rem;display:flex;align-items:center;gap:5px;">
+        <span id="posToggleIcon">&#128274;</span> <span>POS</span>
+      </button>
     </div>
     <div class="nav-tabs">
       <button class="nav-tab active" data-tab="storefront">Storefront</button>
@@ -727,6 +750,17 @@
           <p>No sync activity yet.</p>
         </div>
       </div>
+
+      <!-- POS Mode Settings -->
+      <div class="cart-panel pos-admin-only" style="margin-top:20px;">
+        <h3>POS Mode Settings</h3>
+        <p style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;">POS mode locks the interface to only show the Storefront tab. Ideal for customer-facing iPad setups.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="startChangePosPin()">Change POS PIN</button>
+          <button class="btn btn-danger btn-sm" onclick="resetPosPin()">Reset PIN</button>
+          <span id="posPinStatus" style="font-size:0.8rem;color:var(--text2);margin-left:8px;"></span>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -912,6 +946,28 @@
   </div>
 </div>
 
+<!-- POS PIN Modal -->
+<div class="modal-overlay" id="posPinModal">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <h2 id="posPinTitle">Enter POS PIN</h2>
+    <p id="posPinSubtitle" style="font-size:0.85rem;color:var(--text2);margin-bottom:20px;">Enter your 4-6 digit PIN to continue.</p>
+    <div class="form-group">
+      <input id="posPinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Enter PIN..." style="text-align:center;font-size:1.4rem;letter-spacing:0.3em;padding:14px;">
+    </div>
+    <div class="form-group" id="posPinConfirmGroup" style="display:none;">
+      <input id="posPinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Confirm PIN..." style="text-align:center;font-size:1.4rem;letter-spacing:0.3em;padding:14px;">
+    </div>
+    <p id="posPinError" style="color:var(--red);font-size:0.8rem;min-height:1.2em;margin-bottom:12px;"></p>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-outline" onclick="closePosPin()">Cancel</button>
+      <button class="btn btn-primary" id="posPinSubmitBtn" onclick="submitPosPin()">Unlock</button>
+    </div>
+    <div id="posChangePinLink" style="display:none;margin-top:12px;">
+      <a href="#" onclick="startChangePosPin();return false;" style="font-size:0.8rem;color:var(--accent2);">Change PIN</a>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toasts"></div>
 
 <script>
@@ -1029,6 +1085,7 @@ function todayStr() { return new Date().toISOString().split('T')[0]; }
 // ===========================
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
+    if (isPosMode() && tab.dataset.tab !== 'storefront') return;
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
@@ -1041,6 +1098,131 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     if (tab.dataset.tab === 'sync') renderSyncStatus();
   });
 });
+
+// ===========================
+// POS MODE
+// ===========================
+const POS_PIN_KEY = 'peptide_store_pos_pin';
+const POS_MODE_KEY = 'peptide_store_pos_mode';
+let posPinAction = null;
+
+function isPosMode() { return document.body.classList.contains('pos-mode'); }
+function getStoredPin() { return localStorage.getItem(POS_PIN_KEY); }
+
+function handlePosToggle() {
+  const pin = getStoredPin();
+  if (isPosMode()) {
+    posPinAction = 'exit';
+    openPosPinModal('Exit POS Mode', 'Enter your PIN to return to admin view.', 'Unlock');
+    document.getElementById('posChangePinLink').style.display = 'block';
+  } else {
+    if (!pin) {
+      posPinAction = 'setup';
+      openPosPinModal('Set Up POS PIN', 'Create a 4-6 digit PIN to protect POS mode.', 'Set PIN');
+      document.getElementById('posPinConfirmGroup').style.display = 'block';
+    } else {
+      posPinAction = 'enter';
+      openPosPinModal('Enter POS Mode', 'Enter your PIN to activate POS mode.', 'Activate');
+    }
+  }
+}
+
+function openPosPinModal(title, subtitle, btnLabel) {
+  document.getElementById('posPinTitle').textContent = title;
+  document.getElementById('posPinSubtitle').textContent = subtitle;
+  document.getElementById('posPinSubmitBtn').textContent = btnLabel;
+  document.getElementById('posPinInput').value = '';
+  document.getElementById('posPinConfirm').value = '';
+  document.getElementById('posPinError').textContent = '';
+  document.getElementById('posPinConfirmGroup').style.display = 'none';
+  document.getElementById('posChangePinLink').style.display = 'none';
+  document.getElementById('posPinModal').classList.add('open');
+  setTimeout(() => document.getElementById('posPinInput').focus(), 100);
+}
+
+function closePosPin() {
+  document.getElementById('posPinModal').classList.remove('open');
+  posPinAction = null;
+}
+
+function submitPosPin() {
+  const input = document.getElementById('posPinInput').value.trim();
+  const confirm = document.getElementById('posPinConfirm').value.trim();
+  const errorEl = document.getElementById('posPinError');
+
+  if (!/^\d{4,6}$/.test(input)) { errorEl.textContent = 'PIN must be 4-6 digits.'; return; }
+
+  if (posPinAction === 'setup' || posPinAction === 'change') {
+    if (input !== confirm) { errorEl.textContent = 'PINs do not match.'; return; }
+    localStorage.setItem(POS_PIN_KEY, input);
+    const wasSetup = posPinAction === 'setup';
+    closePosPin();
+    toast('POS PIN saved successfully.');
+    if (wasSetup) enterPosMode();
+    updatePosPinStatus();
+    return;
+  }
+
+  if (input !== getStoredPin()) {
+    errorEl.textContent = 'Incorrect PIN.';
+    document.getElementById('posPinInput').value = '';
+    document.getElementById('posPinInput').focus();
+    return;
+  }
+
+  const action = posPinAction;
+  closePosPin();
+  if (action === 'enter') enterPosMode();
+  else if (action === 'exit') exitPosMode();
+}
+
+function enterPosMode() {
+  document.body.classList.add('pos-mode');
+  localStorage.setItem(POS_MODE_KEY, 'true');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.nav-tab[data-tab="storefront"]').classList.add('active');
+  document.getElementById('tab-storefront').classList.add('active');
+  document.getElementById('posToggleIcon').innerHTML = '&#128275;';
+  document.getElementById('posToggleBtn').querySelector('span:last-child').textContent = 'Exit POS';
+  renderStorefront();
+  toast('POS Mode activated');
+}
+
+function exitPosMode() {
+  document.body.classList.remove('pos-mode');
+  localStorage.setItem(POS_MODE_KEY, 'false');
+  document.getElementById('posToggleIcon').innerHTML = '&#128274;';
+  document.getElementById('posToggleBtn').querySelector('span:last-child').textContent = 'POS';
+  toast('POS Mode deactivated');
+}
+
+function startChangePosPin() {
+  closePosPin();
+  posPinAction = 'change';
+  openPosPinModal('Change POS PIN', 'Enter a new 4-6 digit PIN.', 'Save PIN');
+  document.getElementById('posPinConfirmGroup').style.display = 'block';
+}
+
+function resetPosPin() {
+  if (confirm('Reset the POS PIN? You will need to set a new one next time.')) {
+    localStorage.removeItem(POS_PIN_KEY);
+    toast('POS PIN has been reset.');
+    updatePosPinStatus();
+  }
+}
+
+function updatePosPinStatus() {
+  const el = document.getElementById('posPinStatus');
+  if (el) el.textContent = getStoredPin() ? 'PIN is set' : 'No PIN configured';
+}
+
+function initPosMode() {
+  if (localStorage.getItem(POS_MODE_KEY) === 'true' && getStoredPin()) {
+    enterPosMode();
+  }
+  updatePosPinStatus();
+}
 
 // ===========================
 // STOREFRONT RENDERING
@@ -1165,9 +1347,9 @@ function clearCart() { cart = []; renderCart(); }
 function completeSale() {
   if (cart.length === 0) return;
 
-  // Ask for client assignment
+  // Ask for client assignment (skip in POS mode)
   let clientId = null;
-  if (clients.length > 0) {
+  if (!isPosMode() && clients.length > 0) {
     const clientNames = ['(No client)'].concat(clients.map(c => c.name));
     const choice = prompt('Assign to client? Enter client name or leave blank:\n\n' + clients.map(c => '  - ' + c.name).join('\n'));
     if (choice && choice.trim()) {
@@ -1209,7 +1391,7 @@ function completeSale() {
   cart = [];
   renderCart();
   renderStorefront();
-  toast(`Sale completed! Order #${order.id} — ${fmt(revenue)} revenue, ${fmt(order.profit)} profit`);
+  toast(isPosMode() ? 'Sale completed! Thank you for your purchase.' : `Sale completed! Order #${order.id} — ${fmt(revenue)} revenue, ${fmt(order.profit)} profit`);
 }
 
 // ===========================
@@ -2940,6 +3122,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
 });
 
+// POS PIN modal: Enter key submits
+document.getElementById('posPinInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitPosPin(); });
+document.getElementById('posPinConfirm').addEventListener('keydown', e => { if (e.key === 'Enter') submitPosPin(); });
+
 // Pull fresh data from Firebase when tab regains focus (cross-device sync)
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && fbConnected && fbDb) {
@@ -2952,6 +3138,7 @@ document.addEventListener('visibilitychange', () => {
 // ===========================
 renderStorefront();
 renderCart();
+initPosMode();
 autoConnectFirebase();
 </script>
 </body>
