@@ -191,7 +191,17 @@
   body.pos-mode #tab-analytics,
   body.pos-mode #tab-sync { display: none !important; }
   body.pos-mode #tab-storefront { display: block !important; }
-  body.pos-mode header { justify-content: space-between; }
+  body.pos-mode header { justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 51; }
+
+  /* POS Mode: floating cart */
+  body.pos-mode .storefront-grid { display: block !important; }
+  body.pos-mode .storefront-grid > div:last-child { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 4px 16px 8px; background: var(--bg); }
+  body.pos-mode .storefront-grid > div:last-child .cart-panel { margin-bottom: 0; border-radius: 0 0 var(--radius) var(--radius); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+  body.pos-mode .storefront-grid > div:first-child { padding-top: 8px; }
+  body.pos-mode #cartItems { max-height: 120px; overflow-y: auto; }
+  body.pos-mode .cart-panel h3 { margin-bottom: 10px; font-size: 0.95rem; }
+  body.pos-mode .cart-panel { padding: 14px 16px; }
+  body.pos-mode .cart-summary .row { font-size: 0.95rem; }
 
   /* Responsive */
   @media (max-width: 768px) {
@@ -357,7 +367,7 @@
               <button class="btn btn-outline btn-full" style="margin-top: 8px;" onclick="clearCart()">Clear Cart</button>
             </div>
           </div>
-          <div class="cart-panel">
+          <div class="cart-panel pos-admin-only" id="catalogInfoPanel">
             <h3>Catalog Info</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Products Available</span><span id="qsProductCount">0</span></div>
@@ -1186,6 +1196,8 @@ function enterPosMode() {
   document.getElementById('posToggleIcon').innerHTML = '&#128275;';
   document.getElementById('posToggleBtn').querySelector('span:last-child').textContent = 'Exit POS';
   renderStorefront();
+  renderCart();
+  updatePosCartOffset();
   toast('POS Mode activated');
 }
 
@@ -1194,7 +1206,29 @@ function exitPosMode() {
   localStorage.setItem(POS_MODE_KEY, 'false');
   document.getElementById('posToggleIcon').innerHTML = '&#128274;';
   document.getElementById('posToggleBtn').querySelector('span:last-child').textContent = 'POS';
+  const prodDiv = document.querySelector('.storefront-grid > div:first-child');
+  if (prodDiv) prodDiv.style.paddingTop = '';
+  const main = document.querySelector('main');
+  if (main) main.style.paddingTop = '';
+  const cartContainer = document.querySelector('.storefront-grid > div:last-child');
+  if (cartContainer) cartContainer.style.top = '';
   toast('POS Mode deactivated');
+}
+
+function updatePosCartOffset() {
+  if (!isPosMode()) return;
+  requestAnimationFrame(() => {
+    const header = document.querySelector('header');
+    const cartContainer = document.querySelector('.storefront-grid > div:last-child');
+    const prodDiv = document.querySelector('.storefront-grid > div:first-child');
+    const main = document.querySelector('main');
+    if (cartContainer && prodDiv && header && main) {
+      const headerH = header.offsetHeight;
+      cartContainer.style.top = headerH + 'px';
+      main.style.paddingTop = headerH + 'px';
+      prodDiv.style.paddingTop = cartContainer.offsetHeight + 'px';
+    }
+  });
 }
 
 function startChangePosPin() {
@@ -1303,6 +1337,7 @@ function renderCart() {
     container.innerHTML = '<div class="empty-cart">Cart is empty</div>';
     summary.style.display = 'none';
     document.getElementById('cartCount').textContent = '(0 items)';
+    updatePosCartOffset();
     return;
   }
 
@@ -1330,6 +1365,7 @@ function renderCart() {
   summary.style.display = 'block';
   document.getElementById('cartSubtotal').textContent = fmt(subtotal);
   document.getElementById('cartCount').textContent = `(${totalItems} items)`;
+  updatePosCartOffset();
 }
 
 function changeQty(productId, delta) {
