@@ -1142,7 +1142,6 @@ function handlePosToggle() {
   if (isPosMode()) {
     posPinAction = 'exit';
     openPosPinModal('Exit POS Mode', 'Enter your PIN to return to admin view.', 'Unlock');
-    document.getElementById('posChangePinLink').style.display = 'block';
   } else {
     if (!pin) {
       posPinAction = 'setup';
