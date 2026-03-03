@@ -66,23 +66,23 @@
 
   /* Product Grid */
   .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: all 0.2s; position: relative; overflow: hidden; }
+  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; transition: all 0.2s; position: relative; overflow: hidden; }
   .product-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,92,252,0.1); }
-  .product-card .badge { position: absolute; top: 12px; right: 12px; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+  .product-card .badge { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
   .badge.in-stock { background: rgba(52,211,153,0.15); color: var(--green); }
   .badge.low-stock { background: rgba(251,191,36,0.15); color: var(--yellow); }
   .badge.out-of-stock { background: rgba(248,113,113,0.15); color: var(--red); }
-  .product-card .name { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
-  .product-card .sku { font-size: 0.75rem; color: var(--text2); margin-bottom: 12px; }
-  .product-card .dosage-tag { display: inline-block; background: var(--surface2); padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; color: var(--accent2); margin-bottom: 12px; }
-  .product-card .price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .product-card .sale-price { font-size: 1.3rem; font-weight: 700; color: var(--green); }
-  .product-card .cost-price { font-size: 0.85rem; color: var(--text2); }
-  .product-card .margin-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; }
+  .product-card .name { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+  .product-card .sku { font-size: 0.7rem; color: var(--text2); margin-bottom: 8px; }
+  .product-card .dosage-tag { display: inline-block; background: var(--surface2); padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: var(--accent2); margin-bottom: 8px; }
+  .product-card .price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .product-card .sale-price { font-size: 1.1rem; font-weight: 700; color: var(--green); }
+  .product-card .cost-price { font-size: 0.8rem; color: var(--text2); }
+  .product-card .margin-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
   .margin-high { background: rgba(52,211,153,0.1); color: var(--green); }
   .margin-mid { background: rgba(251,191,36,0.1); color: var(--yellow); }
   .margin-low { background: rgba(248,113,113,0.1); color: var(--red); }
-  .product-card .stock-info { font-size: 0.8rem; color: var(--text2); margin-bottom: 14px; }
+  .product-card .stock-info { font-size: 0.75rem; color: var(--text2); margin-bottom: 10px; }
   .product-card .actions { display: flex; gap: 8px; }
   .btn { padding: 8px 16px; border-radius: 8px; border: none; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
   .btn-primary { background: var(--accent); color: var(--white); }
@@ -365,14 +365,6 @@
               <div class="row total"><span>Total</span><span id="cartSubtotal">$0.00</span></div>
               <button class="btn btn-primary btn-full" style="margin-top: 14px;" onclick="completeSale()">Complete Sale</button>
               <button class="btn btn-outline btn-full" style="margin-top: 8px;" onclick="clearCart()">Clear Cart</button>
-            </div>
-          </div>
-          <div class="cart-panel pos-admin-only" id="catalogInfoPanel">
-            <h3>Catalog Info</h3>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Products Available</span><span id="qsProductCount">0</span></div>
-              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Categories</span><span id="qsCatCount">0</span></div>
-              <div class="row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2)">Items In Stock</span><span id="qsInStockCount">0</span></div>
             </div>
           </div>
         </div>
@@ -1304,12 +1296,6 @@ function renderStorefront() {
     </div>`;
   }).join('');
 
-  // Catalog info (customer-facing)
-  const inStockCount = products.filter(p => p.stock > 0).length;
-  const uniqueCats = new Set(products.map(p => p.category)).size;
-  document.getElementById('qsProductCount').textContent = products.length;
-  document.getElementById('qsCatCount').textContent = uniqueCats;
-  document.getElementById('qsInStockCount').textContent = inStockCount;
 }
 
 // ===========================
