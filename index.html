@@ -189,7 +189,7 @@
 
   /* Dose Calendar */
   .dose-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
-  .dose-day { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; min-height: 80px; }
+  .dose-day { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; min-height: 80px; max-height: 260px; overflow-y: auto; }
   .dose-day-header { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); text-align: center; }
   .dose-day-header.today { color: var(--accent); }
   .dose-badge { display: flex; flex-direction: column; padding: 5px 8px; border-radius: 6px; margin-bottom: 4px; font-size: 0.7rem; line-height: 1.3; }
@@ -2995,7 +2995,7 @@ function saveSub() {
     status: document.getElementById('subStatus').value,
     notes: document.getElementById('subNotes').value.trim(),
   };
-  if (data.price <= 0) { toast('Price is required'); return; }
+  if (data.price < 0) { toast('Price cannot be negative'); return; }
   if (!data.dose) { toast('Dose per session is required'); return; }
 
   if (id) {
