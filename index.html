@@ -204,6 +204,7 @@
   .collapsible-toggle:hover { border-color: var(--accent); color: var(--text); }
   .collapsible-body { transition: max-height 0.3s ease; overflow: hidden; }
   .collapsible-body.collapsed { display: none; }
+  .subs-table-scroll { max-height: 320px; overflow-y: auto; }
 
   /* POS Mode */
   .pos-toggle-btn { transition: all 0.2s; }
@@ -566,30 +567,33 @@
         <div class="dose-calendar" id="doseCalendar"></div>
       </div>
 
-      <!-- Subscriptions Section (moved above clients) -->
-      <div style="margin-bottom:24px;">
-        <div class="sub-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h2 style="font-size:1.1rem;">Subscriptions</h2>
+      <!-- Subscriptions Section (collapsible + scrollable) -->
+      <div id="subsSection" style="margin-bottom:24px;">
+        <div class="collapsible-header" onclick="toggleSubsSection()">
+          <h2 id="subsSectionTitle" style="font-size:1.1rem;">Subscriptions</h2>
+          <button class="collapsible-toggle" id="subsToggleBtn">&#9660;</button>
         </div>
-        <div class="kpi-grid" id="subKpis"></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Dose / Session</th>
-                <th>Frequency</th>
-                <th>Pay Day</th>
-                <th>Dose Day</th>
-                <th>Status</th>
-                <th>Paid / Owed</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="subsTableBody"></tbody>
-          </table>
+        <div class="collapsible-body" id="subsSectionBody">
+          <div class="kpi-grid" id="subKpis"></div>
+          <div class="table-wrap subs-table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Dose / Session</th>
+                  <th>Frequency</th>
+                  <th>Pay Day</th>
+                  <th>Dose Day</th>
+                  <th>Status</th>
+                  <th>Paid / Owed</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="subsTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -2223,6 +2227,21 @@ function initClientsCollapse() {
   }
 }
 
+function toggleSubsSection() {
+  const body = document.getElementById('subsSectionBody');
+  const btn = document.getElementById('subsToggleBtn');
+  const collapsed = body.classList.toggle('collapsed');
+  btn.innerHTML = collapsed ? '&#9654;' : '&#9660;';
+  localStorage.setItem('peptide_subs_collapsed', collapsed ? 'true' : 'false');
+}
+
+function initSubsCollapse() {
+  if (localStorage.getItem('peptide_subs_collapsed') === 'true') {
+    document.getElementById('subsSectionBody').classList.add('collapsed');
+    document.getElementById('subsToggleBtn').innerHTML = '&#9654;';
+  }
+}
+
 function renderClients() {
   const search = document.getElementById('searchClients').value.toLowerCase();
   const filtered = clients.filter(c => !search || c.name.toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search) || (c.phone||'').includes(search));
@@ -2879,6 +2898,7 @@ function dueDayLabel(sub) {
 }
 
 function renderSubscriptions() {
+  document.getElementById('subsSectionTitle').textContent = `Subscriptions (${subscriptions.length})`;
   const activeSubs = subscriptions.filter(s => s.status === 'active');
   const mrr = activeSubs.reduce((s, sub) => s + subMonthlyEquiv(sub), 0);
   const totalCollected = subPayments.reduce((s, p) => s + p.amount, 0);
@@ -3424,6 +3444,7 @@ document.addEventListener('visibilitychange', () => {
 renderStorefront();
 renderCart();
 initClientsCollapse();
+initSubsCollapse();
 initPosMode();
 autoConnectFirebase();
 </script>
