@@ -581,7 +581,8 @@
                 <th>Price</th>
                 <th>Dose / Session</th>
                 <th>Frequency</th>
-                <th>Due Day</th>
+                <th>Pay Day</th>
+                <th>Dose Day</th>
                 <th>Status</th>
                 <th>Paid / Owed</th>
                 <th>Actions</th>
@@ -968,6 +969,18 @@
     <div class="form-group">
       <label id="subDueDayLabel">Payment Day</label>
       <select id="subDueDay"></select>
+    </div>
+    <div class="form-group">
+      <label>Dose Day (Day of Week)</label>
+      <select id="subDoseDay">
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+        <option value="Sunday">Sunday</option>
+      </select>
     </div>
     <div class="form-group"><label>Start Date</label><input id="subStartDate" type="date"></div>
     <div class="form-group">
@@ -2135,8 +2148,8 @@ function getDoseColor(clientId) {
 
 function getSubDays(sub) {
   const days = [];
-  const dueDay = sub.dueDay || '';
-  const dueDayIdx = DAY_NAMES.findIndex(d => d.toLowerCase() === dueDay.toLowerCase());
+  const doseDay = sub.doseDay || sub.dueDay || '';
+  const dueDayIdx = DAY_NAMES.findIndex(d => d.toLowerCase() === doseDay.toLowerCase());
 
   switch (sub.frequency) {
     case 'daily':
@@ -2916,6 +2929,7 @@ function renderSubscriptions() {
       <td>${sub.dose}</td>
       <td>${freqLabels[sub.frequency] || sub.frequency}</td>
       <td>${sub.dueDay ? dueDayLabel(sub) : '—'}</td>
+      <td>${sub.doseDay || sub.dueDay || '—'}</td>
       <td><span class="status-${sub.status}">${sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}</span></td>
       <td>${paidStatus}<br><span style="font-size:0.75rem;color:var(--text2)">Total: ${fmt(totalPaid)}</span></td>
       <td style="white-space:nowrap;">
@@ -2940,6 +2954,7 @@ function openAddSub() {
   document.getElementById('subPrice').value = '';
   document.getElementById('subDose').value = '';
   document.getElementById('subFrequency').value = 'weekly';
+  document.getElementById('subDoseDay').value = 'Monday';
   document.getElementById('subStartDate').value = todayStr();
   document.getElementById('subStatus').value = 'active';
   document.getElementById('subNotes').value = '';
@@ -2958,6 +2973,7 @@ function openEditSub(id) {
   document.getElementById('subPrice').value = sub.price;
   document.getElementById('subDose').value = sub.dose;
   document.getElementById('subFrequency').value = sub.frequency;
+  document.getElementById('subDoseDay').value = sub.doseDay || sub.dueDay || 'Monday';
   document.getElementById('subStartDate').value = sub.startDate;
   document.getElementById('subStatus').value = sub.status;
   document.getElementById('subNotes').value = sub.notes || '';
@@ -2972,6 +2988,7 @@ function saveSub() {
     billing: document.getElementById('subBilling').value,
     price: parseFloat(document.getElementById('subPrice').value) || 0,
     dueDay: document.getElementById('subDueDay').value,
+    doseDay: document.getElementById('subDoseDay').value,
     dose: document.getElementById('subDose').value.trim(),
     frequency: document.getElementById('subFrequency').value,
     startDate: document.getElementById('subStartDate').value,
