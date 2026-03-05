@@ -494,23 +494,31 @@
         </div>
       </div>
       <div class="kpi-grid" id="orderKpis"></div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Order #</th>
-              <th>Date</th>
-              <th>Items</th>
-              <th>Revenue</th>
-              <th>Tip</th>
-              <th>COGS</th>
-              <th>Profit</th>
-              <th>Margin</th>
-              <th style="width:50px"></th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody"></tbody>
-        </table>
+      <div id="ordersSection" style="margin-top:20px;">
+        <div class="collapsible-header" onclick="toggleOrdersSection()">
+          <h2 id="ordersSectionTitle" style="font-size:1.1rem;">Orders</h2>
+          <button class="collapsible-toggle" id="ordersToggleBtn">&#9660;</button>
+        </div>
+        <div class="collapsible-body" id="ordersSectionBody">
+          <div class="table-wrap" style="max-height:420px; overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Revenue</th>
+                  <th>Tip</th>
+                  <th>COGS</th>
+                  <th>Profit</th>
+                  <th>Margin</th>
+                  <th style="width:50px"></th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Subscription Payments History (collapsible) -->
@@ -1922,6 +1930,8 @@ function renderOrders() {
     <div class="kpi-card"><div class="label">Money Recouped</div><div class="value accent">${fmt(totalRev)}</div><div class="sub">${originalInvestment > 0 ? (totalRev / originalInvestment * 100).toFixed(1) : 0}% of investment back</div></div>
   `;
 
+  document.getElementById('ordersSectionTitle').textContent = 'Orders (' + orders.length + ')';
+
   document.getElementById('ordersTableBody').innerHTML = orders.slice().reverse().map(o => `
     <tr>
       <td><strong>#${o.id}</strong></td>
@@ -2423,6 +2433,23 @@ function initUsageLogCollapse() {
   if (localStorage.getItem('peptide_usage_log_collapsed') === 'true') {
     const el = document.getElementById('usageLogSectionBody');
     const btn = document.getElementById('usageLogToggleBtn');
+    if (el) el.classList.add('collapsed');
+    if (btn) btn.innerHTML = '&#9654;';
+  }
+}
+
+function toggleOrdersSection() {
+  const body = document.getElementById('ordersSectionBody');
+  const btn = document.getElementById('ordersToggleBtn');
+  const collapsed = body.classList.toggle('collapsed');
+  btn.innerHTML = collapsed ? '&#9654;' : '&#9660;';
+  localStorage.setItem('peptide_orders_collapsed', collapsed ? 'true' : 'false');
+}
+
+function initOrdersCollapse() {
+  if (localStorage.getItem('peptide_orders_collapsed') === 'true') {
+    const el = document.getElementById('ordersSectionBody');
+    const btn = document.getElementById('ordersToggleBtn');
     if (el) el.classList.add('collapsed');
     if (btn) btn.innerHTML = '&#9654;';
   }
@@ -3803,6 +3830,7 @@ renderCart();
 initClientsCollapse();
 initSubsCollapse();
 initClientMoneyKpis();
+initOrdersCollapse();
 initUsageLogCollapse();
 initProtocolsCollapse();
 initPosMode();
