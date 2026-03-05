@@ -206,16 +206,23 @@
   .collapsible-body.collapsed { display: none; }
   .subs-table-scroll { max-height: 320px; overflow-y: auto; }
 
+  /* Client Autocomplete */
+  .client-dropdown-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  .client-dropdown-item:hover { background: rgba(124,92,252,0.15); color: var(--accent2); }
+  .client-dropdown-item:last-child { border-bottom: none; }
+
   /* POS Mode */
   .pos-toggle-btn { transition: all 0.2s; }
   body.pos-mode .pos-toggle-btn { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); color: var(--green); }
   body.pos-mode .nav-tabs { display: none !important; }
   body.pos-mode #syncBadge { display: none !important; }
   body.pos-mode .pos-admin-only { display: none !important; }
+  body.pos-mode .client-select-section { display: none !important; }
   body.pos-mode #tab-pricing,
   body.pos-mode #tab-orders,
   body.pos-mode #tab-clients,
   body.pos-mode #tab-usage,
+  body.pos-mode #tab-costestimator,
   body.pos-mode #tab-analytics,
   body.pos-mode #tab-sync { display: none !important; }
   body.pos-mode #tab-storefront { display: block !important; }
@@ -348,6 +355,7 @@
       <button class="nav-tab" data-tab="orders">Order History</button>
       <button class="nav-tab" data-tab="clients">Clients</button>
       <button class="nav-tab" data-tab="usage">Usage Tracker</button>
+      <button class="nav-tab" data-tab="costestimator">Cost Estimator</button>
       <button class="nav-tab" data-tab="analytics">Analytics</button>
       <button class="nav-tab" data-tab="sync">Sync</button>
     </div>
@@ -411,6 +419,14 @@
                 <div class="row" id="tipDisplay" style="display:none;margin-top:6px;font-size:0.85rem;"><span>Tip</span><span id="tipAmount">$0.00</span></div>
               </div>
               <div class="row total" style="margin-top:8px;"><span>Total</span><span id="cartTotal">$0.00</span></div>
+              <div class="client-select-section" id="clientSelectSection" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                <label style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;display:block;">Assign Client</label>
+                <div style="position:relative;">
+                  <input type="text" class="search-box" id="cartClientInput" placeholder="Type client name..." autocomplete="off" oninput="onCartClientInput()" onfocus="onCartClientInput()" style="width:100%;padding:8px 12px;">
+                  <div id="cartClientDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;z-index:10;"></div>
+                </div>
+                <div id="cartClientStatus" style="font-size:0.75rem;margin-top:4px;color:var(--text2);"></div>
+              </div>
               <button class="btn btn-primary btn-full" style="margin-top: 14px;" onclick="completeSale()">Complete Sale</button>
               <button class="btn btn-outline btn-full" style="margin-top: 8px;" onclick="clearCart()">Clear Cart</button>
             </div>
@@ -560,6 +576,12 @@
         </div>
       </div>
       <div class="kpi-grid" id="clientKpis"></div>
+      <div style="margin-bottom:12px;">
+        <button class="btn btn-outline btn-sm" id="clientMoneyToggle" onclick="toggleClientMoneyKpis()" style="font-size:0.75rem;padding:4px 10px;">Show Revenue Stats &#9660;</button>
+        <div id="clientMoneyKpisWrapper" style="display:none;margin-top:10px;">
+          <div class="kpi-grid" id="clientMoneyKpis"></div>
+        </div>
+      </div>
 
       <!-- Weekly Dose Calendar -->
       <div class="cart-panel" style="margin-bottom:20px;">
@@ -655,6 +677,21 @@
         </div>
       </div>
       <div class="kpi-grid" id="usageKpis"></div>
+
+      <!-- Protocol Tracking (collapsible) -->
+      <div id="protocolsSection" style="margin-bottom:24px;">
+        <div class="collapsible-header" onclick="toggleProtocolsSection()">
+          <h2 id="protocolsSectionTitle" style="font-size:1.1rem;">Protocols</h2>
+          <button class="collapsible-toggle" id="protocolsToggleBtn">&#9660;</button>
+        </div>
+        <div class="collapsible-body" id="protocolsSectionBody">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button class="btn btn-primary btn-sm" onclick="openAddProtocol()">+ Add Protocol</button>
+          </div>
+          <div id="protocolCards"></div>
+        </div>
+      </div>
+
       <div class="grid-2col" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
         <div>
           <div class="controls">
@@ -672,23 +709,32 @@
           </div>
         </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Person</th>
-              <th>Product</th>
-              <th>Dose Amount</th>
-              <th>Route</th>
-              <th>Cost</th>
-              <th>Notes</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="usageTableBody"></tbody>
-        </table>
+      <!-- Usage Log (collapsible + scrollable) -->
+      <div id="usageLogSection" style="margin-bottom:24px;">
+        <div class="collapsible-header" onclick="toggleUsageLogSection()">
+          <h2 id="usageLogSectionTitle" style="font-size:1.1rem;">Usage Log</h2>
+          <button class="collapsible-toggle" id="usageLogToggleBtn">&#9660;</button>
+        </div>
+        <div class="collapsible-body" id="usageLogSectionBody">
+          <div class="table-wrap" style="max-height:400px; overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Person</th>
+                  <th>Product</th>
+                  <th>Dose Amount</th>
+                  <th>Route</th>
+                  <th>Cost</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usageTableBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Weekly Cost Breakdown -->
@@ -712,17 +758,18 @@
         </div>
       </div>
 
-      <!-- Cost Estimator -->
-      <div class="chart-container" style="margin-top:24px;">
-        <h3 style="display:flex;justify-content:space-between;align-items:center;">
-          Cost Estimator
-          <button class="btn btn-primary btn-sm" onclick="addCostEstRow()">+ Add Product</button>
-        </h3>
-        <p style="font-size:0.8rem;color:var(--text2);margin-bottom:16px;">Add products and dosages to estimate your weekly and monthly costs.</p>
-        <div id="costEstRows"></div>
-        <div class="kpi-grid" id="costEstKpis" style="margin-top:16px;"></div>
-        <div id="costEstBreakdown" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- ============ COST ESTIMATOR TAB ============ -->
+    <div id="tab-costestimator" class="tab-panel">
+      <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="font-size:1.2rem;">Cost Estimator</h2>
+        <button class="btn btn-primary btn-sm" onclick="addCostEstRow()">+ Add Product</button>
       </div>
+      <p style="font-size:0.85rem;color:var(--text2);margin-bottom:20px;">Add products and dosages to estimate your weekly, monthly, and yearly costs.</p>
+      <div id="costEstRows"></div>
+      <div class="kpi-grid" id="costEstKpis" style="margin-top:16px;"></div>
+      <div id="costEstBreakdown" style="margin-top:8px;"></div>
     </div>
 
     <!-- ============ ANALYTICS TAB ============ -->
@@ -936,6 +983,37 @@
   </div>
 </div>
 
+<!-- Protocol Modal -->
+<div class="modal-overlay" id="protocolModal">
+  <div class="modal">
+    <h2 id="protocolModalTitle">Add Protocol</h2>
+    <input type="hidden" id="protocolEditId">
+    <div class="form-group"><label>Protocol Name</label><input id="protocolName" placeholder="e.g. Somatropin Night Protocol"></div>
+    <div class="form-group"><label>Product</label><select id="protocolProduct"></select></div>
+    <div class="form-group"><label>Dose per Administration</label><input id="protocolDose" placeholder="e.g. 3IU, 250mcg"></div>
+    <div class="form-group">
+      <label>Frequency</label>
+      <select id="protocolFrequency">
+        <option value="daily">Daily</option>
+        <option value="5xweek">5x / Week</option>
+        <option value="3xweek">3x / Week</option>
+        <option value="2xweek">2x / Week</option>
+        <option value="eod">Every Other Day</option>
+        <option value="weekly">Weekly</option>
+        <option value="biweekly">Every 2 Weeks</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Duration (weeks)</label><input id="protocolDuration" type="number" min="1" placeholder="e.g. 12"></div>
+    <div class="form-group"><label>Start Date</label><input id="protocolStartDate" type="date"></div>
+    <div class="form-group"><label>Notes</label><input id="protocolNotes" placeholder="Any notes..."></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('protocolModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProtocol()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add/Edit Subscription Modal -->
 <div class="modal-overlay" id="subModal">
   <div class="modal">
@@ -1066,6 +1144,7 @@ const CLIENTS_KEY = 'peptide_store_clients';
 const USAGE_KEY = 'peptide_store_usage';
 const SUBS_KEY = 'peptide_store_subscriptions';
 const SUB_PAYMENTS_KEY = 'peptide_store_sub_payments';
+const PROTOCOLS_KEY = 'peptide_store_protocols';
 
 const DEFAULT_PRODUCTS = [
   { id: 1, name: "Tesamorelin", sku: "TSM-20", dosage: "20mg", category: "growth", stock: 10, cost: 49.92, price: 89.99 },
@@ -1125,6 +1204,8 @@ function loadSubs() { return JSON.parse(localStorage.getItem(SUBS_KEY) || '[]');
 var saveSubs = function(data) { localStorage.setItem(SUBS_KEY, JSON.stringify(data)); };
 function loadSubPayments() { return JSON.parse(localStorage.getItem(SUB_PAYMENTS_KEY) || '[]'); }
 var saveSubPayments = function(data) { localStorage.setItem(SUB_PAYMENTS_KEY, JSON.stringify(data)); };
+function loadProtocols() { return JSON.parse(localStorage.getItem(PROTOCOLS_KEY) || '[]'); }
+var saveProtocols = function(data) { localStorage.setItem(PROTOCOLS_KEY, JSON.stringify(data)); };
 
 let products = loadProducts();
 let orders = loadOrders();
@@ -1132,6 +1213,7 @@ let clients = loadClients();
 let usageLogs = loadUsage();
 let subscriptions = loadSubs();
 let subPayments = loadSubPayments();
+let protocols = loadProtocols();
 let cart = [];
 
 // ===========================
@@ -1181,6 +1263,7 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     if (tab.dataset.tab === 'pricing') renderPricing();
     if (tab.dataset.tab === 'clients') renderClients();
     if (tab.dataset.tab === 'usage') renderUsage();
+    if (tab.dataset.tab === 'costestimator') renderCostEstimator();
     if (tab.dataset.tab === 'sync') renderSyncStatus();
   });
 });
@@ -1518,19 +1601,99 @@ function changeQty(productId, delta) {
   renderCart();
 }
 
-function clearCart() { cart = []; renderCart(); }
+function clearCart() {
+  cart = [];
+  selectedCartClientId = null;
+  selectedCartClientName = '';
+  const ci = document.getElementById('cartClientInput');
+  if (ci) ci.value = '';
+  const cs = document.getElementById('cartClientStatus');
+  if (cs) cs.textContent = '';
+  renderCart();
+}
+
+// ===========================
+// CART CLIENT AUTOCOMPLETE
+// ===========================
+let selectedCartClientId = null;
+let selectedCartClientName = '';
+
+function onCartClientInput() {
+  const input = document.getElementById('cartClientInput');
+  const dropdown = document.getElementById('cartClientDropdown');
+  const status = document.getElementById('cartClientStatus');
+  const query = input.value.trim().toLowerCase();
+  if (!query) {
+    dropdown.style.display = 'none';
+    selectedCartClientId = null;
+    selectedCartClientName = '';
+    status.textContent = '';
+    return;
+  }
+  const matches = clients.filter(c => c.name.toLowerCase().includes(query)).slice(0, 8);
+  const exactMatch = clients.find(c => c.name.toLowerCase() === query);
+  if (exactMatch) {
+    selectedCartClientId = exactMatch.id;
+    selectedCartClientName = exactMatch.name;
+    status.innerHTML = '<span style="color:var(--green);">&#10003; ' + exactMatch.name + '</span>';
+  } else {
+    selectedCartClientId = null;
+    selectedCartClientName = input.value.trim();
+    status.innerHTML = '<span style="color:var(--yellow);">New client &quot;' + input.value.trim() + '&quot; will be created</span>';
+  }
+  let html = matches.map(c =>
+    '<div class="client-dropdown-item" onclick="selectCartClient(' + c.id + ',\'' + c.name.replace(/'/g, "\\'") + '\')">' +
+    c.name + (c.email ? '<span style="color:var(--text2);font-size:0.75rem;margin-left:8px;">' + c.email + '</span>' : '') +
+    '</div>'
+  ).join('');
+  if (!exactMatch && query.length > 0) {
+    html += '<div class="client-dropdown-item" onclick="selectCartClient(null,\'' + input.value.trim().replace(/'/g, "\\'") + '\')" style="color:var(--green);font-style:italic;">+ Create &quot;' + input.value.trim() + '&quot; as new client</div>';
+  }
+  dropdown.innerHTML = html;
+  dropdown.style.display = html ? 'block' : 'none';
+}
+
+function selectCartClient(id, name) {
+  const input = document.getElementById('cartClientInput');
+  const dropdown = document.getElementById('cartClientDropdown');
+  const status = document.getElementById('cartClientStatus');
+  input.value = name;
+  selectedCartClientId = id;
+  selectedCartClientName = name;
+  dropdown.style.display = 'none';
+  if (id) {
+    status.innerHTML = '<span style="color:var(--green);">&#10003; ' + name + '</span>';
+  } else {
+    status.innerHTML = '<span style="color:var(--yellow);">New client &quot;' + name + '&quot; will be created</span>';
+  }
+}
+
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('cartClientDropdown');
+  const inp = document.getElementById('cartClientInput');
+  if (dd && !dd.contains(e.target) && e.target !== inp) dd.style.display = 'none';
+});
 
 function completeSale() {
   if (cart.length === 0) return;
 
-  // Ask for client assignment (skip in POS mode)
+  // Client assignment from inline selector (skip in POS mode)
   let clientId = null;
-  if (!isPosMode() && clients.length > 0) {
-    const clientNames = ['(No client)'].concat(clients.map(c => c.name));
-    const choice = prompt('Assign to client? Enter client name or leave blank:\n\n' + clients.map(c => '  - ' + c.name).join('\n'));
-    if (choice && choice.trim()) {
-      const found = clients.find(c => c.name.toLowerCase() === choice.trim().toLowerCase());
-      if (found) clientId = found.id;
+  if (!isPosMode()) {
+    const clientInput = document.getElementById('cartClientInput');
+    const inputName = clientInput ? clientInput.value.trim() : '';
+    if (inputName) {
+      if (selectedCartClientId) {
+        clientId = selectedCartClientId;
+      } else {
+        // Auto-create new client
+        const newId = Math.max(0, ...clients.map(c => c.id)) + 1;
+        const newClient = { id: newId, name: inputName, email: '', phone: '', notes: '', createdDate: todayStr() };
+        clients.push(newClient);
+        saveClients(clients);
+        clientId = newId;
+        toast('New client "' + inputName + '" created');
+      }
     }
   }
 
@@ -1569,6 +1732,12 @@ function completeSale() {
   saveOrders(orders);
   saveProducts(products);
   cart = [];
+  selectedCartClientId = null;
+  selectedCartClientName = '';
+  const ci = document.getElementById('cartClientInput');
+  if (ci) ci.value = '';
+  const cs = document.getElementById('cartClientStatus');
+  if (cs) cs.textContent = '';
   renderCart();
   renderStorefront();
   const tipMsg = tip > 0 ? ` (incl. ${fmt(tip)} tip)` : '';
@@ -2242,6 +2411,39 @@ function initSubsCollapse() {
   }
 }
 
+function toggleUsageLogSection() {
+  const body = document.getElementById('usageLogSectionBody');
+  const btn = document.getElementById('usageLogToggleBtn');
+  const collapsed = body.classList.toggle('collapsed');
+  btn.innerHTML = collapsed ? '&#9654;' : '&#9660;';
+  localStorage.setItem('peptide_usage_log_collapsed', collapsed ? 'true' : 'false');
+}
+
+function initUsageLogCollapse() {
+  if (localStorage.getItem('peptide_usage_log_collapsed') === 'true') {
+    const el = document.getElementById('usageLogSectionBody');
+    const btn = document.getElementById('usageLogToggleBtn');
+    if (el) el.classList.add('collapsed');
+    if (btn) btn.innerHTML = '&#9654;';
+  }
+}
+
+function toggleClientMoneyKpis() {
+  const wrapper = document.getElementById('clientMoneyKpisWrapper');
+  const btn = document.getElementById('clientMoneyToggle');
+  const isHidden = wrapper.style.display === 'none';
+  wrapper.style.display = isHidden ? 'block' : 'none';
+  btn.innerHTML = isHidden ? 'Hide Revenue Stats &#9650;' : 'Show Revenue Stats &#9660;';
+  localStorage.setItem('peptide_client_money_kpis', isHidden ? 'show' : 'hide');
+}
+
+function initClientMoneyKpis() {
+  if (localStorage.getItem('peptide_client_money_kpis') === 'show') {
+    document.getElementById('clientMoneyKpisWrapper').style.display = 'block';
+    document.getElementById('clientMoneyToggle').innerHTML = 'Hide Revenue Stats &#9650;';
+  }
+}
+
 function renderClients() {
   const search = document.getElementById('searchClients').value.toLowerCase();
   const filtered = clients.filter(c => !search || c.name.toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search) || (c.phone||'').includes(search));
@@ -2258,10 +2460,12 @@ function renderClients() {
 
   document.getElementById('clientKpis').innerHTML = `
     <div class="kpi-card"><div class="label">Total Clients</div><div class="value">${totalClients}</div></div>
+    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs}</div></div>
+  `;
+  document.getElementById('clientMoneyKpis').innerHTML = `
     <div class="kpi-card"><div class="label">Vial Sales Revenue</div><div class="value green">${fmt(totalClientSpend)}</div></div>
     <div class="kpi-card"><div class="label">Subscription Revenue</div><div class="value green">${fmt(totalSubRevenue)}</div></div>
     <div class="kpi-card"><div class="label">Avg Revenue / Client</div><div class="value accent">${fmt(avgSpend)}</div></div>
-    <div class="kpi-card"><div class="label">Active Subscriptions</div><div class="value">${activeSubs}</div></div>
   `;
 
   document.getElementById('clientsTableBody').innerHTML = filtered.map(c => {
@@ -2434,8 +2638,6 @@ function calcDoseCost(entry) {
   const vial = parseWithUnit(product.dosage);
   const dose = parseWithUnit(entry.dose);
   if (vial.value <= 0 || dose.value <= 0) return 0;
-  // If units match (or one/both have no unit), calculate ratio
-  if (vial.unit && dose.unit && vial.unit !== dose.unit) return 0; // incompatible units
   return product.cost * (dose.value / vial.value);
 }
 
@@ -2493,6 +2695,7 @@ function renderUsage() {
 
   const routeLabels = { subcutaneous: 'SubQ', intramuscular: 'IM', intravenous: 'IV', intranasal: 'Nasal', oral: 'Oral', topical: 'Topical', sublingual: 'Sublingual', other: 'Other' };
 
+  document.getElementById('usageLogSectionTitle').textContent = `Usage Log (${filtered.length})`;
   document.getElementById('usageTableBody').innerHTML = filtered.map(u => {
     const cost = calcDoseCost(u);
     return `<tr>
@@ -2567,7 +2770,7 @@ function renderUsage() {
     document.getElementById('weeklyCostBreakdown').innerHTML = tableHtml;
   }
 
-  renderCostEstimator();
+  renderProtocols();
 }
 
 // ===========================
@@ -2653,7 +2856,6 @@ function recalcCostEst() {
     const vial = parseWithUnit(product.dosage);
     const dose = parseWithUnit(row.dose);
     if (vial.value <= 0 || dose.value <= 0) return;
-    if (vial.unit && dose.unit && vial.unit !== dose.unit) return;
 
     const costPerDose = product.cost * (dose.value / vial.value);
     const dosesPerWeek = freqPerWeek[row.frequency] || 7;
@@ -2729,6 +2931,161 @@ function recalcCostEst() {
 
   html += '</tbody></table>';
   document.getElementById('costEstBreakdown').innerHTML = html;
+}
+
+// ===========================
+// PROTOCOL TRACKING
+// ===========================
+const PROTO_FREQ_PER_WEEK = { daily: 7, '5xweek': 5, '3xweek': 3, '2xweek': 2, eod: 3.5, weekly: 1, biweekly: 0.5, monthly: 7/30 };
+const PROTO_FREQ_LABELS = { daily: 'Daily', '5xweek': '5x/Week', '3xweek': '3x/Week', '2xweek': '2x/Week', eod: 'Every Other Day', weekly: 'Weekly', biweekly: 'Every 2 Weeks', monthly: 'Monthly' };
+
+function toggleProtocolsSection() {
+  const body = document.getElementById('protocolsSectionBody');
+  const btn = document.getElementById('protocolsToggleBtn');
+  const collapsed = body.classList.toggle('collapsed');
+  btn.innerHTML = collapsed ? '&#9654;' : '&#9660;';
+  localStorage.setItem('peptide_protocols_collapsed', collapsed ? 'true' : 'false');
+}
+
+function initProtocolsCollapse() {
+  if (localStorage.getItem('peptide_protocols_collapsed') === 'true') {
+    const el = document.getElementById('protocolsSectionBody');
+    const btn = document.getElementById('protocolsToggleBtn');
+    if (el) el.classList.add('collapsed');
+    if (btn) btn.innerHTML = '&#9654;';
+  }
+}
+
+function openAddProtocol() {
+  document.getElementById('protocolModalTitle').textContent = 'Add Protocol';
+  document.getElementById('protocolEditId').value = '';
+  document.getElementById('protocolName').value = '';
+  document.getElementById('protocolProduct').innerHTML = products.map(p => '<option value="' + p.id + '">' + p.name + ' (' + p.dosage + ')</option>').join('');
+  document.getElementById('protocolDose').value = '';
+  document.getElementById('protocolFrequency').value = 'daily';
+  document.getElementById('protocolDuration').value = '';
+  document.getElementById('protocolStartDate').value = todayStr();
+  document.getElementById('protocolNotes').value = '';
+  document.getElementById('protocolModal').classList.add('open');
+}
+
+function editProtocol(id) {
+  const p = protocols.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('protocolModalTitle').textContent = 'Edit Protocol';
+  document.getElementById('protocolEditId').value = p.id;
+  document.getElementById('protocolName').value = p.name;
+  document.getElementById('protocolProduct').innerHTML = products.map(pr => '<option value="' + pr.id + '"' + (pr.id === p.productId ? ' selected' : '') + '>' + pr.name + ' (' + pr.dosage + ')</option>').join('');
+  document.getElementById('protocolDose').value = p.dose;
+  document.getElementById('protocolFrequency').value = p.frequency;
+  document.getElementById('protocolDuration').value = p.durationWeeks;
+  document.getElementById('protocolStartDate').value = p.startDate;
+  document.getElementById('protocolNotes').value = p.notes || '';
+  document.getElementById('protocolModal').classList.add('open');
+}
+
+function saveProtocol() {
+  const id = document.getElementById('protocolEditId').value;
+  const data = {
+    name: document.getElementById('protocolName').value.trim(),
+    productId: parseInt(document.getElementById('protocolProduct').value),
+    dose: document.getElementById('protocolDose').value.trim(),
+    frequency: document.getElementById('protocolFrequency').value,
+    durationWeeks: parseInt(document.getElementById('protocolDuration').value) || 12,
+    startDate: document.getElementById('protocolStartDate').value || todayStr(),
+    notes: document.getElementById('protocolNotes').value.trim(),
+  };
+  if (!data.name) { toast('Protocol name is required'); return; }
+  if (!data.dose) { toast('Dose amount is required'); return; }
+  if (id) {
+    const p = protocols.find(x => x.id === parseInt(id));
+    Object.assign(p, data);
+  } else {
+    data.id = Math.max(0, ...protocols.map(p => p.id)) + 1;
+    data.status = 'active';
+    data.createdDate = todayStr();
+    protocols.push(data);
+  }
+  saveProtocols(protocols);
+  document.getElementById('protocolModal').classList.remove('open');
+  renderProtocols();
+  toast(id ? 'Protocol updated!' : 'Protocol added!');
+}
+
+function toggleProtocolStatus(id, status) {
+  const p = protocols.find(x => x.id === id);
+  if (!p) return;
+  p.status = status;
+  saveProtocols(protocols);
+  renderProtocols();
+  toast('Protocol ' + status);
+}
+
+function deleteProtocol(id) {
+  if (!confirm('Delete this protocol? This cannot be undone.')) return;
+  protocols = protocols.filter(p => p.id !== id);
+  saveProtocols(protocols);
+  renderProtocols();
+  toast('Protocol deleted');
+}
+
+function renderProtocols() {
+  document.getElementById('protocolsSectionTitle').textContent = 'Protocols (' + protocols.length + ')';
+  const container = document.getElementById('protocolCards');
+  if (protocols.length === 0) {
+    container.innerHTML = '<p style="color:var(--text2);font-size:0.85rem;padding:12px 0;">No protocols yet. Click "+ Add Protocol" to define a usage regimen.</p>';
+    return;
+  }
+  container.innerHTML = protocols.map(proto => {
+    const product = products.find(p => p.id === proto.productId);
+    const productName = product ? product.name + ' (' + product.dosage + ')' : 'Unknown';
+    const startDate = new Date(proto.startDate);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + proto.durationWeeks * 7);
+    const today = new Date();
+    const totalDays = proto.durationWeeks * 7;
+    const elapsedDays = Math.max(0, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)));
+    const progress = Math.min(100, Math.round(elapsedDays / totalDays * 100));
+    const daysRemaining = Math.max(0, totalDays - elapsedDays);
+    const weeksRemaining = Math.ceil(daysRemaining / 7);
+    let weeklyCost = 0, totalCost = 0;
+    if (product && proto.dose) {
+      const vial = parseWithUnit(product.dosage);
+      const dose = parseWithUnit(proto.dose);
+      if (vial.value > 0 && dose.value > 0) {
+        const costPerDose = product.cost * (dose.value / vial.value);
+        const dosesPerWeek = PROTO_FREQ_PER_WEEK[proto.frequency] || 7;
+        weeklyCost = costPerDose * dosesPerWeek;
+        totalCost = weeklyCost * proto.durationWeeks;
+      }
+    }
+    const freqLabel = PROTO_FREQ_LABELS[proto.frequency] || proto.frequency;
+    const statusLabel = proto.status.charAt(0).toUpperCase() + proto.status.slice(1);
+    const statusClass = proto.status === 'active' ? 'status-active' : proto.status === 'paused' ? 'status-paused' : 'status-cancelled';
+    return '<div class="cart-panel" style="margin-bottom:12px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
+        '<h3 style="margin:0;font-size:1rem;">' + proto.name + '</h3>' +
+        '<span class="' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div style="margin-top:8px;font-size:0.85rem;color:var(--text2);">' +
+        '<strong>' + productName + '</strong> &mdash; ' + proto.dose + ' ' + freqLabel + ' for ' + proto.durationWeeks + ' weeks' +
+      '</div>' +
+      (proto.notes ? '<div style="font-size:0.8rem;color:var(--text2);margin-top:4px;font-style:italic;">' + proto.notes + '</div>' : '') +
+      '<div class="kpi-grid" style="margin-top:12px;">' +
+        '<div class="kpi-card"><div class="label">Progress</div><div class="value accent">' + progress + '%</div><div class="sub">' + (weeksRemaining > 0 ? weeksRemaining + ' wks left' : 'Complete') + '</div></div>' +
+        '<div class="kpi-card"><div class="label">Weekly Cost</div><div class="value red">' + fmt(weeklyCost) + '</div></div>' +
+        '<div class="kpi-card"><div class="label">Total Protocol Cost</div><div class="value red">' + fmt(totalCost) + '</div></div>' +
+      '</div>' +
+      (proto.status === 'active' ? '<div style="margin-top:10px;background:var(--surface);border-radius:6px;overflow:hidden;height:8px;"><div style="height:100%;background:var(--accent);width:' + progress + '%;border-radius:6px;"></div></div>' : '') +
+      '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">' +
+        '<button class="btn btn-outline btn-sm" onclick="editProtocol(' + proto.id + ')">Edit</button>' +
+        (proto.status === 'active' ? '<button class="btn btn-outline btn-sm" onclick="toggleProtocolStatus(' + proto.id + ',\'paused\')">Pause</button>' : '') +
+        (proto.status === 'paused' ? '<button class="btn btn-outline btn-sm" onclick="toggleProtocolStatus(' + proto.id + ',\'active\')">Resume</button>' : '') +
+        (proto.status !== 'completed' ? '<button class="btn btn-outline btn-sm" onclick="toggleProtocolStatus(' + proto.id + ',\'completed\')">Complete</button>' : '') +
+        '<button class="btn btn-danger btn-sm" onclick="deleteProtocol(' + proto.id + ')">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function openAddUsageEntry() {
@@ -3445,6 +3802,9 @@ renderStorefront();
 renderCart();
 initClientsCollapse();
 initSubsCollapse();
+initClientMoneyKpis();
+initUsageLogCollapse();
+initProtocolsCollapse();
 initPosMode();
 autoConnectFirebase();
 </script>
