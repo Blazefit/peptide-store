@@ -21,7 +21,7 @@ scientific instead of inconsistent:
 | Family | Symbol | Top-left number | Top-right | Accent |
 |---|---|---|---|---|
 | **PEPTIDE** | 2-letter code (`Bp`, `Tb`, `Pt`) | the number already in the name (157, 500, 141) — falls back to the aa count if there's no number | amino-acid count (or `PEPTIDE` tag) | mint `#2BE8B0` |
-| **HORMONE** | 2-letter code (`Te`, `Tr`, `Es`) | **molecular weight, g/mol** | chemical formula | amber `#FFB020` |
+| **HORMONE** | 2-letter code (`Te`, `Nd`, `Es`) | **molecular weight, g/mol** | chemical formula | amber `#FFB020` |
 
 **Tile anatomy:** the big center symbol is a uniform **2 letters** so every tile reads
 the same from across a room (true periodic-table feel). Recognizability comes from the
@@ -70,12 +70,15 @@ Symbol + the number from the name (top-left) + amino-acid count (top-right) + fu
 ### Hormone/steroid family — numbered by molecular weight (g/mol)
 | g/mol | Sym | Compound | Class | Tagline |
 |---|---|---|---|---|
+Curated for POD: FDA-approved anabolics + non-controlled hormones, generic
+(non-trademarked) names only. Dropped (never FDA-approved for human use):
+Trenbolone, Masteron/Drostanolone, Primobolan/Methenolone. NOTE: anabolic
+steroids stay Schedule III even when FDA-approved, so Te/Nd/Oa still carry
+some POD review risk.
+
 | 288 | Te | Testosterone | Androgen | THE ORIGINAL UPGRADE |
 | 274 | Nd | Nandrolone | 19-nortestosterone | JOINTS OF STEEL |
-| 270 | Tr | Trenbolone | Androgen | NO COMPROMISE |
-| 306 | An | Anavar (Oxandrolone) | Oral androgen | THE CUT |
-| 304 | Ms | Masteron (Drostanolone) | Androgen | HARD & DRY |
-| 302 | Pr | Primobolan (Methenolone) | Androgen | LEAN TISSUE, KEPT |
+| 306 | Oa | Oxandrolone | Anabolic steroid | THE CUT |
 | 272 | Es | Estradiol | Estrogen | BALANCE THE EQUATION |
 | 288 | Dh | DHEA | Adrenal precursor | THE PRECURSOR |
 | 651 | T3 | Liothyronine | Thyroid T3 | THROTTLE THE FURNACE |
@@ -133,7 +136,7 @@ any print run** — a few are newer or have analog ambiguity:
 - **Retatrutide = 39 aa** (confirmed), Tirzepatide = 39 aa
 - **CJC-1295 = 29 aa** (modified GRF(1-29) backbone; the DAC version adds a non-amino-acid complex)
 - **TB-500 = 43 aa** (full Thymosin β-4; TB-500 itself is often a fragment)
-- New steroids use the **base molecule** MW (no ester): Anavar 306, Masteron 304, Primobolan 302
+- Steroids use the **base molecule** MW (no ester): Oxandrolone 306
 - AOD-9604 = 16 aa (hGH 176-191 + Tyr)
 
 ---

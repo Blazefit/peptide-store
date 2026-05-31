@@ -73,13 +73,19 @@ ELEMENTS = [
     ("Ds", "DSIP",           "Delta Sleep Peptide",   "PEP", "",     9,   "DELTA SLEEP",            ""),
     ("In", "Insulin",        "A21 / B30 Chains",      "PEP", "",     51,  "THE MASTER SWITCH",      ""),
     ("Hc", "HCG",            "Chorionic Gonadotropin","PEP", "",     237, "KEEP THE SIGNAL LIVE",   ""),
-    # --- HORMONE / STEROID FAMILY : numbered by molecular weight (g/mol) ---
+    # --- HORMONE FAMILY : numbered by molecular weight (g/mol) ---
+    #     Curated for POD sale to FDA-APPROVED anabolics + NON-controlled hormones,
+    #     using GENERIC (non-trademarked) names only:
+    #       - Testosterone, Nandrolone, Oxandrolone are FDA-approved anabolic
+    #         steroids. NOTE: anabolic steroids are still Schedule III controlled
+    #         substances even when FDA-approved, so these carry some POD review risk.
+    #       - Estradiol, DHEA, Liothyronine (T3), Melatonin are non-controlled.
+    #     DROPPED (never FDA-approved for human use): Trenbolone, Masteron
+    #     (Drostanolone), Primobolan (Methenolone). Brand names (Anavar, etc.)
+    #     renamed to generic to avoid trademark exposure.
     ("Te", "Testosterone",   "Androgen",             "HOR", "", 288, "THE ORIGINAL UPGRADE", "C19H28O2"),
     ("Nd", "Nandrolone",     "19-Nortestosterone",   "HOR", "", 274, "JOINTS OF STEEL",      "C18H26O2"),
-    ("Tr", "Trenbolone",     "Androgen",             "HOR", "", 270, "NO COMPROMISE",        "C18H22O2"),
-    ("An", "Anavar",         "Oxandrolone",          "HOR", "", 306, "THE CUT",              "C19H30O3"),
-    ("Ms", "Masteron",       "Drostanolone",         "HOR", "", 304, "HARD & DRY",           "C20H32O2"),
-    ("Pr", "Primobolan",     "Methenolone",          "HOR", "", 302, "LEAN TISSUE, KEPT",    "C20H30O2"),
+    ("Oa", "Oxandrolone",    "Anabolic Steroid",     "HOR", "", 306, "THE CUT",              "C19H30O3"),
     ("Es", "Estradiol",      "Estrogen",             "HOR", "", 272, "BALANCE THE EQUATION", "C18H24O2"),
     ("Dh", "DHEA",           "Adrenal Precursor",    "HOR", "", 288, "THE PRECURSOR",        "C19H28O2"),
     ("T3", "Liothyronine",   "Thyroid T3",           "HOR", "", 651, "THROTTLE THE FURNACE", "C15H12I3NO4"),
@@ -104,14 +110,14 @@ STACKS = [
     # --- Hormone-base performance ---
     ("THE FOUNDATION",  "Hormone Performance", ["Te", "Hc"],             "BUILT ON BEDROCK",       "estrogen management"),
     ("WORKHORSE",       "Hormone Performance", ["Te", "Gh"],             "SHOW UP EVERY DAY",      ""),
-    ("PRIME",           "Hormone Performance", ["Te", "Pr", "Hc"],       "PEAK CONDITION",         ""),
+    ("PRIME",           "Hormone Performance", ["Te", "Gh", "Hc"],       "PEAK CONDITION",         ""),
     # --- Advanced body composition ---
     ("THE HOLY TRINITY","Body Composition",    ["Te", "Gh", "Re"],       "THREE IS ALL YOU NEED",  ""),
-    ("BLACK LABEL",     "Body Composition",    ["Te", "Pr", "Gh", "Re"], "TOP SHELF ONLY",         "KLOW blend"),
-    ("OLD GUARD",       "Body Composition",    ["Te", "Ms", "Gh", "Re"], "EARNED NOT GIVEN",       "KLOW blend"),
-    ("GREEK GOD",       "Body Composition",    ["Te", "Pr", "Gh"],       "CARVED FROM MARBLE",     "GH peptide support"),
+    ("BLACK LABEL",     "Body Composition",    ["Te", "Gh", "Ig", "Re"], "TOP SHELF ONLY",         "KLOW blend"),
+    ("OLD GUARD",       "Body Composition",    ["Te", "Nd", "Gh", "Re"], "EARNED NOT GIVEN",       "KLOW blend"),
+    ("GREEK GOD",       "Body Composition",    ["Te", "Gh", "Cj"],       "CARVED FROM MARBLE",     "GH peptide support"),
     ("MASS MONSTER",    "Body Composition",    ["Te", "Gh", "Ig"],       "MAXIMUM OVERLOAD",       ""),
-    ("SHREDDER",        "Body Composition",    ["Te", "An", "Gh", "Re"], "SHRINK-WRAPPED",         ""),
+    ("SHREDDER",        "Body Composition",    ["Te", "Sg", "Gh", "Re"], "SHRINK-WRAPPED",         ""),
     # --- Cognitive / nootropic ---
     ("STOIC",           "Cognitive / Nootropic",["Sk"],                  "UNSHAKEABLE",            "adaptogen + nootropic support"),
     ("LIMITLESS",       "Cognitive / Nootropic",["Sx", "Mb"],            "NO CEILING",             "nootropic support"),

@@ -11,13 +11,13 @@
   <text x="157.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#2BE8B0">Testosterone</text>
   <text x="157.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">288</text><text x="305.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
   <rect x="345.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#7C5CFC" stroke-width="7"/>
-  <text x="452.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Pr</text>
-  <text x="452.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#7C5CFC">Primobolan</text>
-  <text x="452.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">302</text><text x="600.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <text x="452.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Gh</text>
+  <text x="452.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#7C5CFC">Somatropin</text>
+  <text x="452.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">191aa</text><text x="600.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
   <rect x="640.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#FF5C8A" stroke-width="7"/>
-  <text x="747.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Gh</text>
-  <text x="747.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#FF5C8A">Somatropin</text>
-  <text x="747.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">191aa</text><text x="895.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <text x="747.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Ig</text>
+  <text x="747.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#FF5C8A">IGF-1 LR3</text>
+  <text x="747.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">83aa</text><text x="895.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
   <rect x="935.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#38BDF8" stroke-width="7"/>
   <text x="1042.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Re</text>
   <text x="1042.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#38BDF8">Retatrutide</text>
