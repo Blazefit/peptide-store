@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <!-- HUMAN+ tile : Somatropin -->
+  <!-- ===== brand wordmark ===== -->
+  <text x="600" y="190" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="92" font-weight="800"
+        text-anchor="middle" letter-spacing="6" fill="#FFFFFF">HUMAN<tspan fill="#2BE8B0">+</tspan></text>
+  <text x="600" y="240" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" text-anchor="middle"
+        letter-spacing="8" fill="#FFFFFF" fill-opacity="0.45">THE PERIODIC TABLE OF ENHANCEMENT</text>
+
+  <!-- ===== element tile ===== -->
+  <rect x="200" y="360" width="800" height="800" rx="20" fill="none" stroke="#2BE8B0" stroke-width="10"/>
+  <line x1="200" y1="510" x2="1000" y2="510" stroke="#2BE8B0" stroke-width="3" stroke-opacity="0.4"/>
+
+  <!-- number + unit (top-left) -->
+  <text x="245" y="468" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="84" font-weight="700" fill="#2BE8B0">191</text>
+  <text x="248" y="505" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="30" letter-spacing="3" fill="#FFFFFF" fill-opacity="0.6">AA</text>
+
+  <!-- family + formula (top-right) -->
+  <text x="955" y="428" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="30" letter-spacing="4"
+        text-anchor="end" fill="#FFFFFF" fill-opacity="0.6">PEPTIDE</text>
+  <text x="955" y="478" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" letter-spacing="2"
+        text-anchor="end" fill="#2BE8B0">191 aa</text>
+
+  <!-- giant symbol -->
+  <text x="600.0" y="880" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="360" font-weight="800"
+        text-anchor="middle" fill="#FFFFFF">Gh</text>
+
+  <!-- full name -->
+  <text x="600.0" y="1010" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="76" font-weight="800"
+        text-anchor="middle" fill="#2BE8B0">Somatropin</text>
+  <text x="600.0" y="1060" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="34" letter-spacing="2"
+        text-anchor="middle" fill="#FFFFFF" fill-opacity="0.7">HUMAN GROWTH HORMONE</text>
+
+  <!-- tagline (bottom of tile) -->
+  <text x="600.0" y="1125" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" font-weight="700" letter-spacing="6"
+        text-anchor="middle" fill="#FFFFFF">GROW OR DIE</text>
+
+  <!-- footer line -->
+  <text x="600" y="1300" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"
+        text-anchor="middle" fill="#FFFFFF" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>
