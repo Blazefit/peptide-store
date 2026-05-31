@@ -6,6 +6,8 @@ Vector tile generator for the t-shirt line.
 Edit the ELEMENTS table below, then run:
     python3 generate_tiles.py
 Outputs print-ready SVGs to ./svg and PNG previews to ./preview.
+Also writes high-res, transparent, Printful-ready PNGs to ./print (dark
+garment) and ./print/light (white ink swapped to near-black for light garments).
 
 DESIGN NOTES
 ------------
@@ -26,7 +28,7 @@ DESIGN NOTES
   Now / Space Grotesk) and a mono (JetBrains Mono) and OUTLINE the text.
 """
 
-import os, subprocess, json
+import os, re, subprocess, json
 from site_template import SITE_TEMPLATE
 
 # ----------------------------------------------------------------------------
@@ -387,14 +389,58 @@ def render_png(svg_path, png_path, bg=BG_PREVIEW):
     subprocess.run(["rsvg-convert", "-b", bg, "-w", "900", "-o", png_path, svg_path], check=True)
 
 
+# ---- PRINT / POD EXPORT ---------------------------------------------------
+# Printful direct-to-garment wants a high-res PNG with a real alpha channel.
+# Our SVGs are already white+accent art on a transparent canvas (no full-canvas
+# background rect), so the print PNG is just the same vector rendered with NO
+# `-b` background flag and a large pixel width. strip_bg() is a belt-and-braces
+# guard that removes any full-canvas background <rect> should one ever be added.
+PRINT_W = 4500  # 4500 x ~5250 px (6:7) ≈ 300 DPI on a 15in x 17.5in print area
+WHITE_INK = "#14141c"  # near-black ink used on the LIGHT-garment variant
+
+
+def strip_bg(svg):
+    """Remove any full-canvas (x=0 y=0, 100%/1200-wide) background <rect> so the
+    rendered PNG keeps a transparent alpha. No-op for the current art."""
+    pat = re.compile(
+        r'<rect\b[^>]*\bx="0"[^>]*\by="0"[^>]*'
+        r'(?:width="(?:1200|100%)"[^>]*height="(?:1400|100%)"|'
+        r'height="(?:1400|100%)"[^>]*width="(?:1200|100%)")'
+        r'[^>]*/>',
+        re.IGNORECASE)
+    return pat.sub("", svg)
+
+
+def light_variant(svg):
+    """Light-garment version: swap white ink to near-black, mirroring the
+    luminance swap the website does in `garmentSVG` (site_template.py)."""
+    return (svg.replace("#FFFFFF", WHITE_INK).replace("#ffffff", WHITE_INK)
+               .replace("#FFF", WHITE_INK).replace("#fff", WHITE_INK))
+
+
+def render_print(svg, png_path, light=False):
+    """Render `svg` (a string) to a transparent, high-res print PNG.
+    rsvg-convert with no `-b` flag preserves the SVG's transparent background."""
+    art = strip_bg(svg)
+    if light:
+        art = light_variant(art)
+    subprocess.run(["rsvg-convert", "-w", str(PRINT_W), "-o", png_path, "-"],
+                   input=art.encode("utf-8"), check=True)
+
+
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     svg_dir = os.path.join(here, "svg")
     prev_dir = os.path.join(here, "preview")
+    print_dir = os.path.join(here, "print")          # dark-garment print PNGs
+    print_light_dir = os.path.join(print_dir, "light")  # light-garment variant
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
+    os.makedirs(print_dir, exist_ok=True)
+    os.makedirs(print_light_dir, exist_ok=True)
 
     made = []
+    printed = 0
     # every compound gets its own hero tile
     for el in ELEMENTS:
         sym = el[0]
@@ -404,6 +450,9 @@ def main():
         with open(sp, "w") as f:
             f.write(svg)
         render_png(sp, os.path.join(prev_dir, base + ".png"))
+        render_print(svg, os.path.join(print_dir, base + ".png"))
+        render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
+        printed += 1
         made.append(base)
 
     # stack tiles
@@ -414,14 +463,21 @@ def main():
         with open(sp, "w") as f:
             f.write(svg)
         render_png(sp, os.path.join(prev_dir, base + ".png"))
+        render_print(svg, os.path.join(print_dir, base + ".png"))
+        render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
+        printed += 1
         made.append(base)
 
     # concept + poster
     for name, fn in [("concept_HumanPlus", modified_human), ("poster_PeriodicTable", periodic_poster)]:
+        svg = fn()
         sp = os.path.join(svg_dir, name + ".svg")
         with open(sp, "w") as f:
-            f.write(fn())
+            f.write(svg)
         render_png(sp, os.path.join(prev_dir, name + ".png"))
+        render_print(svg, os.path.join(print_dir, name + ".png"))
+        render_print(svg, os.path.join(print_light_dir, name + ".png"), light=True)
+        printed += 1
         made.append(name)
 
     # static render-gallery fallback
@@ -437,6 +493,8 @@ def main():
         f.write(build_site())
 
     print(f"Generated {len(made)} designs + index.html (interactive) + gallery.html")
+    print(f"Print-ready PNGs: {printed} dark (print/) + {printed} light (print/light/) "
+          f"@ {PRINT_W}px wide, transparent background")
 
 
 if __name__ == "__main__":
