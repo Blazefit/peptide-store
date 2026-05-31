@@ -40,18 +40,37 @@ Open that URL on your **phone and desktop** (both must be on the tailnet). Use
 PORT=9000 ./serve.sh    # use a different port
 ```
 
-## Keep it running after you close the terminal (optional)
+## Always-on (recommended) — runs at login, restarts on crash
 
-`tailscale serve --bg` keeps the proxy alive, but the file server stops when the
-terminal closes. To keep the whole thing up persistently, run it under `caffeinate`
-or as a LaunchAgent. Simplest "stays up while logged in":
+`serve.sh` only runs while its terminal is open. For a permanent service that
+starts automatically and restarts itself, use the installer instead:
+
 ```bash
-cd peptide-store/designs
-caffeinate -s ./serve.sh
+cd ~/peptide-store/designs
+chmod +x install_service.sh
+./install_service.sh
 ```
 
-For a true always-on service (survives logout/reboot), tell me and I'll add a
-`launchd` plist — but for review/testing, the command above is enough.
+This installs a macOS **LaunchAgent** (`com.humanplus.site`) that:
+- serves `designs/` on port 8088 at every login,
+- restarts automatically if it ever crashes (`KeepAlive`),
+- re-asserts the Tailscale HTTPS route.
+
+You can now close the terminal — the site stays up at
+`https://<mac-mini>.<tailnet>.ts.net/`.
+
+**Manage it:**
+```bash
+./install_service.sh --uninstall   # remove the service + clear the route
+tail -f ~/Library/Logs/humanplus/err.log   # view logs
+```
+
+> Note: a LaunchAgent runs when you're **logged in**. It survives reboots as long
+> as the Mac logs back into your user account. If the Mac mini boots to the login
+> screen and waits there, enable automatic login (System Settings → Users & Groups →
+> Automatically log in as…) so the service comes up unattended. For a true
+> system-wide daemon that runs before login, tell me and I'll switch it to a
+> `LaunchDaemon`.
 
 ## Troubleshooting
 - **`tailscale: command not found`** → add the CLI:
