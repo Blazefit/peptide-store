@@ -17,18 +17,18 @@
   <text x="955" y="422" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"
         text-anchor="end" fill="#FFFFFF" fill-opacity="0.6">PEPTIDE</text>
 
-  <!-- giant 2-letter symbol -->
-  <text x="600.0" y="875" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="360" font-weight="800"
+  <!-- giant 2-letter symbol (raised so descenders like p/g/y never hit the name) -->
+  <text x="600.0" y="820" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="340" font-weight="800"
         text-anchor="middle" fill="#FFFFFF">Gh</text>
 
   <!-- full name -->
-  <text x="600.0" y="1010" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="76" font-weight="800"
+  <text x="600.0" y="1025" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="74" font-weight="800"
         text-anchor="middle" fill="#2BE8B0">Somatropin</text>
-  <text x="600.0" y="1060" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="34" letter-spacing="2"
+  <text x="600.0" y="1072" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="33" letter-spacing="2"
         text-anchor="middle" fill="#FFFFFF" fill-opacity="0.7">HUMAN GROWTH HORMONE</text>
 
   <!-- tagline -->
-  <text x="600.0" y="1125" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" font-weight="700" letter-spacing="6"
+  <text x="600.0" y="1132" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="33" font-weight="700" letter-spacing="6"
         text-anchor="middle" fill="#FFFFFF">GROW OR DIE</text>
 
   <text x="600" y="1300" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"

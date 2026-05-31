@@ -66,17 +66,29 @@ ELEMENTS = [
     ("Gp", "GHRP-6",         "GH-Releasing Peptide",  "PEP", "6",    6,   "HUNGER + GROWTH",        ""),
     ("Ad", "AOD-9604",       "hGH Fragment 176-191",  "PEP", "9604", 16,  "FAT-LOSS FRAGMENT",      ""),
     ("Ss", "SS-31",          "Elamipretide",          "PEP", "31",   4,   "MITOCHONDRIAL ARMOR",    ""),
+    ("Kp", "KPV",            "a-MSH Fragment",        "PEP", "",     3,   "INFLAMMATION OFF",       ""),
     ("Ds", "DSIP",           "Delta Sleep Peptide",   "PEP", "",     9,   "DELTA SLEEP",            ""),
     ("In", "Insulin",        "A21 / B30 Chains",      "PEP", "",     51,  "THE MASTER SWITCH",      ""),
     # --- HORMONE / STEROID FAMILY : numbered by molecular weight (g/mol) ---
     ("Te", "Testosterone",   "Androgen",             "HOR", "", 288, "THE ORIGINAL UPGRADE", "C19H28O2"),
     ("Nd", "Nandrolone",     "19-Nortestosterone",   "HOR", "", 274, "JOINTS OF STEEL",      "C18H26O2"),
     ("Tr", "Trenbolone",     "Androgen",             "HOR", "", 270, "NO COMPROMISE",        "C18H22O2"),
+    ("An", "Anavar",         "Oxandrolone",          "HOR", "", 306, "THE CUT",              "C19H30O3"),
+    ("Ms", "Masteron",       "Drostanolone",         "HOR", "", 304, "HARD & DRY",           "C20H32O2"),
+    ("Pr", "Primobolan",     "Methenolone",          "HOR", "", 302, "LEAN TISSUE, KEPT",    "C20H30O2"),
     ("Es", "Estradiol",      "Estrogen",             "HOR", "", 272, "BALANCE THE EQUATION", "C18H24O2"),
     ("Dh", "DHEA",           "Adrenal Precursor",    "HOR", "", 288, "THE PRECURSOR",        "C19H28O2"),
     ("T3", "Liothyronine",   "Thyroid T3",           "HOR", "", 651, "THROTTLE THE FURNACE", "C15H12I3NO4"),
     ("Ml", "Melatonin",      "Pineal Hormone",       "HOR", "", 232, "LIGHTS OUT",           "C13H16N2O2"),
 ]
+
+# Curated stacks: (name, subtitle, [component symbols], tagline)
+STACKS = [
+    ("WOLVERINE", "Regeneration Protocol",   ["Bp", "Tb"],             "REGENERATE EVERYTHING"),
+    ("GLOW",      "Skin / Hair / Recovery",  ["Gk", "Bp", "Tb"],       "FROM THE INSIDE OUT"),
+    ("KLOW",      "Full Repair Protocol",    ["Kp", "Gk", "Bp", "Tb"], "THE COMPLETE OVERHAUL"),
+]
+STACK_COLORS = ["#2BE8B0", "#7C5CFC", "#FF5C8A", "#38BDF8", "#FFB020"]
 
 # ----------------------------------------------------------------------------
 PALETTE = {
@@ -137,18 +149,18 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
   <!-- top-right -->
   {tr}
 
-  <!-- giant 2-letter symbol -->
-  <text x="{cx}" y="{ty+515}" font-family="{SANS}" font-size="360" font-weight="800"
+  <!-- giant 2-letter symbol (raised so descenders like p/g/y never hit the name) -->
+  <text x="{cx}" y="{ty+460}" font-family="{SANS}" font-size="340" font-weight="800"
         text-anchor="middle" fill="{WHITE}">{esc(sym)}</text>
 
   <!-- full name -->
-  <text x="{cx}" y="{ty+650}" font-family="{SANS}" font-size="76" font-weight="800"
+  <text x="{cx}" y="{ty+665}" font-family="{SANS}" font-size="74" font-weight="800"
         text-anchor="middle" fill="{acc}">{esc(full)}</text>
-  <text x="{cx}" y="{ty+700}" font-family="{SANS}" font-size="34" letter-spacing="2"
+  <text x="{cx}" y="{ty+712}" font-family="{SANS}" font-size="33" letter-spacing="2"
         text-anchor="middle" fill="{WHITE}" fill-opacity="0.7">{esc(sub.upper())}</text>
 
   <!-- tagline -->
-  <text x="{cx}" y="{ty+765}" font-family="{MONO}" font-size="34" font-weight="700" letter-spacing="6"
+  <text x="{cx}" y="{ty+772}" font-family="{MONO}" font-size="33" font-weight="700" letter-spacing="6"
         text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
 
   <text x="600" y="1300" font-family="{MONO}" font-size="28" letter-spacing="4"
@@ -228,6 +240,67 @@ def periodic_poster():
 </svg>'''
 
 
+def stack_tile(name, subtitle, comps, tagline):
+    """A combined 'stack' tile: big name + a row of component mini element-tiles."""
+    lut = {e[0]: e for e in ELEMENTS}
+    n = len(comps)
+    bw, gap = 230, 34
+    total = n * bw + (n - 1) * gap
+    start = 600 - total / 2
+    box_y, box_h = 640, 300
+    minis = []
+    stops = []
+    for i, csym in enumerate(comps):
+        e = lut[csym]
+        col = STACK_COLORS[i % len(STACK_COLORS)]
+        x = start + i * (bw + gap)
+        cxm = x + bw / 2
+        stops.append(f'<stop offset="{int(i*100/(max(n-1,1)))}%" stop-color="{col}"/>')
+        minis.append(f'''
+  <rect x="{x}" y="{box_y}" width="{bw}" height="{box_h}" rx="14" fill="none" stroke="{col}" stroke-width="7"/>
+  <text x="{cxm}" y="{box_y+150}" font-family="{SANS}" font-size="120" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(e[0])}</text>
+  <text x="{cxm}" y="{box_y+215}" font-family="{SANS}" font-size="30" font-weight="700" text-anchor="middle" fill="{col}">{esc(e[1])}</text>
+  <text x="{cxm}" y="{box_y+258}" font-family="{MONO}" font-size="22" text-anchor="middle" fill="{WHITE}" fill-opacity="0.6">{e[5]}{'aa' if e[3]=='PEP' else ''}</text>''')
+        if i < n - 1:
+            plus_x = x + bw + gap / 2
+            minis.append(f'<text x="{plus_x}" y="{box_y+box_h/2+22}" font-family="{SANS}" font-size="70" font-weight="800" text-anchor="middle" fill="{WHITE}" fill-opacity="0.5">+</text>')
+    return f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">{''.join(stops)}</linearGradient></defs>
+  <text x="600" y="180" font-family="{SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{STACK_COLORS[0]}">+</tspan></text>
+  <text x="600" y="230" font-family="{MONO}" font-size="24" text-anchor="middle" letter-spacing="6" fill="{WHITE}" fill-opacity="0.45">STACK SERIES</text>
+  <text x="600" y="420" font-family="{SANS}" font-size="200" font-weight="800" text-anchor="middle" fill="url(#g)">{esc(name)}</text>
+  <text x="600" y="500" font-family="{MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.75">{esc(subtitle.upper())}</text>
+  {''.join(minis)}
+  <text x="600" y="1080" font-family="{MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
+  <text x="600" y="1320" font-family="{MONO}" font-size="26" letter-spacing="4" text-anchor="middle" fill="{WHITE}" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>'''
+
+
+def build_gallery(prev_dir, names):
+    """Write a responsive index.html so all tiles are reviewable on any device."""
+    cards = "\n".join(
+        f'    <figure><img src="preview/{n}.png" alt="{n}" loading="lazy"><figcaption>{n}</figcaption></figure>'
+        for n in names)
+    return f'''<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUMAN+ — Design Gallery</title>
+<style>
+  body {{ margin:0; background:#0d0d12; color:#e2e2f0; font-family:system-ui,sans-serif; }}
+  header {{ padding:24px; text-align:center; }}
+  h1 {{ font-size:2rem; margin:0; }} h1 span {{ color:#2BE8B0; }}
+  p.sub {{ color:#9393b0; letter-spacing:3px; font-size:.8rem; }}
+  .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; padding:16px; max-width:1600px; margin:0 auto; }}
+  figure {{ margin:0; background:#1a1a24; border:1px solid #2e2e4a; border-radius:12px; overflow:hidden; }}
+  img {{ width:100%; display:block; }}
+  figcaption {{ padding:8px 12px; font-size:.75rem; color:#9393b0; font-family:monospace; }}
+</style></head><body>
+<header><h1>HUMAN<span>+</span></h1><p class="sub">THE PERIODIC TABLE OF ENHANCEMENT — DESIGN GALLERY</p></header>
+<div class="grid">
+{cards}
+</div></body></html>'''
+
+
 def render_png(svg_path, png_path, bg=BG_PREVIEW):
     subprocess.run(["rsvg-convert", "-b", bg, "-w", "900", "-o", png_path, svg_path], check=True)
 
@@ -239,20 +312,29 @@ def main():
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
 
-    flagships = {"Te", "Gh", "Bp", "Tb", "Pt", "Re"}
     made = []
+    # every compound gets its own hero tile
     for el in ELEMENTS:
         sym = el[0]
-        if sym not in flagships:
-            continue
         svg = hero_tile(*el)
-        base = f"tile_{sym}_{el[1].replace(' ', '')}"
+        base = f"tile_{sym}_{el[1].replace(' ', '').replace('/', '-')}"
         sp = os.path.join(svg_dir, base + ".svg")
         with open(sp, "w") as f:
             f.write(svg)
         render_png(sp, os.path.join(prev_dir, base + ".png"))
         made.append(base)
 
+    # stack tiles
+    for name, subtitle, comps, tagline in STACKS:
+        svg = stack_tile(name, subtitle, comps, tagline)
+        base = f"stack_{name}"
+        sp = os.path.join(svg_dir, base + ".svg")
+        with open(sp, "w") as f:
+            f.write(svg)
+        render_png(sp, os.path.join(prev_dir, base + ".png"))
+        made.append(base)
+
+    # concept + poster
     for name, fn in [("concept_HumanPlus", modified_human), ("poster_PeriodicTable", periodic_poster)]:
         sp = os.path.join(svg_dir, name + ".svg")
         with open(sp, "w") as f:
@@ -260,7 +342,15 @@ def main():
         render_png(sp, os.path.join(prev_dir, name + ".png"))
         made.append(name)
 
-    print("Generated:", ", ".join(made))
+    # gallery for multi-device review
+    order = [n for n in made if n.startswith("poster")] + \
+            [n for n in made if n.startswith("stack")] + \
+            [n for n in made if n.startswith("concept")] + \
+            [n for n in made if n.startswith("tile")]
+    with open(os.path.join(here, "index.html"), "w") as f:
+        f.write(build_gallery(prev_dir, order))
+
+    print(f"Generated {len(made)} designs + index.html")
 
 
 if __name__ == "__main__":

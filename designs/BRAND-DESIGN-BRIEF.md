@@ -63,6 +63,7 @@ Symbol + the number from the name (top-left) + amino-acid count (top-right) + fu
 | Gp | 6    | 6   | GHRP-6 | GH-releasing peptide | HUNGER + GROWTH |
 | Ad | 9604 | 16  | AOD-9604 | hGH fragment 176-191 | FAT-LOSS FRAGMENT |
 | Ss | 31   | 4   | SS-31 | Elamipretide | MITOCHONDRIAL ARMOR |
+| Kp | —    | 3   | KPV | α-MSH fragment | INFLAMMATION OFF |
 | Ds | —    | 9   | DSIP | Delta sleep peptide | DELTA SLEEP |
 | In | —    | 51  | Insulin | A21 / B30 chains | THE MASTER SWITCH |
 
@@ -72,6 +73,9 @@ Symbol + the number from the name (top-left) + amino-acid count (top-right) + fu
 | 288 | Te | Testosterone | Androgen | THE ORIGINAL UPGRADE |
 | 274 | Nd | Nandrolone | 19-nortestosterone | JOINTS OF STEEL |
 | 270 | Tr | Trenbolone | Androgen | NO COMPROMISE |
+| 306 | An | Anavar (Oxandrolone) | Oral androgen | THE CUT |
+| 304 | Ms | Masteron (Drostanolone) | Androgen | HARD & DRY |
+| 302 | Pr | Primobolan (Methenolone) | Androgen | LEAN TISSUE, KEPT |
 | 272 | Es | Estradiol | Estrogen | BALANCE THE EQUATION |
 | 288 | Dh | DHEA | Adrenal precursor | THE PRECURSOR |
 | 651 | T3 | Liothyronine | Thyroid T3 | THROTTLE THE FURNACE |
@@ -82,6 +86,35 @@ Symbol + the number from the name (top-left) + amino-acid count (top-right) + fu
 > "Name no." is the number already in the compound's name, used top-left for instant
 > recognition (BPC **157**, PT **141**, SS **31**). For compounds with no number in the
 > name, the top-left shows the amino-acid count instead and the right shows a `PEPTIDE` tag.
+
+---
+
+## Stack Series (combine multiple compounds into one tile)
+
+Real compounded blends rendered as a multi-color "stack" tile — big gradient name
++ a row of component mini-tiles. The basis for a future **custom-stack builder** on
+the site (pick compounds → auto-generate a combined tile).
+
+| Stack | Components | For | Tagline |
+|---|---|---|---|
+| **WOLVERINE** | BPC-157 + TB-500 | Regeneration / healing | REGENERATE EVERYTHING |
+| **GLOW** | GHK-Cu + BPC-157 + TB-500 | Skin / hair / recovery | FROM THE INSIDE OUT |
+| **KLOW** | KPV + GHK-Cu + BPC-157 + TB-500 | Full repair (GLOW + KPV) | THE COMPLETE OVERHAUL |
+
+> Stack compositions are the commonly marketed versions — confirm exact ratios with
+> your compounding source before using them as product copy.
+
+---
+
+## ⚠️ Verify-before-print checklist (amino acids / MW)
+
+All values are real to the best of current knowledge, but **double-check these before
+any print run** — a few are newer or have analog ambiguity:
+- **Retatrutide = 39 aa** (confirmed), Tirzepatide = 39 aa
+- **CJC-1295 = 30 aa** (modified GRF(1-29) backbone; some sources cite 29 + DAC)
+- **TB-500 = 43 aa** (full Thymosin β-4; TB-500 itself is often a fragment)
+- New steroids use the **base molecule** MW (no ester): Anavar 306, Masteron 304, Primobolan 302
+- AOD-9604 = 16 aa (hGH 176-191 + Tyr)
 
 ---
 

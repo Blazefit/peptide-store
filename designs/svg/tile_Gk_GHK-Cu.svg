@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <!-- HUMAN+ tile : GHK-Cu -->
+  <text x="600" y="190" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="92" font-weight="800"
+        text-anchor="middle" letter-spacing="6" fill="#FFFFFF">HUMAN<tspan fill="#2BE8B0">+</tspan></text>
+  <text x="600" y="240" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" text-anchor="middle"
+        letter-spacing="8" fill="#FFFFFF" fill-opacity="0.45">THE PERIODIC TABLE OF ENHANCEMENT</text>
+
+  <rect x="200" y="360" width="800" height="800" rx="20" fill="none" stroke="#2BE8B0" stroke-width="10"/>
+  <line x1="200" y1="510" x2="1000" y2="510" stroke="#2BE8B0" stroke-width="3" stroke-opacity="0.4"/>
+
+  <!-- top-left number -->
+  <text x="245" y="468" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="84" font-weight="700" fill="#2BE8B0">3</text>
+  <text x="248" y="505" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="3" fill="#FFFFFF" fill-opacity="0.6">AMINO ACIDS</text>
+
+  <!-- top-right -->
+  <text x="955" y="422" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"
+        text-anchor="end" fill="#FFFFFF" fill-opacity="0.6">PEPTIDE</text>
+
+  <!-- giant 2-letter symbol (raised so descenders like p/g/y never hit the name) -->
+  <text x="600.0" y="820" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="340" font-weight="800"
+        text-anchor="middle" fill="#FFFFFF">Gk</text>
+
+  <!-- full name -->
+  <text x="600.0" y="1025" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="74" font-weight="800"
+        text-anchor="middle" fill="#2BE8B0">GHK-Cu</text>
+  <text x="600.0" y="1072" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="33" letter-spacing="2"
+        text-anchor="middle" fill="#FFFFFF" fill-opacity="0.7">COPPER TRIPEPTIDE</text>
+
+  <!-- tagline -->
+  <text x="600.0" y="1132" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="33" font-weight="700" letter-spacing="6"
+        text-anchor="middle" fill="#FFFFFF">COPPER-BOUND RENEWAL</text>
+
+  <text x="600" y="1300" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"
+        text-anchor="middle" fill="#FFFFFF" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>
