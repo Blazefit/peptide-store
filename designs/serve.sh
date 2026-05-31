@@ -4,9 +4,9 @@
 #
 # Run this ON THE MAC MINI (or any machine on your tailnet). It serves the
 # interactive site (designs/index.html) and exposes it over Tailscale with
-# real HTTPS, reachable only by devices logged into your tailnet.
+# private tailnet HTTP and HTTPS routes, reachable only by devices logged into your tailnet.
 #
-#   ./serve.sh           # serve + Tailscale Serve (private HTTPS URL)
+#   ./serve.sh           # serve + Tailscale Serve (private tailnet URLs)
 #   ./serve.sh --local   # serve on http://localhost:PORT only (no Tailscale)
 #   PORT=9000 ./serve.sh # pick a different port
 #
@@ -32,7 +32,10 @@ else
 fi
 
 cleanup(){ echo; echo "Stopping…"; kill "$SERVER_PID" 2>/dev/null || true;
-           [[ $LOCAL_ONLY -eq 0 ]] && tailscale serve --https=443 off 2>/dev/null || true; }
+           if [[ $LOCAL_ONLY -eq 0 ]]; then
+             tailscale serve --http="$PORT" off 2>/dev/null || true
+             tailscale serve --https=443 off 2>/dev/null || true
+           fi; }
 trap cleanup EXIT INT TERM
 
 sleep 1
@@ -51,19 +54,22 @@ if ! command -v tailscale >/dev/null 2>&1; then
   wait "$SERVER_PID"
 fi
 
-echo "Bringing up Tailscale Serve (private HTTPS)…"
-# Proxy your tailnet HTTPS endpoint to the local static server.
-tailscale serve --bg --https=443 "http://127.0.0.1:$PORT" >/dev/null 2>&1 || \
-tailscale serve --bg "$PORT" >/dev/null 2>&1 || {
+echo "Bringing up Tailscale Serve (private tailnet routes)…"
+# HTTP on $PORT works without HTTPS certificate provisioning; HTTPS uses port 443 when certs are healthy.
+tailscale serve --bg --http="$PORT" "http://127.0.0.1:$PORT" >/dev/null 2>&1 || true
+tailscale serve --bg --https=443 "http://127.0.0.1:$PORT" >/dev/null 2>&1 || {
   echo "Could not start Tailscale Serve automatically."
-  echo "Try manually:  tailscale serve --bg $PORT"
+  echo "Try manually:  tailscale serve --bg --http=$PORT http://127.0.0.1:$PORT"
 }
 
 echo
 echo "────────────────────────────────────────────────────────"
 tailscale serve status 2>/dev/null || true
-URL="$(tailscale status --json 2>/dev/null | python3 -c 'import sys,json; d=json.load(sys.stdin); n=d.get("Self",{}).get("DNSName","").rstrip("."); print("https://"+n+"/") if n else None' 2>/dev/null || true)"
-[[ -n "${URL:-}" ]] && echo "Open on any device on your tailnet:  $URL"
+DNS_NAME="$(tailscale status --json 2>/dev/null | python3 -c 'import sys,json; d=json.load(sys.stdin); n=d.get("Self",{}).get("DNSName","").rstrip("."); print(n)' 2>/dev/null || true)"
+if [[ -n "${DNS_NAME:-}" ]]; then
+  echo "Open on any device on your tailnet:  http://$DNS_NAME:$PORT/"
+  echo "HTTPS, once certs are healthy:        https://$DNS_NAME/"
+fi
 echo "────────────────────────────────────────────────────────"
 echo "Serving. Ctrl-C to stop and tear down the Tailscale route."
 wait "$SERVER_PID"

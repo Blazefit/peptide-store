@@ -28,11 +28,14 @@ chmod +x serve.sh      # first time only
 
 That's it. The script:
 - serves `designs/` on `localhost` (default port 8088), and
-- runs **`tailscale serve`** to expose it over HTTPS to your tailnet,
-- prints the URL to open — looks like `https://mac-mini.<your-tailnet>.ts.net/`.
+- runs **`tailscale serve`** to expose it privately to your tailnet,
+- prints the URLs to open.
 
-Open that URL on your **phone and desktop** (both must be on the tailnet). Use
-`Ctrl-C` to stop; it tears down the Tailscale route automatically.
+Open the private HTTP URL on your **phone and desktop** (both must be on the
+tailnet): `http://mac-mini.<your-tailnet>.ts.net:8088/`. The HTTPS URL
+`https://mac-mini.<your-tailnet>.ts.net/` also works once Tailscale HTTPS
+certificate provisioning is healthy. Use `Ctrl-C` to stop; it tears down the
+Tailscale routes automatically.
 
 ### Options
 ```bash
@@ -54,10 +57,10 @@ chmod +x install_service.sh
 This installs a macOS **LaunchAgent** (`com.humanplus.site`) that:
 - serves `designs/` on port 8088 at every login,
 - restarts automatically if it ever crashes (`KeepAlive`),
-- re-asserts the Tailscale HTTPS route.
+- re-asserts the private Tailscale HTTP route and the HTTPS route.
 
 You can now close the terminal — the site stays up at
-`https://<mac-mini>.<tailnet>.ts.net/`.
+`http://<mac-mini>.<tailnet>.ts.net:8088/`.
 
 **Manage it:**
 ```bash
@@ -77,7 +80,8 @@ tail -f ~/Library/Logs/humanplus/err.log   # view logs
   `sudo ln -s /Applications/Tailscale.app/Contents/MacOS/Tailscale /usr/local/bin/tailscale`
 - **URL loads on the Mac but not the phone** → confirm the phone is signed into the
   same tailnet and Tailscale is toggled on.
-- **HTTPS warning** → first hit can take a few seconds while Tailscale provisions the
-  cert; refresh.
+- **HTTPS fails but HTTP works** → Tailscale HTTPS certificate provisioning is the
+  issue. Keep using the private HTTP URL, then check MagicDNS and HTTPS
+  Certificates in the Tailscale DNS admin page.
 - **Want a shareable link for someone NOT on your tailnet** → that's `tailscale funnel`
   (public). Ask me and I'll switch the script — but it makes the site public.

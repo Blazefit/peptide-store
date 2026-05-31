@@ -25,6 +25,7 @@ if [[ "${1:-}" == "--uninstall" ]]; then
   echo "Removing HUMAN+ service…"
   launchctl unload -w "$PLIST" 2>/dev/null || launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
   rm -f "$PLIST"
+  tailscale serve --http="$PORT" off 2>/dev/null || true
   tailscale serve --https=443 off 2>/dev/null || true
   echo "Done. Service removed and Tailscale route cleared."
   exit 0
@@ -68,10 +69,11 @@ launchctl load -w "$PLIST"
 
 sleep 1.5
 
-# ---- assert the Tailscale route (persists across reboots on its own) ----
+# ---- assert the Tailscale routes (persist across reboots on their own) ----
 if command -v tailscale >/dev/null 2>&1; then
-  tailscale serve --bg --https=443 "http://127.0.0.1:$PORT" >/dev/null 2>&1 \
-    || tailscale serve --bg "$PORT" >/dev/null 2>&1 || true
+  # HTTP on $PORT is the private tailnet fallback when HTTPS cert provisioning is unavailable.
+  tailscale serve --bg --http="$PORT" "http://127.0.0.1:$PORT" >/dev/null 2>&1 || true
+  tailscale serve --bg --https=443 "http://127.0.0.1:$PORT" >/dev/null 2>&1 || true
 else
   echo "⚠  tailscale CLI not found — site runs locally but no tailnet URL."
   echo "   Fix: sudo ln -s /Applications/Tailscale.app/Contents/MacOS/Tailscale /usr/local/bin/tailscale"
@@ -82,8 +84,11 @@ echo
 echo "────────────────────────────────────────────────────────"
 LOCAL_CODE="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT/index.html" || echo 000)"
 echo "Local server (index.html):  HTTP $LOCAL_CODE  (200 = good)"
-URL="$(tailscale status --json 2>/dev/null | "$PYBIN" -c 'import sys,json;d=json.load(sys.stdin);n=d.get("Self",{}).get("DNSName","").rstrip(".");print("https://"+n+"/") if n else print("")' 2>/dev/null || true)"
-[[ -n "${URL:-}" ]] && echo "Always-on URL:              $URL"
+DNS_NAME="$(tailscale status --json 2>/dev/null | "$PYBIN" -c 'import sys,json;d=json.load(sys.stdin);n=d.get("Self",{}).get("DNSName","").rstrip(".");print(n)' 2>/dev/null || true)"
+if [[ -n "${DNS_NAME:-}" ]]; then
+  echo "Private tailnet HTTP URL:   http://$DNS_NAME:$PORT/"
+  echo "Private tailnet HTTPS URL:  https://$DNS_NAME/  (requires Tailscale HTTPS certs)"
+fi
 echo "────────────────────────────────────────────────────────"
 echo "The site now starts automatically and restarts if it crashes."
 echo "Logs: $LOGDIR/   •   Uninstall: ./install_service.sh --uninstall"

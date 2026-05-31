@@ -108,9 +108,12 @@ immediately (static files; just refresh the browser). No restart needed.
 - An always-on LaunchAgent `com.humanplus.site` runs:
   `python3 -m http.server 8088 --bind 127.0.0.1` with working dir `~/peptide-store/designs`.
   Plist at `~/Library/LaunchAgents/com.humanplus.site.plist`. Logs in `~/Library/Logs/humanplus/`.
-- Tailscale Serve proxies the tailnet HTTPS endpoint (443) → `http://127.0.0.1:8088`.
+- Tailscale Serve proxies:
+  - private tailnet HTTP `http://daneels-mac-mini.rattlesnake-jazz.ts.net:8088/` → `http://127.0.0.1:8088`
+  - private tailnet HTTPS `https://daneels-mac-mini.rattlesnake-jazz.ts.net/` → `http://127.0.0.1:8088`
 - Tailnet name: `rattlesnake-jazz`. Intended URL:
-  `https://daneels-mac-mini.rattlesnake-jazz.ts.net/`
+  `http://daneels-mac-mini.rattlesnake-jazz.ts.net:8088/` (working private URL);
+  `https://daneels-mac-mini.rattlesnake-jazz.ts.net/` once Tailscale cert provisioning works.
 - Local check `curl http://127.0.0.1:8088/index.html` returns **HTTP 200** (server confirmed working).
 
 Manage:
@@ -127,6 +130,10 @@ tail -f ~/Library/Logs/humanplus/err.log   # logs
 
 **Symptom:** On the Mac mini, `http://127.0.0.1:8088/index.html` = HTTP 200 (server fine).
 From an iPhone on the same tailnet, the HTTPS URL "won't connect / times out".
+
+**Current workaround:** The private tailnet HTTP route is live at
+`http://daneels-mac-mini.rattlesnake-jazz.ts.net:8088/`. This stays private to the
+tailnet and bypasses Tailscale's HTTPS certificate provisioning layer.
 
 **Most likely cause:** `tailscale serve --https=443` requires **HTTPS Certificates**
 and **MagicDNS** to be ENABLED for the tailnet. These are admin-console settings, not
