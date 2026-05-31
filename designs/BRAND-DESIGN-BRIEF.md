@@ -18,49 +18,55 @@ Peptides have **amino acids**; steroids do **not** (they're not made of amino ac
 So the table uses two families, color-coded — which makes it look intentional and
 scientific instead of inconsistent:
 
-| Family | What it is | The "atomic number" = | Accent color |
-|---|---|---|---|
-| **PEPTIDE** | chains of amino acids | **amino-acid count** (HGH = 191) | mint/electric green `#2BE8B0` |
-| **HORMONE** | steroids & small-molecule hormones | **molecular weight, g/mol** (Test = 288) | amber/gold `#FFB020` |
+| Family | Big symbol | Top-left number | Top-right number | Accent |
+|---|---|---|---|---|
+| **PEPTIDE** | recognizable abbreviation (`BPC`, `TB`, `PT`, `SS`) | the number already in the name (157, 500, 141) — falls back to the aa count if the name has no number | **amino-acid count** | mint `#2BE8B0` |
+| **HORMONE** | short symbol (`Te`, `Tr`, `Es`) | **molecular weight, g/mol** | chemical formula | amber `#FFB020` |
 
+**Peptide tile anatomy** (the recognizability fix): the big center text is the name
+people actually say — `BPC`, not `Bp` — with the model number (`157`) top-left and the
+real amino-acid count top-right, and the full name (`BPC-157`) spelled out below.
 Base art is **white + one family accent on a dark garment**.
 
 ---
 
 ## THE ELEMENT TABLE
 
-### Peptide family — numbered by amino-acid count
-| # (aa) | Sym | Compound | Class | Tagline |
-|---|---|---|---|---|
-| 191 | Gh | Somatropin (HGH) | Growth hormone | GROW OR DIE |
-| 15 | Bp | BPC-157 | Body Protection Compound | THE BODY'S REPAIR CODE |
-| 43 | Tb | TB-500 | Thymosin Beta-4 | HEAL WITHOUT PERMISSION |
-| 31 | Sg | Semaglutide | GLP-1 agonist | APPETITE, OVERRULED |
-| 39 | Tz | Tirzepatide | GIP / GLP-1 | DUAL-ACTION OVERRIDE |
-| 5 | Ip | Ipamorelin | GH secretagogue | CLEAN PULSE |
-| 30 | Cj | CJC-1295 | GHRH analog | SUSTAINED SIGNAL |
-| 29 | Sr | Sermorelin | GRF (1-29) | WAKE THE PITUITARY |
-| 44 | Tm | Tesamorelin | GHRH analog | CUT THE VISCERAL |
-| 3 | Gk | GHK-Cu | Copper tripeptide | COPPER-BOUND RENEWAL |
-| 7 | Mt | Melanotan II | Melanocortin agonist | SUN IN A VIAL |
-| 7 | Pt | PT-141 | Bremelanotide | DESIRE, DECODED |
-| 9 | Ox | Oxytocin | Nonapeptide | THE BOND MOLECULE |
-| 7 | Sk | Selank | Anxiolytic peptide | CALM, WEAPONIZED |
-| 7 | Sx | Semax | Nootropic peptide | FOCUS PROTOCOL |
-| 4 | Ep | Epitalon | Telomerase activator | RESET THE CLOCK |
-| 28 | Ta | Thymosin α-1 | Immune modulator | IMMUNE FIRMWARE |
-| 83 | Ig | IGF-1 LR3 | Long R3 IGF-1 | GROWTH, AMPLIFIED |
-| 16 | Mc | MOTS-c | Mitochondrial peptide | MITOCHONDRIAL COMMAND |
-| 10 | Gn | Gonadorelin | GnRH decapeptide | RESTART THE AXIS |
-| 10 | Ks | Kisspeptin-10 | KISS1 fragment | IGNITE THE CASCADE |
-| 6 | Hx | Hexarelin | GH secretagogue | MAX PULSE |
-| 6 | G6 | GHRP-6 | GH-releasing peptide | HUNGER + GROWTH |
-| 16 | Ad | AOD-9604 | hGH fragment 176-191 | FAT-LOSS FRAGMENT |
-| 9 | Ds | DSIP | Delta sleep peptide | DELTA SLEEP |
-| 51 | In | Insulin | A21 / B30 chains | THE MASTER SWITCH |
+### Peptide family
+Big **symbol** + the number from the name (top-left) + amino-acid count (top-right).
+
+| Symbol | Name no. | aa | Full name | Class | Tagline |
+|---|---|---|---|---|---|
+| HGH  | —    | 191 | Somatropin | Growth hormone | GROW OR DIE |
+| BPC  | 157  | 15  | BPC-157 | Body Protection Compound | THE BODY'S REPAIR CODE |
+| TB   | 500  | 43  | TB-500 | Thymosin Beta-4 | HEAL WITHOUT PERMISSION |
+| SEMA | —    | 31  | Semaglutide | GLP-1 agonist | APPETITE, OVERRULED |
+| TIRZ | —    | 39  | Tirzepatide | GIP / GLP-1 | DUAL-ACTION OVERRIDE |
+| IPA  | —    | 5   | Ipamorelin | GH secretagogue | CLEAN PULSE |
+| CJC  | 1295 | 30  | CJC-1295 | GHRH analog | SUSTAINED SIGNAL |
+| SERM | —    | 29  | Sermorelin | GRF (1-29) | WAKE THE PITUITARY |
+| TESA | —    | 44  | Tesamorelin | GHRH analog | CUT THE VISCERAL |
+| GHK  | —    | 3   | GHK-Cu | Copper tripeptide | COPPER-BOUND RENEWAL |
+| MT   | II   | 7   | Melanotan II | Melanocortin agonist | SUN IN A VIAL |
+| PT   | 141  | 7   | PT-141 | Bremelanotide | DESIRE, DECODED |
+| OXT  | —    | 9   | Oxytocin | Nonapeptide | THE BOND MOLECULE |
+| SEL  | —    | 7   | Selank | Anxiolytic peptide | CALM, WEAPONIZED |
+| SMX  | —    | 7   | Semax | Nootropic peptide | FOCUS PROTOCOL |
+| EPI  | —    | 4   | Epitalon | Telomerase activator | RESET THE CLOCK |
+| TA   | 1    | 28  | Thymosin α-1 | Immune modulator | IMMUNE FIRMWARE |
+| IGF  | 1    | 83  | IGF-1 LR3 | Long R3 IGF-1 | GROWTH, AMPLIFIED |
+| MOTS | c    | 16  | MOTS-c | Mitochondrial peptide | MITOCHONDRIAL COMMAND |
+| GON  | —    | 10  | Gonadorelin | GnRH decapeptide | RESTART THE AXIS |
+| KISS | 10   | 10  | Kisspeptin-10 | KISS1 fragment | IGNITE THE CASCADE |
+| HEX  | —    | 6   | Hexarelin | GH secretagogue | MAX PULSE |
+| GHRP | 6    | 6   | GHRP-6 | GH-releasing peptide | HUNGER + GROWTH |
+| AOD  | 9604 | 16  | AOD-9604 | hGH fragment 176-191 | FAT-LOSS FRAGMENT |
+| SS   | 31   | 4   | SS-31 | Elamipretide | MITOCHONDRIAL ARMOR |
+| DSIP | —    | 9   | DSIP | Delta sleep peptide | DELTA SLEEP |
+| INS  | —    | 51  | Insulin | A21 / B30 chains | THE MASTER SWITCH |
 
 ### Hormone/steroid family — numbered by molecular weight (g/mol)
-| # (g/mol) | Sym | Compound | Class | Tagline |
+| g/mol | Sym | Compound | Class | Tagline |
 |---|---|---|---|---|
 | 288 | Te | Testosterone | Androgen | THE ORIGINAL UPGRADE |
 | 274 | Nd | Nandrolone | 19-nortestosterone | JOINTS OF STEEL |
@@ -70,10 +76,9 @@ Base art is **white + one family accent on a dark garment**.
 | 651 | T3 | Liothyronine | Thyroid T3 | THROTTLE THE FURNACE |
 | 232 | Ml | Melatonin | Pineal hormone | LIGHTS OUT |
 
-> **Note on symbols:** several (Te, Tb, Sr, Pt, In, Mt, Ds, Es) deliberately echo
-> real element symbols — a fun homage, but verify they don't confuse customers before
-> committing. All amino-acid counts and molecular weights are real; double-check
-> before sending anything to print.
+> All amino-acid counts and molecular weights are real; double-check before sending
+> anything to print. "Name no." is the number already in the compound's name, used
+> top-left for instant recognition (BPC **157**, PT **141**, SS **31**).
 
 ---
 
