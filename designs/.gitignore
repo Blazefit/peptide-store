@@ -1,6 +1,6 @@
-node_modules/
-preview/SITE_*.png
-package*.json
-
 __pycache__/
 *.pyc
+preview/SITE_*.png
+node_modules/
+.DS_Store
+.goutputstream-*
