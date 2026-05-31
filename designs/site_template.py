@@ -12,7 +12,7 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
 <style>
   :root{
     --bg:#0d0d12; --surface:#16161f; --surface2:#1e1e2c; --border:#2a2a40;
-    --text:#e6e6f2; --text2:#9393b0; --green:#2BE8B0; --amber:#FFB020;
+    --text:#e6e6f2; --text2:#9393b0; --green:#2BE8B0; --amber:#FFB020; --violet:#7C5CFC;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;}
@@ -34,15 +34,17 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
   .cell{position:relative;aspect-ratio:1/1.12;border:2px solid var(--green);border-radius:9px;background:var(--surface);
     cursor:pointer;padding:6px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s,box-shadow .12s;overflow:hidden;}
   .cell.hor{border-color:var(--amber);}
+  .cell.mol{border-color:var(--violet);}
   .cell:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.5);}
   .cell.sel{box-shadow:0 0 0 3px var(--green) inset,0 8px 28px rgba(43,232,176,.25);}
   .cell.hor.sel{box-shadow:0 0 0 3px var(--amber) inset,0 8px 28px rgba(255,176,32,.25);}
+  .cell.mol.sel{box-shadow:0 0 0 3px var(--violet) inset,0 8px 28px rgba(124,92,252,.25);}
   .cell .num{font-family:ui-monospace,monospace;font-size:.66rem;font-weight:700;}
-  .cell.pep .num{color:var(--green);} .cell.hor .num{color:var(--amber);}
+  .cell.pep .num{color:var(--green);} .cell.hor .num{color:var(--amber);} .cell.mol .num{color:var(--violet);}
   .cell .unit{font-family:ui-monospace,monospace;font-size:.5rem;color:var(--text2);position:absolute;top:6px;right:6px;}
   .cell .sym{font-size:1.7rem;font-weight:800;text-align:center;line-height:1;margin:auto 0;}
   .cell .nm{font-size:.55rem;font-weight:700;text-align:center;}
-  .cell.pep .nm{color:var(--green);} .cell.hor .nm{color:var(--amber);}
+  .cell.pep .nm{color:var(--green);} .cell.hor .nm{color:var(--amber);} .cell.mol .nm{color:var(--violet);}
   .cell .chk{position:absolute;top:4px;left:50%;transform:translateX(-50%);opacity:0;font-weight:800;color:var(--green);}
   .cell.sel .chk{opacity:1;}
   /* sticky tray */
@@ -101,6 +103,7 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
     <div class="legend">
       <span><i style="background:var(--green)"></i>PEPTIDE (amino acids)</span>
       <span><i style="background:var(--amber)"></i>HORMONE (g/mol)</span>
+      <span><i style="background:var(--violet)"></i>MOLECULE (g/mol)</span>
     </div>
 
     <h2 style="margin-top:18px;">Quick-Start Stacks</h2>
@@ -129,7 +132,7 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
         <p class="muted" id="designSub"></p>
         <div class="art-wrap" id="artWrap" style="margin-top:12px;"></div>
         <label class="fld">Stack name</label>
-        <input type="text" id="stackName" maxlength="14" placeholder="MY STACK">
+        <input type="text" id="stackName" maxlength="18" placeholder="MY STACK">
         <label class="fld">Tagline</label>
         <input type="text" id="stackTag" maxlength="26" placeholder="BUILT DIFFERENT">
       </div>
@@ -181,8 +184,9 @@ let accentColor = DB.green;
 /* ---------- live SVG tile (mirrors generate_tiles.py hero_tile) ---------- */
 function esc(s){return (s+"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
+function accentOf(e){return DB.palette[e.fam]||DB.palette.PEP;}
 function heroTileSVG(e){
-  const acc = e.fam==="PEP"?DB.palette.PEP:DB.palette.HOR;
+  const acc = accentOf(e);
   const tx=200,ty=360,tw=800,th=800,cx=tx+tw/2;
   let tlBig,tlLabel,tr;
   if(e.fam==="PEP"){
@@ -193,7 +197,8 @@ function heroTileSVG(e){
       tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="28" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".6">PEPTIDE</text>`;}
   } else {
     tlBig=e.count;tlLabel="g/mol";
-    tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="28" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".6">HORMONE</text>
+    const famWord = e.fam==="MOL"?"MOLECULE":"HORMONE";
+    tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="28" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".6">${famWord}</text>
         <text x="${tx+tw-45}" y="${ty+120}" font-family="${SANS}" font-size="34" letter-spacing="1" text-anchor="end" fill="${acc}">${esc(e.formula)}</text>`;
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
@@ -218,7 +223,7 @@ function fitFS(text,maxW,base,avg=0.82){
 }
 
 /* live stack tile (mirrors stack_tile) */
-function stackTileSVG(name,sub,comps,tag){
+function stackTileSVG(name,sub,comps,tag,extras){
   const cols=DB.stackColors;
   const n=comps.length, gap=80;
   const bw=Math.min(230,Math.floor((1100-(n-1)*gap)/n));
@@ -237,6 +242,10 @@ function stackTileSVG(name,sub,comps,tag){
       minis+=`<text x="${px}" y="${boxY+boxH/2+30}" font-family="${SANS}" font-size="88" font-weight="800" text-anchor="middle" fill="${DB.green}">+</text>`;}
   });
   const nameFS=fitFS(name,1080,200);
+  let extrasSVG="";
+  if(extras){const et="+ "+extras.toUpperCase();
+    const efs=Math.min(32,Math.floor(1060/(et.length*0.6)));
+    extrasSVG=`<text x="600" y="1000" font-family="${MONO}" font-size="${efs}" letter-spacing="2" text-anchor="middle" fill="${DB.green}" fill-opacity=".85">${esc(et)}</text>`;}
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
     <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>
     <text x="600" y="180" font-family="${SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="#fff">HUMAN<tspan fill="${DB.green}">+</tspan></text>
@@ -244,17 +253,21 @@ function stackTileSVG(name,sub,comps,tag){
     <text x="600" y="420" font-family="${SANS}" font-size="${nameFS}" font-weight="800" text-anchor="middle" fill="url(#sg)">${esc(name||"MY STACK")}</text>
     <text x="600" y="500" font-family="${MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="#fff" fill-opacity=".75">${esc((sub||"CUSTOM PROTOCOL").toUpperCase())}</text>
     ${minis}
+    ${extrasSVG}
     <text x="600" y="1080" font-family="${MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="#fff">${esc(tag||"BUILT DIFFERENT")}</text>
     <text x="600" y="1320" font-family="${MONO}" font-size="26" letter-spacing="4" text-anchor="middle" fill="#fff" fill-opacity=".4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
   </svg>`;
 }
 
-/* current design = single tile if 1 selected, else a stack */
+/* current design = single tile if 1 selected (custom), else a stack.
+   A loaded preset always renders as a stack tile so its extras/subtitle show. */
 function currentDesignSVG(){
   const name=(document.getElementById('stackName')?.value)||"";
   const tag=(document.getElementById('stackTag')?.value)||"";
+  if(presetMeta)
+    return stackTileSVG(name||presetMeta.name, presetMeta.sub, selected, tag||presetMeta.tag, presetMeta.extras||"");
   if(selected.length===1) return heroTileSVG(EL[selected[0]]);
-  return stackTileSVG(name||"MY STACK","CUSTOM PROTOCOL",selected,tag||"BUILT DIFFERENT");
+  return stackTileSVG(name||"MY STACK","CUSTOM PROTOCOL",selected,tag||"BUILT DIFFERENT","");
 }
 
 /* ---------- garment mockups ---------- */
@@ -306,11 +319,11 @@ function renderGrid(){
   const g=document.getElementById('grid');
   g.innerHTML="";
   DB.elements.forEach(e=>{
-    const acc=e.fam==="PEP"?DB.palette.PEP:DB.palette.HOR;
     const tl=e.fam==="PEP"?(e.name_num||e.count):e.count;
     const unit=e.fam==="PEP"?e.count+"aa":"g/mol";
+    const cls=e.fam==="PEP"?"pep":(e.fam==="MOL"?"mol":"hor");
     const d=document.createElement('div');
-    d.className="cell "+(e.fam==="PEP"?"pep":"hor")+(selected.includes(e.sym)?" sel":"");
+    d.className="cell "+cls+(selected.includes(e.sym)?" sel":"");
     d.innerHTML=`<span class="chk">&#10003;</span>
       <div class="num">${tl}</div><div class="unit">${unit}</div>
       <div class="sym">${esc(e.sym)}</div><div class="nm">${esc(e.full)}</div>`;
@@ -322,8 +335,10 @@ function renderPresets(){
   const p=document.getElementById('presets');p.innerHTML="";
   DB.stacks.forEach(s=>{
     const d=document.createElement('div');d.className="preset";
-    d.innerHTML=`<div class="pn">${esc(s.name)}</div><div class="pc">${s.comps.join(" + ")}</div>`;
-    d.onclick=()=>{selected=[...s.comps];presetMeta={name:s.name,tag:s.tag,sub:s.sub};renderGrid();renderTray();window.scrollTo({top:0,behavior:'smooth'});};
+    let recipe=s.comps.map(c=>EL[c].full).join(" + ");
+    if(s.extras) recipe+=" + "+s.extras;
+    d.innerHTML=`<div class="pn">${esc(s.name)}</div><div class="pc">${esc(recipe)}</div>`;
+    d.onclick=()=>{selected=[...s.comps];presetMeta={name:s.name,tag:s.tag,sub:s.sub,extras:s.extras};renderGrid();renderTray();window.scrollTo({top:0,behavior:'smooth'});};
     p.appendChild(d);
   });
 }
@@ -349,7 +364,7 @@ function renderGallery(){
   const g=document.getElementById('galleryGrid');g.innerHTML="";
   DB.stacks.forEach(s=>{
     const w=document.createElement('div');w.style.cssText="background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--border);";
-    w.innerHTML=stackTileSVG(s.name,s.sub,s.comps,s.tag);
+    w.innerHTML=stackTileSVG(s.name,s.sub,s.comps,s.tag,s.extras);
     g.appendChild(w);
   });
   DB.elements.forEach(e=>{

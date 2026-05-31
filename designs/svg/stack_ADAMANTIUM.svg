@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2BE8B0"/><stop offset="33%" stop-color="#7C5CFC"/><stop offset="66%" stop-color="#FF5C8A"/><stop offset="100%" stop-color="#38BDF8"/></linearGradient></defs>
+  <text x="600" y="180" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="#FFFFFF">HUMAN<tspan fill="#2BE8B0">+</tspan></text>
+  <text x="600" y="230" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="24" text-anchor="middle" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.45">STACK SERIES</text>
+  <text x="600" y="420" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="131" font-weight="800" text-anchor="middle" fill="url(#g)">ADAMANTIUM</text>
+  <text x="600" y="500" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" letter-spacing="6" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.75">RECOVERY / REPAIR</text>
+  
+  <rect x="50.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#2BE8B0" stroke-width="7"/>
+  <text x="157.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Bp</text>
+  <text x="157.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#2BE8B0">BPC-157</text>
+  <text x="157.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">15aa</text><text x="305.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="345.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#7C5CFC" stroke-width="7"/>
+  <text x="452.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Tb</text>
+  <text x="452.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#7C5CFC">TB-500</text>
+  <text x="452.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">43aa</text><text x="600.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="640.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#FF5C8A" stroke-width="7"/>
+  <text x="747.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Kp</text>
+  <text x="747.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#FF5C8A">KPV</text>
+  <text x="747.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">3aa</text><text x="895.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="935.0" y="640" width="215" height="300" rx="14" fill="none" stroke="#38BDF8" stroke-width="7"/>
+  <text x="1042.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Gk</text>
+  <text x="1042.5" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#38BDF8">GHK-Cu</text>
+  <text x="1042.5" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">3aa</text>
+  
+  <text x="600" y="1080" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="#FFFFFF">UNBREAKABLE</text>
+  <text x="600" y="1320" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" letter-spacing="4" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>

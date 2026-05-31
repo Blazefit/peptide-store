@@ -29,18 +29,32 @@ storefront app. Do not confuse it with `designs/index.html`.)
 
 ---
 
-## 2. The two-family design system
+## 2. The three-family design system
 
-Peptides are made of amino acids; steroids/hormones are not. So the table splits
-into two families, color-coded, each numbered differently:
+The table splits into three color-coded families, each numbered differently:
 
 | Family | Big symbol | Top-left number | Top-right | Accent color |
 |---|---|---|---|---|
 | **PEPTIDE** | 2-letter code (`Bp`, `Tb`, `Pt`) | the number already in the name (157, 500, 141); falls back to the amino-acid count if the name has no number | amino-acid count | mint `#2BE8B0` |
 | **HORMONE** | 2-letter code (`Te`, `Tr`, `An`) | molecular weight (g/mol) | chemical formula | amber `#FFB020` |
+| **MOLECULE** | 2-letter code (`Na`, `Mq`, `Mb`) | molecular weight (g/mol) | chemical formula | violet `#7C5CFC` |
+
+The MOLECULE family covers metabolic cofactors / small-molecule nootropics that
+are neither peptides nor hormones (NAD+, 5-Amino-1MQ, Methylene Blue). Family is
+set by the `fam` field in `ELEMENTS`: `PEP` / `HOR` / `MOL`.
 
 Base art = white + the family accent, on a dark garment.
 Brand "+" separator color (used between stack components) = `#2BE8B0` (the green in the HUMAN+ logo).
+
+### Stacks
+24 curated stacks live in `STACKS` in `generate_tiles.py`, grouped into 5
+categories (Recovery/Repair, Hormone Performance, Body Composition,
+Cognitive/Nootropic, Mito/Longevity). Each is
+`(name, subtitle, [component symbols], tagline, extras)`. `comps` must be element
+symbols (rendered as mini element-tiles); `extras` is a free-text list of
+supportive ingredients that have no element tile (supplements, blends like
+"KLOW blend", "caffeine + L-theanine + tyrosine"), shown as a small green
+"+ ..." line under the tiles.
 
 Full element list, amino-acid/MW values (verified), taglines, and the
 verify-before-print checklist live in **`BRAND-DESIGN-BRIEF.md`**.

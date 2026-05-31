@@ -70,6 +70,7 @@ ELEMENTS = [
     ("Kp", "KPV",            "a-MSH Fragment",        "PEP", "",     3,   "INFLAMMATION OFF",       ""),
     ("Ds", "DSIP",           "Delta Sleep Peptide",   "PEP", "",     9,   "DELTA SLEEP",            ""),
     ("In", "Insulin",        "A21 / B30 Chains",      "PEP", "",     51,  "THE MASTER SWITCH",      ""),
+    ("Hc", "HCG",            "Chorionic Gonadotropin","PEP", "",     237, "KEEP THE SIGNAL LIVE",   ""),
     # --- HORMONE / STEROID FAMILY : numbered by molecular weight (g/mol) ---
     ("Te", "Testosterone",   "Androgen",             "HOR", "", 288, "THE ORIGINAL UPGRADE", "C19H28O2"),
     ("Nd", "Nandrolone",     "19-Nortestosterone",   "HOR", "", 274, "JOINTS OF STEEL",      "C18H26O2"),
@@ -81,15 +82,46 @@ ELEMENTS = [
     ("Dh", "DHEA",           "Adrenal Precursor",    "HOR", "", 288, "THE PRECURSOR",        "C19H28O2"),
     ("T3", "Liothyronine",   "Thyroid T3",           "HOR", "", 651, "THROTTLE THE FURNACE", "C15H12I3NO4"),
     ("Ml", "Melatonin",      "Pineal Hormone",       "HOR", "", 232, "LIGHTS OUT",           "C13H16N2O2"),
+    # --- MOLECULE FAMILY : metabolic cofactors / small-molecule nootropics, by g/mol ---
+    ("Na", "NAD+",           "Nicotinamide Dinucl.", "MOL", "", 663, "CELLULAR CURRENCY",    "C21H27N7O14P2"),
+    ("Mq", "5-Amino-1MQ",    "NNMT Inhibitor",       "MOL", "", 159, "DELETE THE FAT GENE",  "C10H11N2"),
+    ("Mb", "Methylene Blue", "Methylthioninium",     "MOL", "", 320, "ELECTRON DONOR",       "C16H18ClN3S"),
 ]
 
-# Curated stacks: (name, subtitle, [component symbols], tagline)
+# Curated stacks: (name, subtitle, [component symbols], tagline, extras)
+#   comps  = element symbols rendered as mini element-tiles (must exist in ELEMENTS)
+#   extras = supportive ingredients with no element tile (supplements, blends),
+#            shown as a small "+ ..." line under the tiles. "" if none.
 STACKS = [
-    ("WOLVERINE", "Regeneration Protocol",   ["Bp", "Tb"],             "REGENERATE EVERYTHING"),
-    ("GLOW",      "Skin / Hair / Recovery",  ["Gk", "Bp", "Tb"],       "FROM THE INSIDE OUT"),
-    ("KLOW",      "Full Repair Protocol",    ["Kp", "Gk", "Bp", "Tb"], "THE COMPLETE OVERHAUL"),
-    ("ZEUS",      "Growth / Mass Protocol",  ["Te", "Gh", "Ig"],       "BUILT BY THE GODS"),
-    ("LEAN",      "Cut / Recomp Protocol",   ["Sg", "Ad", "T3"],       "STRIP IT DOWN"),
+    # --- Recovery / repair ---
+    ("WOLVERINE",       "Recovery / Repair",   ["Bp", "Tb"],             "REGENERATE EVERYTHING",  ""),
+    ("ADAMANTIUM",      "Recovery / Repair",   ["Bp", "Tb", "Kp", "Gk"], "UNBREAKABLE",            ""),
+    ("SPARTAN",         "Recovery / Repair",   ["Bp", "Tb", "Cj", "Ip"], "NO RETREAT",             ""),
+    ("FIELD REPAIR",    "Recovery / Repair",   ["Bp", "Gk"],             "PATCH AND DEPLOY",       ""),
+    ("PHOENIX",         "Recovery / Repair",   ["Ep", "Na", "Bp", "Tb"], "RISE FROM THE ASHES",    ""),
+    # --- Hormone-base performance ---
+    ("THE FOUNDATION",  "Hormone Performance", ["Te", "Hc"],             "BUILT ON BEDROCK",       "estrogen management"),
+    ("WORKHORSE",       "Hormone Performance", ["Te", "Gh"],             "SHOW UP EVERY DAY",      ""),
+    ("PRIME",           "Hormone Performance", ["Te", "Pr", "Hc"],       "PEAK CONDITION",         ""),
+    # --- Advanced body composition ---
+    ("THE HOLY TRINITY","Body Composition",    ["Te", "Gh", "Re"],       "THREE IS ALL YOU NEED",  ""),
+    ("BLACK LABEL",     "Body Composition",    ["Te", "Pr", "Gh", "Re"], "TOP SHELF ONLY",         "KLOW blend"),
+    ("OLD GUARD",       "Body Composition",    ["Te", "Ms", "Gh", "Re"], "EARNED NOT GIVEN",       "KLOW blend"),
+    ("GREEK GOD",       "Body Composition",    ["Te", "Pr", "Gh"],       "CARVED FROM MARBLE",     "GH peptide support"),
+    ("MASS MONSTER",    "Body Composition",    ["Te", "Gh", "Ig"],       "MAXIMUM OVERLOAD",       ""),
+    ("SHREDDER",        "Body Composition",    ["Te", "An", "Gh", "Re"], "SHRINK-WRAPPED",         ""),
+    # --- Cognitive / nootropic ---
+    ("STOIC",           "Cognitive / Nootropic",["Sk"],                  "UNSHAKEABLE",            "adaptogen + nootropic support"),
+    ("LIMITLESS",       "Cognitive / Nootropic",["Sx", "Mb"],            "NO CEILING",             "nootropic support"),
+    ("LOCK IN",         "Cognitive / Nootropic",["Sx"],                  "TUNNEL VISION",          "caffeine + L-theanine + tyrosine"),
+    ("IRON MIND",       "Cognitive / Nootropic",["Sk"],                  "FORGE THE MIND",         "Lion's Mane + Rhodiola + Bacopa"),
+    ("CLEAR HEAD",      "Cognitive / Nootropic",["Sk"],                  "SIGNAL NO NOISE",        "magnesium + L-theanine"),
+    ("GAME DAY",        "Cognitive / Nootropic",["Sx"],                  "GO TIME",                "performance nootropic support"),
+    # --- Mito / longevity / aesthetic ---
+    ("REACTOR",         "Mito / Longevity",    ["Ss", "Mc"],             "POWER THE CORE",         ""),
+    ("OVERDRIVE",       "Mito / Longevity",    ["Mc", "Mq", "Na"],       "REDLINE THE ENGINE",     ""),
+    ("SHOWTIME",        "Mito / Aesthetic",    ["Gk", "Mt"],             "STEAL THE STAGE",        "aesthetic support"),
+    ("THE VAULT",       "Mito / Longevity",    ["Mc", "Ss", "Na"],       "LOCK IN LONGEVITY",      ""),
 ]
 STACK_COLORS = ["#2BE8B0", "#7C5CFC", "#FF5C8A", "#38BDF8", "#FFB020"]
 
@@ -97,6 +129,7 @@ STACK_COLORS = ["#2BE8B0", "#7C5CFC", "#FF5C8A", "#38BDF8", "#FFB020"]
 PALETTE = {
     "PEP": "#2BE8B0",   # electric mint  (peptides)
     "HOR": "#FFB020",   # amber/gold     (hormones/steroids)
+    "MOL": "#7C5CFC",   # electric violet (metabolic cofactors / small molecules)
 }
 BRAND_GREEN = "#2BE8B0"  # the HUMAN+ logo "+" color; used for stack "+" separators
 WHITE = "#FFFFFF"
@@ -128,10 +161,11 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
             tl_big, tl_label = str(count), "AMINO ACIDS"
             tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="4"
         text-anchor="end" fill="{WHITE}" fill-opacity="0.6">PEPTIDE</text>'''
-    else:  # HOR
+    else:  # HOR or MOL : numbered by molecular weight
         tl_big, tl_label = str(count), "g/mol"
+        fam_word = "HORMONE" if fam == "HOR" else "MOLECULE"
         tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="4"
-        text-anchor="end" fill="{WHITE}" fill-opacity="0.6">HORMONE</text>
+        text-anchor="end" fill="{WHITE}" fill-opacity="0.6">{fam_word}</text>
   <text x="{tx+tw-45}" y="{ty+120}" font-family="{SANS}" font-size="34" letter-spacing="1"
         text-anchor="end" fill="{acc}">{esc(formula)}</text>'''
 
@@ -235,10 +269,12 @@ def periodic_poster():
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}" width="1200" height="{height}">
   <text x="600" y="170" font-family="{SANS}" font-size="120" font-weight="800" text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{PALETTE['PEP']}">+</tspan></text>
   <text x="600" y="240" font-family="{MONO}" font-size="30" text-anchor="middle" letter-spacing="10" fill="{WHITE}" fill-opacity="0.6">THE PERIODIC TABLE OF ENHANCEMENT</text>
-  <rect x="330" y="285" width="26" height="26" rx="5" fill="none" stroke="{PALETTE['PEP']}" stroke-width="4"/>
-  <text x="368" y="306" font-family="{MONO}" font-size="24" fill="{WHITE}" fill-opacity="0.8">PEPTIDE (amino acids)</text>
-  <rect x="730" y="285" width="26" height="26" rx="5" fill="none" stroke="{PALETTE['HOR']}" stroke-width="4"/>
-  <text x="768" y="306" font-family="{MONO}" font-size="24" fill="{WHITE}" fill-opacity="0.8">HORMONE (g/mol)</text>
+  <rect x="150" y="285" width="26" height="26" rx="5" fill="none" stroke="{PALETTE['PEP']}" stroke-width="4"/>
+  <text x="188" y="306" font-family="{MONO}" font-size="24" fill="{WHITE}" fill-opacity="0.8">PEPTIDE (aa)</text>
+  <rect x="470" y="285" width="26" height="26" rx="5" fill="none" stroke="{PALETTE['HOR']}" stroke-width="4"/>
+  <text x="508" y="306" font-family="{MONO}" font-size="24" fill="{WHITE}" fill-opacity="0.8">HORMONE (g/mol)</text>
+  <rect x="850" y="285" width="26" height="26" rx="5" fill="none" stroke="{PALETTE['MOL']}" stroke-width="4"/>
+  <text x="888" y="306" font-family="{MONO}" font-size="24" fill="{WHITE}" fill-opacity="0.8">MOLECULE (g/mol)</text>
   {''.join(cells)}
   <text x="600" y="{height-60}" font-family="{MONO}" font-size="26" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
 </svg>'''
@@ -255,8 +291,10 @@ def fit_text(text, max_w, base_fs, avg=0.82):
     return fs, ""
 
 
-def stack_tile(name, subtitle, comps, tagline):
-    """A combined 'stack' tile: big name + a row of component mini element-tiles."""
+def stack_tile(name, subtitle, comps, tagline, extras=""):
+    """A combined 'stack' tile: big name + a row of component mini element-tiles.
+    `extras` is a free-text list of supportive ingredients with no element tile
+    (supplements / blends), shown as a small "+ ..." line under the tiles."""
     lut = {e[0]: e for e in ELEMENTS}
     n = len(comps)
     # size mini-tiles + gaps to always fit within a 1100px content band
@@ -284,6 +322,13 @@ def stack_tile(name, subtitle, comps, tagline):
             plus_x = x + bw + gap / 2
             minis.append(f'<text x="{plus_x}" y="{box_y+box_h/2+30}" font-family="{SANS}" font-size="88" font-weight="800" text-anchor="middle" fill="{BRAND_GREEN}">+</text>')
     name_fs, name_len = fit_text(name, 1080, 200)
+    extras_svg = ""
+    if extras:
+        et = "+ " + extras.upper()
+        efs = min(32, int(1060 / (len(et) * 0.6)))
+        extras_svg = (f'<text x="600" y="1000" font-family="{MONO}" font-size="{efs}" '
+                      f'letter-spacing="2" text-anchor="middle" fill="{BRAND_GREEN}" '
+                      f'fill-opacity="0.85">{esc(et)}</text>')
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">{''.join(stops)}</linearGradient></defs>
@@ -292,6 +337,7 @@ def stack_tile(name, subtitle, comps, tagline):
   <text x="600" y="420" font-family="{SANS}" font-size="{name_fs}" font-weight="800" text-anchor="middle" fill="url(#g)"{name_len}>{esc(name)}</text>
   <text x="600" y="500" font-family="{MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.75">{esc(subtitle.upper())}</text>
   {''.join(minis)}
+  {extras_svg}
   <text x="600" y="1080" font-family="{MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
   <text x="600" y="1320" font-family="{MONO}" font-size="26" letter-spacing="4" text-anchor="middle" fill="{WHITE}" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
 </svg>'''
@@ -306,7 +352,7 @@ def build_site():
          "name_num": e[4], "count": e[5], "tag": e[6], "formula": e[7]}
         for e in ELEMENTS
     ]
-    stacks = [{"name": s[0], "sub": s[1], "comps": s[2], "tag": s[3]} for s in STACKS]
+    stacks = [{"name": s[0], "sub": s[1], "comps": s[2], "tag": s[3], "extras": s[4]} for s in STACKS]
     data = json.dumps({"elements": els, "stacks": stacks,
                        "palette": PALETTE, "green": BRAND_GREEN,
                        "stackColors": STACK_COLORS}, indent=0)
@@ -353,7 +399,7 @@ def main():
     for el in ELEMENTS:
         sym = el[0]
         svg = hero_tile(*el)
-        base = f"tile_{sym}_{el[1].replace(' ', '').replace('/', '-')}"
+        base = f"tile_{sym}_{el[1].replace(' ', '').replace('/', '-').replace('+', '')}"
         sp = os.path.join(svg_dir, base + ".svg")
         with open(sp, "w") as f:
             f.write(svg)
@@ -361,9 +407,9 @@ def main():
         made.append(base)
 
     # stack tiles
-    for name, subtitle, comps, tagline in STACKS:
-        svg = stack_tile(name, subtitle, comps, tagline)
-        base = f"stack_{name}"
+    for name, subtitle, comps, tagline, extras in STACKS:
+        svg = stack_tile(name, subtitle, comps, tagline, extras)
+        base = f"stack_{name.replace(' ', '_')}"
         sp = os.path.join(svg_dir, base + ".svg")
         with open(sp, "w") as f:
             f.write(svg)
