@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <defs>
+    <radialGradient id="port" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#b6a4cf"/><stop offset="100%" stop-color="#6e5197"/>
+    </radialGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10131b"/>
+      <stop offset="100%" stop-color="#0a0c12"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="1400" fill="#0f1118"/>
+  <rect x="60" y="60" width="1080" height="1280" rx="34" fill="url(#card)" stroke="#9b83be" stroke-width="6"/>
+  <rect x="72" y="72" width="1056" height="1256" rx="30" fill="none" stroke="#7A5AA8" stroke-width="2" stroke-opacity="0.7"/>
+  
+
+  <text x="600" y="188" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="74" font-weight="800" letter-spacing="2" text-anchor="middle" fill="#eef2f8">THE STILL MIND</text>
+  <text x="600" y="238" font-family="ui-monospace,'Courier New',monospace" font-size="26" letter-spacing="5" text-anchor="middle" fill="#7A5AA8">SELANK</text>
+
+  <rect x="150" y="300" width="900" height="690" rx="26" fill="url(#port)" stroke="#7A5AA8" stroke-width="4"/>
+  <circle cx="992" cy="358" r="40" fill="#957bb9" stroke="#fff" stroke-width="5"/><circle cx="992" cy="358" r="40" fill="url(#gloss)"/>
+  <g><polygon points="600.0,486.4 407.3,935.0 792.7,935.0" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><polygon points="542.7,442.7 600.0,367.8 657.3,442.7" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="440.5" r="34.4" fill="#4a3a61"/><line x1="775.1" y1="463.8" x2="775.1" y2="935.0" stroke="#493665" stroke-width="10"/><circle cx="775.1" cy="458.2" r="21.0" fill="#ab97c8" stroke="#493665" stroke-width="4"/></g>
+
+  <text x="600" y="1060" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#eef2f8">SAGE</text>
+  <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">VIOLET AURA &#183; ESSENCE 7</text>
+
+  <text x="600" y="1160" font-family="ui-monospace,'Courier New',monospace" font-size="23" letter-spacing="3" text-anchor="middle" fill="#7A5AA8">EVOLVES INTO</text>
+  <text x="600" y="1196" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="30" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#eef2f8">STOIC</text>
+
+  <text x="600" y="1254" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="27" font-style="italic" text-anchor="middle" fill="#9aa3b5">Quiets the storm without dulling the blade.</text>
+  <text x="600" y="1300" font-family="ui-monospace,'Courier New',monospace" font-size="22" letter-spacing="6" text-anchor="middle" fill="#9aa3b5" fill-opacity="0.8">HUMAN+ &#183; MYTHOS</text>
+</svg>

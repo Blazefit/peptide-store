@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <defs>
+    <radialGradient id="port" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#b6a4cf"/><stop offset="100%" stop-color="#6e5197"/>
+    </radialGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10131b"/>
+      <stop offset="100%" stop-color="#0a0c12"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="1400" fill="#0f1118"/>
+  <rect x="60" y="60" width="1080" height="1280" rx="34" fill="url(#card)" stroke="#9b83be" stroke-width="6"/>
+  <rect x="72" y="72" width="1056" height="1256" rx="30" fill="none" stroke="#7A5AA8" stroke-width="2" stroke-opacity="0.7"/>
+  
+
+  <text x="600" y="188" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="74" font-weight="800" letter-spacing="2" text-anchor="middle" fill="#eef2f8">OVERDRIVE</text>
+  <text x="600" y="238" font-family="ui-monospace,'Courier New',monospace" font-size="26" letter-spacing="5" text-anchor="middle" fill="#7A5AA8">MITO / LONGEVITY</text>
+
+  <rect x="150" y="300" width="900" height="690" rx="26" fill="url(#port)" stroke="#7A5AA8" stroke-width="4"/>
+  <circle cx="992" cy="358" r="40" fill="#957bb9" stroke="#fff" stroke-width="5"/><circle cx="992" cy="358" r="40" fill="url(#gloss)"/>
+  <g><line x1="600.0" y1="320.9" x2="600.0" y2="264.4" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="656.5" y1="336.0" x2="684.8" y2="287.1" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="697.9" y1="377.4" x2="746.8" y2="349.2" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="713.0" y1="433.9" x2="769.5" y2="433.9" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="697.9" y1="490.4" x2="746.8" y2="518.7" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="656.5" y1="531.8" x2="684.8" y2="580.7" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="600.0" y1="546.9" x2="600.0" y2="603.4" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="543.5" y1="531.8" x2="515.2" y2="580.7" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="502.1" y1="490.4" x2="453.2" y2="518.7" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="487.0" y1="433.9" x2="430.5" y2="433.9" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="502.1" y1="377.4" x2="453.2" y2="349.2" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><line x1="543.5" y1="336.0" x2="515.2" y2="287.1" stroke="#a58fc4" stroke-width="5" stroke-opacity="0.7"/><circle cx="600.0" cy="433.9" r="83.7" fill="none" stroke="#ab97c8" stroke-width="6" stroke-opacity="0.8"/><polygon points="505.4,675.1 582.5,675.1 582.5,912.4 524.3,912.4" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><polygon points="694.6,675.1 617.5,675.1 617.5,912.4 675.7,912.4" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><polygon points="452.9,497.7 747.1,497.7 694.6,675.1 505.4,675.1" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><polygon points="452.9,503.4 424.9,509.0 387.0,582.6 415.0,582.6" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><polygon points="747.1,503.4 775.1,509.0 813.0,582.6 785.0,582.6" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="433.9" r="44.1" fill="#876ab1" stroke="#493665" stroke-width="6" stroke-linejoin="round"/></g>
+
+  <text x="600" y="1060" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#eef2f8">ASCENDANT</text>
+  <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">VIOLET AURA &#183; TIER 3</text>
+
+  <text x="600" y="1160" font-family="ui-monospace,'Courier New',monospace" font-size="23" letter-spacing="3" text-anchor="middle" fill="#7A5AA8">FORGED FROM</text>
+  <text x="600" y="1196" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="30" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#eef2f8">CORE + UNMAKER + CURRENT</text>
+
+  <text x="600" y="1254" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="27" font-style="italic" text-anchor="middle" fill="#9aa3b5">The engine redlined past every safe limit.</text>
+  <text x="600" y="1300" font-family="ui-monospace,'Courier New',monospace" font-size="22" letter-spacing="6" text-anchor="middle" fill="#9aa3b5" fill-opacity="0.8">HUMAN+ &#183; MYTHOS</text>
+</svg>

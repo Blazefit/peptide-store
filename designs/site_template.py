@@ -92,7 +92,11 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
 <header>
   <div class="logo">HUMAN<span>+</span></div>
   <div class="tagline">MODIFIED &middot; ENHANCED &middot; OPTIMIZED</div>
-  <button class="btn btn-ghost" id="navGallery" style="padding:7px 12px;font-size:.8rem;">Gallery</button>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <a class="btn btn-ghost" href="home.html" style="padding:7px 12px;font-size:.8rem;text-decoration:none;">&#8962; Hub</a>
+    <a class="btn btn-ghost" href="mythic.html" style="padding:7px 12px;font-size:.8rem;text-decoration:none;">Mythos</a>
+    <button class="btn btn-ghost" id="navGallery" style="padding:7px 12px;font-size:.8rem;">Gallery</button>
+  </div>
 </header>
 
 <!-- ============ PAGE 1 : BUILDER ============ -->

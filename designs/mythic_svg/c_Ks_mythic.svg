@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <defs>
+    <radialGradient id="port" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#501a20"/><stop offset="100%" stop-color="#060504"/>
+    </radialGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#17130d"/>
+      <stop offset="100%" stop-color="#0b0907"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="1400" fill="#0c0a08"/>
+  <rect x="60" y="60" width="1080" height="1280" rx="10" fill="url(#card)" stroke="#B23A48" stroke-width="6"/>
+  <rect x="72" y="72" width="1056" height="1256" rx="6" fill="none" stroke="#862c36" stroke-width="2" stroke-opacity="0.7"/>
+  <path d="M74,74 l64,0 m-64,0 l0,64" fill="none" stroke="#B23A48" stroke-width="5"/><circle cx="90" cy="90" r="6" fill="#B23A48"/><path d="M1126,74 l-64,0 m64,0 l0,64" fill="none" stroke="#B23A48" stroke-width="5"/><circle cx="1110" cy="90" r="6" fill="#B23A48"/><path d="M74,1326 l64,0 m-64,0 l0,-64" fill="none" stroke="#B23A48" stroke-width="5"/><circle cx="90" cy="1310" r="6" fill="#B23A48"/><path d="M1126,1326 l-64,0 m64,0 l0,-64" fill="none" stroke="#B23A48" stroke-width="5"/><circle cx="1110" cy="1310" r="6" fill="#B23A48"/>
+
+  <text x="600" y="188" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="74" font-weight="800" letter-spacing="6" text-anchor="middle" fill="#ece4d2">THE SPARK</text>
+  <text x="600" y="238" font-family="ui-monospace,'Courier New',monospace" font-size="26" letter-spacing="5" text-anchor="middle" fill="#B23A48">KISSPEPTIN-10</text>
+
+  <rect x="150" y="300" width="900" height="690" rx="8" fill="url(#port)" stroke="#862c36" stroke-width="4"/>
+  
+  <g><polygon points="541.1,497.7 267.2,441.2 242.7,576.8 526.4,629.9" fill="#6a272d" stroke="#501a20" stroke-width="5" stroke-linejoin="round"/><polygon points="658.9,497.7 932.8,441.2 957.3,576.8 673.6,629.9" fill="#6a272d" stroke="#501a20" stroke-width="5" stroke-linejoin="round"/><polygon points="505.4,675.1 582.5,675.1 582.5,935.0 528.5,935.0" fill="#7d2e35" stroke="#501a20" stroke-width="6" stroke-linejoin="round"/><polygon points="694.6,675.1 617.5,675.1 617.5,935.0 671.5,935.0" fill="#7d2e35" stroke="#501a20" stroke-width="6" stroke-linejoin="round"/><polygon points="452.9,497.7 747.1,497.7 694.6,675.1 505.4,675.1" fill="#7d2e35" stroke="#501a20" stroke-width="6" stroke-linejoin="round"/><polygon points="452.9,503.4 424.9,509.0 417.8,686.4 445.9,686.4" fill="#7d2e35" stroke="#501a20" stroke-width="6" stroke-linejoin="round"/><polygon points="747.1,503.4 775.1,509.0 782.2,686.4 754.1,686.4" fill="#7d2e35" stroke="#501a20" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="433.9" r="44.1" fill="#7d2e35" stroke="#501a20" stroke-width="6" stroke-linejoin="round"/></g>
+
+  <text x="600" y="1060" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#ece4d2">SERAPH</text>
+  <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#998f78">CRIMSON AURA &#183; ESSENCE 10</text>
+
+  <text x="600" y="1160" font-family="ui-monospace,'Courier New',monospace" font-size="23" letter-spacing="3" text-anchor="middle" fill="#B23A48">BASE FORM</text>
+  <text x="600" y="1196" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="30" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#ece4d2">—</text>
+
+  <text x="600" y="1254" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="27" font-style="italic" text-anchor="middle" fill="#998f78">Ignites the cascade that wakes the line.</text>
+  <text x="600" y="1300" font-family="ui-monospace,'Courier New',monospace" font-size="22" letter-spacing="6" text-anchor="middle" fill="#998f78" fill-opacity="0.8">HUMAN+ &#183; MYTHOS</text>
+</svg>
