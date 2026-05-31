@@ -269,7 +269,7 @@ def stack_tile(name, subtitle, comps, tagline):
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">{''.join(stops)}</linearGradient></defs>
   <text x="600" y="180" font-family="{SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{STACK_COLORS[0]}">+</tspan></text>
   <text x="600" y="230" font-family="{MONO}" font-size="24" text-anchor="middle" letter-spacing="6" fill="{WHITE}" fill-opacity="0.45">STACK SERIES</text>
-  <text x="600" y="420" font-family="{SANS}" font-size="200" font-weight="800" text-anchor="middle" fill="url(#g)">{esc(name)}</text>
+  <text x="600" y="420" font-family="{SANS}" font-size="{min(200, int(1000 / max(len(name), 1) * 1.55))}" font-weight="800" text-anchor="middle" fill="url(#g)">{esc(name)}</text>
   <text x="600" y="500" font-family="{MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.75">{esc(subtitle.upper())}</text>
   {''.join(minis)}
   <text x="600" y="1080" font-family="{MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
