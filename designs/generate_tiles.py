@@ -47,7 +47,7 @@ ELEMENTS = [
     ("Tz", "Tirzepatide",    "GIP / GLP-1",           "PEP", "",     39,  "DUAL-ACTION OVERRIDE",   ""),
     ("Re", "Retatrutide",    "GIP / GLP-1 / Glucagon","PEP", "",     39,  "TRIPLE THREAT",          ""),
     ("Ip", "Ipamorelin",     "GH Secretagogue",       "PEP", "",     5,   "CLEAN PULSE",            ""),
-    ("Cj", "CJC-1295",       "GHRH Analog",           "PEP", "1295", 30,  "SUSTAINED SIGNAL",       ""),
+    ("Cj", "CJC-1295",       "GHRH Analog",           "PEP", "1295", 29,  "SUSTAINED SIGNAL",       ""),
     ("Sr", "Sermorelin",     "GRF (1-29)",            "PEP", "",     29,  "WAKE THE PITUITARY",     ""),
     ("Tm", "Tesamorelin",    "GHRH Analog",           "PEP", "",     44,  "CUT THE VISCERAL",       ""),
     ("Gk", "GHK-Cu",         "Copper Tripeptide",     "PEP", "",     3,   "COPPER-BOUND RENEWAL",   ""),

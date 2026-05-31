@@ -44,7 +44,7 @@ Symbol + the number from the name (top-left) + amino-acid count (top-right) + fu
 | Tz | —    | 39  | Tirzepatide | GIP / GLP-1 | DUAL-ACTION OVERRIDE |
 | Re | —    | 39  | Retatrutide | GIP / GLP-1 / glucagon | TRIPLE THREAT |
 | Ip | —    | 5   | Ipamorelin | GH secretagogue | CLEAN PULSE |
-| Cj | 1295 | 30  | CJC-1295 | GHRH analog | SUSTAINED SIGNAL |
+| Cj | 1295 | 29  | CJC-1295 | GHRH analog | SUSTAINED SIGNAL |
 | Sr | —    | 29  | Sermorelin | GRF (1-29) | WAKE THE PITUITARY |
 | Tm | —    | 44  | Tesamorelin | GHRH analog | CUT THE VISCERAL |
 | Gk | —    | 3   | GHK-Cu | Copper tripeptide | COPPER-BOUND RENEWAL |
@@ -111,7 +111,7 @@ the site (pick compounds → auto-generate a combined tile).
 All values are real to the best of current knowledge, but **double-check these before
 any print run** — a few are newer or have analog ambiguity:
 - **Retatrutide = 39 aa** (confirmed), Tirzepatide = 39 aa
-- **CJC-1295 = 30 aa** (modified GRF(1-29) backbone; some sources cite 29 + DAC)
+- **CJC-1295 = 29 aa** (modified GRF(1-29) backbone; the DAC version adds a non-amino-acid complex)
 - **TB-500 = 43 aa** (full Thymosin β-4; TB-500 itself is often a fragment)
 - New steroids use the **base molecule** MW (no ester): Anavar 306, Masteron 304, Primobolan 302
 - AOD-9604 = 16 aa (hGH 176-191 + Tyr)

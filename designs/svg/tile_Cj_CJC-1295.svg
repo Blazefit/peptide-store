@@ -17,7 +17,7 @@
   <text x="955" y="422" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="3"
         text-anchor="end" fill="#FFFFFF" fill-opacity="0.6">AMINO ACIDS</text>
   <text x="955" y="488" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="64" font-weight="700"
-        text-anchor="end" fill="#2BE8B0">30</text>
+        text-anchor="end" fill="#2BE8B0">29</text>
 
   <!-- giant 2-letter symbol (raised so descenders like p/g/y never hit the name) -->
   <text x="600.0" y="820" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="340" font-weight="800"
