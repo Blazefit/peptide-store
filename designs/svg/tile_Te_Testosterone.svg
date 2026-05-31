@@ -19,7 +19,7 @@
   <text x="955" y="478" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="34" letter-spacing="1"
         text-anchor="end" fill="#FFB020">C19H28O2</text>
 
-  <!-- giant symbol -->
+  <!-- giant 2-letter symbol -->
   <text x="600.0" y="875" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="360" font-weight="800"
         text-anchor="middle" fill="#FFFFFF">Te</text>
 

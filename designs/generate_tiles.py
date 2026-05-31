@@ -12,11 +12,14 @@ DESIGN NOTES
 - Every tile is 1200 x 1400 px = a 12in x 14in print area at 100 DPI.
 - Artwork is WHITE + ONE ACCENT on a TRANSPARENT background (built for a dark
   garment). Previews are rendered on near-black so you can see them.
+- Big symbol is ALWAYS a 2-letter code so every tile reads the same from across
+  a room (true periodic-table feel). Recognizability comes from the full name
+  spelled out underneath + the number in the top-left.
 - Two families:
-    PEPTIDE  -> recognizable abbreviation (BPC, TB, PT...) as the big symbol,
-                the number already in the name (157, 500, 141) TOP-LEFT,
-                the real AMINO-ACID count TOP-RIGHT.  Accent = mint green.
-    HORMONE  -> steroids/small molecules; numbered by MOLECULAR WEIGHT.
+    PEPTIDE  -> top-left = the number already in the name (157, 500, 141) when it
+                has one, else the amino-acid count; top-right = amino-acid count.
+                Accent = mint green.
+    HORMONE  -> steroids/small molecules numbered by MOLECULAR WEIGHT (g/mol).
                 Accent = amber/gold.
 - Fonts here are DejaVu/Liberation (Helvetica-like + a mono) so previews render
   on this box. For final print, swap to a licensed grotesque (Neue Haas / Helvetica
@@ -28,42 +31,43 @@ import os, subprocess
 # ----------------------------------------------------------------------------
 # THE ELEMENT TABLE
 # (sym, full_name, sub, family, name_num, count, tagline, formula)
-#   sym       = big recognizable abbreviation shown in the tile center
+#   sym       = 2-letter code shown big in the tile center
 #   full_name = spelled-out compound name shown below the symbol
 #   family    = "PEP" peptide (count = amino acids) | "HOR" hormone (count = g/mol)
-#   name_num  = the number that's already in the name ("157","500","141"); "" if none
+#   name_num  = the number already in the name ("157","500","141"); "" if none
 #   count     = amino-acid count (PEP) or molecular weight in g/mol (HOR)
 #   formula   = chemical formula (HOR) or "" (PEP)
 # ----------------------------------------------------------------------------
 ELEMENTS = [
     # --- PEPTIDE FAMILY ---
-    ("HGH",  "Somatropin",     "Human Growth Hormone",  "PEP", "",     191, "GROW OR DIE",            ""),
-    ("BPC",  "BPC-157",        "Body Protection Cmpd",  "PEP", "157",  15,  "THE BODY'S REPAIR CODE", ""),
-    ("TB",   "TB-500",         "Thymosin Beta-4",       "PEP", "500",  43,  "HEAL WITHOUT PERMISSION",""),
-    ("SEMA", "Semaglutide",    "GLP-1 Agonist",         "PEP", "",     31,  "APPETITE, OVERRULED",    ""),
-    ("TIRZ", "Tirzepatide",    "GIP / GLP-1",           "PEP", "",     39,  "DUAL-ACTION OVERRIDE",   ""),
-    ("IPA",  "Ipamorelin",     "GH Secretagogue",       "PEP", "",     5,   "CLEAN PULSE",            ""),
-    ("CJC",  "CJC-1295",       "GHRH Analog",           "PEP", "1295", 30,  "SUSTAINED SIGNAL",       ""),
-    ("SERM", "Sermorelin",     "GRF (1-29)",            "PEP", "",     29,  "WAKE THE PITUITARY",     ""),
-    ("TESA", "Tesamorelin",    "GHRH Analog",           "PEP", "",     44,  "CUT THE VISCERAL",       ""),
-    ("GHK",  "GHK-Cu",         "Copper Tripeptide",     "PEP", "",     3,   "COPPER-BOUND RENEWAL",   ""),
-    ("MT",   "Melanotan II",   "Melanocortin Agonist",  "PEP", "II",   7,   "SUN IN A VIAL",          ""),
-    ("PT",   "PT-141",         "Bremelanotide",         "PEP", "141",  7,   "DESIRE, DECODED",        ""),
-    ("OXT",  "Oxytocin",       "Nonapeptide",           "PEP", "",     9,   "THE BOND MOLECULE",      ""),
-    ("SEL",  "Selank",         "Anxiolytic Peptide",    "PEP", "",     7,   "CALM, WEAPONIZED",       ""),
-    ("SMX",  "Semax",          "Nootropic Peptide",     "PEP", "",     7,   "FOCUS PROTOCOL",         ""),
-    ("EPI",  "Epitalon",       "Telomerase Activator",  "PEP", "",     4,   "RESET THE CLOCK",        ""),
-    ("TA",   "Thymosin a-1",   "Immune Modulator",      "PEP", "1",    28,  "IMMUNE FIRMWARE",        ""),
-    ("IGF",  "IGF-1 LR3",      "Long R3 IGF-1",         "PEP", "1",    83,  "GROWTH, AMPLIFIED",      ""),
-    ("MOTS", "MOTS-c",         "Mitochondrial Peptide", "PEP", "c",    16,  "MITOCHONDRIAL COMMAND",  ""),
-    ("GON",  "Gonadorelin",    "GnRH Decapeptide",      "PEP", "",     10,  "RESTART THE AXIS",       ""),
-    ("KISS", "Kisspeptin-10",  "KISS1 Fragment",        "PEP", "10",   10,  "IGNITE THE CASCADE",     ""),
-    ("HEX",  "Hexarelin",      "GH Secretagogue",       "PEP", "",     6,   "MAX PULSE",              ""),
-    ("GHRP", "GHRP-6",         "GH-Releasing Peptide",  "PEP", "6",    6,   "HUNGER + GROWTH",        ""),
-    ("AOD",  "AOD-9604",       "hGH Fragment 176-191",  "PEP", "9604", 16,  "FAT-LOSS FRAGMENT",      ""),
-    ("SS",   "SS-31",          "Elamipretide",          "PEP", "31",   4,   "MITOCHONDRIAL ARMOR",    ""),
-    ("DSIP", "DSIP",           "Delta Sleep Peptide",   "PEP", "",     9,   "DELTA SLEEP",            ""),
-    ("INS",  "Insulin",        "A21 / B30 Chains",      "PEP", "",     51,  "THE MASTER SWITCH",      ""),
+    ("Gh", "Somatropin",     "Human Growth Hormone",  "PEP", "",     191, "GROW OR DIE",            ""),
+    ("Bp", "BPC-157",        "Body Protection Cmpd",  "PEP", "157",  15,  "THE BODY'S REPAIR CODE", ""),
+    ("Tb", "TB-500",         "Thymosin Beta-4",       "PEP", "500",  43,  "HEAL WITHOUT PERMISSION",""),
+    ("Sg", "Semaglutide",    "GLP-1 Agonist",         "PEP", "",     31,  "APPETITE, OVERRULED",    ""),
+    ("Tz", "Tirzepatide",    "GIP / GLP-1",           "PEP", "",     39,  "DUAL-ACTION OVERRIDE",   ""),
+    ("Re", "Retatrutide",    "GIP / GLP-1 / Glucagon","PEP", "",     39,  "TRIPLE THREAT",          ""),
+    ("Ip", "Ipamorelin",     "GH Secretagogue",       "PEP", "",     5,   "CLEAN PULSE",            ""),
+    ("Cj", "CJC-1295",       "GHRH Analog",           "PEP", "1295", 30,  "SUSTAINED SIGNAL",       ""),
+    ("Sr", "Sermorelin",     "GRF (1-29)",            "PEP", "",     29,  "WAKE THE PITUITARY",     ""),
+    ("Tm", "Tesamorelin",    "GHRH Analog",           "PEP", "",     44,  "CUT THE VISCERAL",       ""),
+    ("Gk", "GHK-Cu",         "Copper Tripeptide",     "PEP", "",     3,   "COPPER-BOUND RENEWAL",   ""),
+    ("Mt", "Melanotan II",   "Melanocortin Agonist",  "PEP", "II",   7,   "SUN IN A VIAL",          ""),
+    ("Pt", "PT-141",         "Bremelanotide",         "PEP", "141",  7,   "DESIRE, DECODED",        ""),
+    ("Ox", "Oxytocin",       "Nonapeptide",           "PEP", "",     9,   "THE BOND MOLECULE",      ""),
+    ("Sk", "Selank",         "Anxiolytic Peptide",    "PEP", "",     7,   "CALM, WEAPONIZED",       ""),
+    ("Sx", "Semax",          "Nootropic Peptide",     "PEP", "",     7,   "FOCUS PROTOCOL",         ""),
+    ("Ep", "Epitalon",       "Telomerase Activator",  "PEP", "",     4,   "RESET THE CLOCK",        ""),
+    ("Ta", "Thymosin a-1",   "Immune Modulator",      "PEP", "1",    28,  "IMMUNE FIRMWARE",        ""),
+    ("Ig", "IGF-1 LR3",      "Long R3 IGF-1",         "PEP", "1",    83,  "GROWTH, AMPLIFIED",      ""),
+    ("Mc", "MOTS-c",         "Mitochondrial Peptide", "PEP", "c",    16,  "MITOCHONDRIAL COMMAND",  ""),
+    ("Gn", "Gonadorelin",    "GnRH Decapeptide",      "PEP", "",     10,  "RESTART THE AXIS",       ""),
+    ("Ks", "Kisspeptin-10",  "KISS1 Fragment",        "PEP", "10",   10,  "IGNITE THE CASCADE",     ""),
+    ("Hx", "Hexarelin",      "GH Secretagogue",       "PEP", "",     6,   "MAX PULSE",              ""),
+    ("Gp", "GHRP-6",         "GH-Releasing Peptide",  "PEP", "6",    6,   "HUNGER + GROWTH",        ""),
+    ("Ad", "AOD-9604",       "hGH Fragment 176-191",  "PEP", "9604", 16,  "FAT-LOSS FRAGMENT",      ""),
+    ("Ss", "SS-31",          "Elamipretide",          "PEP", "31",   4,   "MITOCHONDRIAL ARMOR",    ""),
+    ("Ds", "DSIP",           "Delta Sleep Peptide",   "PEP", "",     9,   "DELTA SLEEP",            ""),
+    ("In", "Insulin",        "A21 / B30 Chains",      "PEP", "",     51,  "THE MASTER SWITCH",      ""),
     # --- HORMONE / STEROID FAMILY : numbered by molecular weight (g/mol) ---
     ("Te", "Testosterone",   "Androgen",             "HOR", "", 288, "THE ORIGINAL UPGRADE", "C19H28O2"),
     ("Nd", "Nandrolone",     "19-Nortestosterone",   "HOR", "", 274, "JOINTS OF STEEL",      "C18H26O2"),
@@ -90,32 +94,24 @@ def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def sym_font(sym, base):
-    """Scale the big symbol down as the abbreviation gets longer."""
-    n = len(sym)
-    if n <= 2:  return base
-    if n == 3:  return int(base * 0.78)
-    return int(base * 0.58)   # 4 chars (GHRP, MOTS, SEMA...)
-
-
 def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
-    """One large element tile, centered, 1200x1400, transparent bg."""
+    """One large element tile, centered, 1200x1400, transparent bg. 2-letter symbol."""
     acc = PALETTE[fam]
     tx, ty, tw, th = 200, 360, 800, 800
     cx = tx + tw / 2
-    fs = sym_font(sym, 360)
 
-    # ---- top corners differ by family ----
+    # ---- top corners ----
     if fam == "PEP":
         if name_num:
             tl_big, tl_label = name_num, "SERIES"
-        else:
-            tl_big, tl_label = str(count), "AMINO ACIDS"
-        # top-right always shows the real amino-acid count
-        tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="3"
+            tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="3"
         text-anchor="end" fill="{WHITE}" fill-opacity="0.6">AMINO ACIDS</text>
   <text x="{tx+tw-45}" y="{ty+128}" font-family="{MONO}" font-size="64" font-weight="700"
         text-anchor="end" fill="{acc}">{count}</text>'''
+        else:
+            tl_big, tl_label = str(count), "AMINO ACIDS"
+            tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="4"
+        text-anchor="end" fill="{WHITE}" fill-opacity="0.6">PEPTIDE</text>'''
     else:  # HOR
         tl_big, tl_label = str(count), "g/mol"
         tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="4"
@@ -141,8 +137,8 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
   <!-- top-right -->
   {tr}
 
-  <!-- giant symbol -->
-  <text x="{cx}" y="{ty+515}" font-family="{SANS}" font-size="{fs}" font-weight="800"
+  <!-- giant 2-letter symbol -->
+  <text x="{cx}" y="{ty+515}" font-family="{SANS}" font-size="360" font-weight="800"
         text-anchor="middle" fill="{WHITE}">{esc(sym)}</text>
 
   <!-- full name -->
@@ -191,7 +187,8 @@ def modified_human():
 
 
 def periodic_poster():
-    """Full table laid out as a grid poster, two families color-coded."""
+    """Full table laid out as a grid poster, two families color-coded.
+    All symbols are 2 letters so the grid reads uniformly."""
     cols = 6
     cell_w, cell_h = 170, 190
     pad = 14
@@ -202,20 +199,18 @@ def periodic_poster():
         x = margin_x + c * (cell_w + pad)
         y = margin_y + r * (cell_h + pad)
         acc = PALETTE[fam]
-        # top-left number, top-right count/unit
         if fam == "PEP":
             tl = name_num if name_num else str(count)
             tr = f"{count}aa"
         else:
             tl = str(count)
             tr = "g/mol"
-        fs = sym_font(sym, 78)
         cells.append(f'''
   <g>
     <rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" rx="10" fill="none" stroke="{acc}" stroke-width="4"/>
     <text x="{x+14}" y="{y+40}" font-family="{MONO}" font-size="26" fill="{acc}">{tl}</text>
     <text x="{x+cell_w-12}" y="{y+34}" font-family="{MONO}" font-size="16" text-anchor="end" fill="{WHITE}" fill-opacity="0.5">{tr}</text>
-    <text x="{x+cell_w/2}" y="{y+120}" font-family="{SANS}" font-size="{fs}" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(sym)}</text>
+    <text x="{x+cell_w/2}" y="{y+118}" font-family="{SANS}" font-size="78" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(sym)}</text>
     <text x="{x+cell_w/2}" y="{y+162}" font-family="{SANS}" font-size="18" font-weight="700" text-anchor="middle" fill="{acc}">{esc(full)}</text>
   </g>''')
     rows = (len(ELEMENTS) + cols - 1) // cols
@@ -244,7 +239,7 @@ def main():
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
 
-    flagships = {"Te", "HGH", "BPC", "TB", "PT", "SS"}
+    flagships = {"Te", "Gh", "Bp", "Tb", "Pt", "Re"}
     made = []
     for el in ELEMENTS:
         sym = el[0]

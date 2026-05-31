@@ -19,9 +19,9 @@
   <text x="955" y="488" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="64" font-weight="700"
         text-anchor="end" fill="#2BE8B0">15</text>
 
-  <!-- giant symbol -->
-  <text x="600.0" y="875" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="280" font-weight="800"
-        text-anchor="middle" fill="#FFFFFF">BPC</text>
+  <!-- giant 2-letter symbol -->
+  <text x="600.0" y="875" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="360" font-weight="800"
+        text-anchor="middle" fill="#FFFFFF">Bp</text>
 
   <!-- full name -->
   <text x="600.0" y="1010" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="76" font-weight="800"
