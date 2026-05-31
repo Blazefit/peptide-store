@@ -7,18 +7,18 @@
         letter-spacing="8" fill="#FFFFFF" fill-opacity="0.45">THE PERIODIC TABLE OF ENHANCEMENT</text>
 
   <rect x="200" y="360" width="800" height="800" rx="20" fill="none" stroke="#2BE8B0" stroke-width="10"/>
-  <line x1="200" y1="510" x2="1000" y2="510" stroke="#2BE8B0" stroke-width="3" stroke-opacity="0.4"/>
+  <line x1="200" y1="530" x2="1000" y2="530" stroke="#2BE8B0" stroke-width="3" stroke-opacity="0.4"/>
 
-  <!-- top-left number -->
-  <text x="245" y="468" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="84" font-weight="700" fill="#2BE8B0">9</text>
-  <text x="248" y="505" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="3" fill="#FFFFFF" fill-opacity="0.6">AMINO ACIDS</text>
+  <!-- top-left number (roomy spacing above the divider) -->
+  <text x="245" y="462" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="80" font-weight="700" fill="#2BE8B0">9</text>
+  <text x="248" y="510" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" letter-spacing="3" fill="#FFFFFF" fill-opacity="0.6">AMINO ACIDS</text>
 
   <!-- top-right -->
-  <text x="955" y="422" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"
+  <text x="955" y="418" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="28" letter-spacing="4"
         text-anchor="end" fill="#FFFFFF" fill-opacity="0.6">PEPTIDE</text>
 
   <!-- giant 2-letter symbol (raised so descenders like p/g/y never hit the name) -->
-  <text x="600.0" y="820" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="340" font-weight="800"
+  <text x="600.0" y="835" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="340" font-weight="800"
         text-anchor="middle" fill="#FFFFFF">Ds</text>
 
   <!-- full name -->

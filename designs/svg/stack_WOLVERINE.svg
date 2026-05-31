@@ -3,17 +3,17 @@
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2BE8B0"/><stop offset="100%" stop-color="#7C5CFC"/></linearGradient></defs>
   <text x="600" y="180" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="#FFFFFF">HUMAN<tspan fill="#2BE8B0">+</tspan></text>
   <text x="600" y="230" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="24" text-anchor="middle" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.45">STACK SERIES</text>
-  <text x="600" y="420" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="172" font-weight="800" text-anchor="middle" fill="url(#g)">WOLVERINE</text>
+  <text x="600" y="420" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="146" font-weight="800" text-anchor="middle" fill="url(#g)">WOLVERINE</text>
   <text x="600" y="500" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" letter-spacing="6" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.75">REGENERATION PROTOCOL</text>
   
-  <rect x="353.0" y="640" width="230" height="300" rx="14" fill="none" stroke="#2BE8B0" stroke-width="7"/>
-  <text x="468.0" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Bp</text>
-  <text x="468.0" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#2BE8B0">BPC-157</text>
-  <text x="468.0" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">15aa</text><text x="600.0" y="812.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="70" font-weight="800" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.5">+</text>
-  <rect x="617.0" y="640" width="230" height="300" rx="14" fill="none" stroke="#7C5CFC" stroke-width="7"/>
-  <text x="732.0" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Tb</text>
-  <text x="732.0" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#7C5CFC">TB-500</text>
-  <text x="732.0" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">43aa</text>
+  <rect x="330.0" y="640" width="230" height="300" rx="14" fill="none" stroke="#2BE8B0" stroke-width="7"/>
+  <text x="445.0" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Bp</text>
+  <text x="445.0" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#2BE8B0">BPC-157</text>
+  <text x="445.0" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">15aa</text><text x="600.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="640.0" y="640" width="230" height="300" rx="14" fill="none" stroke="#7C5CFC" stroke-width="7"/>
+  <text x="755.0" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="#FFFFFF">Tb</text>
+  <text x="755.0" y="855" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#7C5CFC">TB-500</text>
+  <text x="755.0" y="898" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">43aa</text>
   <text x="600" y="1080" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="#FFFFFF">REGENERATE EVERYTHING</text>
   <text x="600" y="1320" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" letter-spacing="4" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
 </svg>

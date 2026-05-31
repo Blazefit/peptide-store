@@ -26,7 +26,8 @@ DESIGN NOTES
   Now / Space Grotesk) and a mono (JetBrains Mono) and OUTLINE the text.
 """
 
-import os, subprocess
+import os, subprocess, json
+from site_template import SITE_TEMPLATE
 
 # ----------------------------------------------------------------------------
 # THE ELEMENT TABLE
@@ -87,6 +88,8 @@ STACKS = [
     ("WOLVERINE", "Regeneration Protocol",   ["Bp", "Tb"],             "REGENERATE EVERYTHING"),
     ("GLOW",      "Skin / Hair / Recovery",  ["Gk", "Bp", "Tb"],       "FROM THE INSIDE OUT"),
     ("KLOW",      "Full Repair Protocol",    ["Kp", "Gk", "Bp", "Tb"], "THE COMPLETE OVERHAUL"),
+    ("ZEUS",      "Growth / Mass Protocol",  ["Te", "Gh", "Ig"],       "BUILT BY THE GODS"),
+    ("LEAN",      "Cut / Recomp Protocol",   ["Sg", "Ad", "T3"],       "STRIP IT DOWN"),
 ]
 STACK_COLORS = ["#2BE8B0", "#7C5CFC", "#FF5C8A", "#38BDF8", "#FFB020"]
 
@@ -95,6 +98,7 @@ PALETTE = {
     "PEP": "#2BE8B0",   # electric mint  (peptides)
     "HOR": "#FFB020",   # amber/gold     (hormones/steroids)
 }
+BRAND_GREEN = "#2BE8B0"  # the HUMAN+ logo "+" color; used for stack "+" separators
 WHITE = "#FFFFFF"
 BG_PREVIEW = "#0d0d12"  # near-black garment for previews
 
@@ -116,19 +120,19 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
     if fam == "PEP":
         if name_num:
             tl_big, tl_label = name_num, "SERIES"
-            tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="3"
+            tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="3"
         text-anchor="end" fill="{WHITE}" fill-opacity="0.6">AMINO ACIDS</text>
-  <text x="{tx+tw-45}" y="{ty+128}" font-family="{MONO}" font-size="64" font-weight="700"
+  <text x="{tx+tw-45}" y="{ty+126}" font-family="{MONO}" font-size="62" font-weight="700"
         text-anchor="end" fill="{acc}">{count}</text>'''
         else:
             tl_big, tl_label = str(count), "AMINO ACIDS"
-            tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="4"
+            tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="4"
         text-anchor="end" fill="{WHITE}" fill-opacity="0.6">PEPTIDE</text>'''
     else:  # HOR
         tl_big, tl_label = str(count), "g/mol"
-        tr = f'''<text x="{tx+tw-45}" y="{ty+62}" font-family="{MONO}" font-size="28" letter-spacing="4"
+        tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="4"
         text-anchor="end" fill="{WHITE}" fill-opacity="0.6">HORMONE</text>
-  <text x="{tx+tw-45}" y="{ty+118}" font-family="{SANS}" font-size="34" letter-spacing="1"
+  <text x="{tx+tw-45}" y="{ty+120}" font-family="{SANS}" font-size="34" letter-spacing="1"
         text-anchor="end" fill="{acc}">{esc(formula)}</text>'''
 
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -140,17 +144,17 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
         letter-spacing="8" fill="{WHITE}" fill-opacity="0.45">THE PERIODIC TABLE OF ENHANCEMENT</text>
 
   <rect x="{tx}" y="{ty}" width="{tw}" height="{th}" rx="20" fill="none" stroke="{acc}" stroke-width="10"/>
-  <line x1="{tx}" y1="{ty+150}" x2="{tx+tw}" y2="{ty+150}" stroke="{acc}" stroke-width="3" stroke-opacity="0.4"/>
+  <line x1="{tx}" y1="{ty+170}" x2="{tx+tw}" y2="{ty+170}" stroke="{acc}" stroke-width="3" stroke-opacity="0.4"/>
 
-  <!-- top-left number -->
-  <text x="{tx+45}" y="{ty+108}" font-family="{MONO}" font-size="84" font-weight="700" fill="{acc}">{tl_big}</text>
-  <text x="{tx+48}" y="{ty+145}" font-family="{MONO}" font-size="28" letter-spacing="3" fill="{WHITE}" fill-opacity="0.6">{tl_label}</text>
+  <!-- top-left number (roomy spacing above the divider) -->
+  <text x="{tx+45}" y="{ty+102}" font-family="{MONO}" font-size="80" font-weight="700" fill="{acc}">{tl_big}</text>
+  <text x="{tx+48}" y="{ty+150}" font-family="{MONO}" font-size="26" letter-spacing="3" fill="{WHITE}" fill-opacity="0.6">{tl_label}</text>
 
   <!-- top-right -->
   {tr}
 
   <!-- giant 2-letter symbol (raised so descenders like p/g/y never hit the name) -->
-  <text x="{cx}" y="{ty+460}" font-family="{SANS}" font-size="340" font-weight="800"
+  <text x="{cx}" y="{ty+475}" font-family="{SANS}" font-size="340" font-weight="800"
         text-anchor="middle" fill="{WHITE}">{esc(sym)}</text>
 
   <!-- full name -->
@@ -240,14 +244,28 @@ def periodic_poster():
 </svg>'''
 
 
+def fit_text(text, max_w, base_fs, avg=0.82):
+    """Return (font_size, attr) so heavy-weight caps never exceed max_w px.
+    librsvg ignores textLength, so we guarantee fit by font-size alone.
+    avg≈0.82 is calibrated to DejaVu Sans Bold uppercase advance width."""
+    fs = base_fs
+    if len(text) * avg * fs <= max_w:
+        return fs, ""
+    fs = int(max_w / (len(text) * avg))
+    return fs, ""
+
+
 def stack_tile(name, subtitle, comps, tagline):
     """A combined 'stack' tile: big name + a row of component mini element-tiles."""
     lut = {e[0]: e for e in ELEMENTS}
     n = len(comps)
-    bw, gap = 230, 34
+    # size mini-tiles + gaps to always fit within a 1100px content band
+    gap = 80
+    bw = min(230, int((1100 - (n - 1) * gap) / n))
     total = n * bw + (n - 1) * gap
     start = 600 - total / 2
     box_y, box_h = 640, 300
+    sym_fs = min(120, int(bw * 0.62))
     minis = []
     stops = []
     for i, csym in enumerate(comps):
@@ -258,18 +276,20 @@ def stack_tile(name, subtitle, comps, tagline):
         stops.append(f'<stop offset="{int(i*100/(max(n-1,1)))}%" stop-color="{col}"/>')
         minis.append(f'''
   <rect x="{x}" y="{box_y}" width="{bw}" height="{box_h}" rx="14" fill="none" stroke="{col}" stroke-width="7"/>
-  <text x="{cxm}" y="{box_y+150}" font-family="{SANS}" font-size="120" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(e[0])}</text>
+  <text x="{cxm}" y="{box_y+150}" font-family="{SANS}" font-size="{sym_fs}" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(e[0])}</text>
   <text x="{cxm}" y="{box_y+215}" font-family="{SANS}" font-size="30" font-weight="700" text-anchor="middle" fill="{col}">{esc(e[1])}</text>
   <text x="{cxm}" y="{box_y+258}" font-family="{MONO}" font-size="22" text-anchor="middle" fill="{WHITE}" fill-opacity="0.6">{e[5]}{'aa' if e[3]=='PEP' else ''}</text>''')
         if i < n - 1:
+            # brand-style "+" : green, bold, centered cleanly in the gap between tiles
             plus_x = x + bw + gap / 2
-            minis.append(f'<text x="{plus_x}" y="{box_y+box_h/2+22}" font-family="{SANS}" font-size="70" font-weight="800" text-anchor="middle" fill="{WHITE}" fill-opacity="0.5">+</text>')
+            minis.append(f'<text x="{plus_x}" y="{box_y+box_h/2+30}" font-family="{SANS}" font-size="88" font-weight="800" text-anchor="middle" fill="{BRAND_GREEN}">+</text>')
+    name_fs, name_len = fit_text(name, 1080, 200)
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">{''.join(stops)}</linearGradient></defs>
-  <text x="600" y="180" font-family="{SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{STACK_COLORS[0]}">+</tspan></text>
+  <text x="600" y="180" font-family="{SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{BRAND_GREEN}">+</tspan></text>
   <text x="600" y="230" font-family="{MONO}" font-size="24" text-anchor="middle" letter-spacing="6" fill="{WHITE}" fill-opacity="0.45">STACK SERIES</text>
-  <text x="600" y="420" font-family="{SANS}" font-size="{min(200, int(1000 / max(len(name), 1) * 1.55))}" font-weight="800" text-anchor="middle" fill="url(#g)">{esc(name)}</text>
+  <text x="600" y="420" font-family="{SANS}" font-size="{name_fs}" font-weight="800" text-anchor="middle" fill="url(#g)"{name_len}>{esc(name)}</text>
   <text x="600" y="500" font-family="{MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.75">{esc(subtitle.upper())}</text>
   {''.join(minis)}
   <text x="600" y="1080" font-family="{MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
@@ -277,14 +297,30 @@ def stack_tile(name, subtitle, comps, tagline):
 </svg>'''
 
 
-def build_gallery(prev_dir, names):
-    """Write a responsive index.html so all tiles are reviewable on any device."""
+def build_site():
+    """Self-contained interactive site: clickable periodic table -> stack builder
+    -> garment visualizer. Single source of truth = ELEMENTS + STACKS, embedded
+    as JSON so the same data drives the SVG previews and the live app."""
+    els = [
+        {"sym": e[0], "full": e[1], "sub": e[2], "fam": e[3],
+         "name_num": e[4], "count": e[5], "tag": e[6], "formula": e[7]}
+        for e in ELEMENTS
+    ]
+    stacks = [{"name": s[0], "sub": s[1], "comps": s[2], "tag": s[3]} for s in STACKS]
+    data = json.dumps({"elements": els, "stacks": stacks,
+                       "palette": PALETTE, "green": BRAND_GREEN,
+                       "stackColors": STACK_COLORS}, indent=0)
+    return SITE_TEMPLATE.replace("/*__DATA__*/", data)
+
+
+def build_gallery(names):
+    """Static fallback gallery of rendered PNGs (gallery.html)."""
     cards = "\n".join(
         f'    <figure><img src="preview/{n}.png" alt="{n}" loading="lazy"><figcaption>{n}</figcaption></figure>'
         for n in names)
     return f'''<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HUMAN+ — Design Gallery</title>
+<title>HUMAN+ — Render Gallery</title>
 <style>
   body {{ margin:0; background:#0d0d12; color:#e2e2f0; font-family:system-ui,sans-serif; }}
   header {{ padding:24px; text-align:center; }}
@@ -295,7 +331,7 @@ def build_gallery(prev_dir, names):
   img {{ width:100%; display:block; }}
   figcaption {{ padding:8px 12px; font-size:.75rem; color:#9393b0; font-family:monospace; }}
 </style></head><body>
-<header><h1>HUMAN<span>+</span></h1><p class="sub">THE PERIODIC TABLE OF ENHANCEMENT — DESIGN GALLERY</p></header>
+<header><h1>HUMAN<span>+</span></h1><p class="sub">RENDER GALLERY (static PNGs) — see index.html for the interactive builder</p></header>
 <div class="grid">
 {cards}
 </div></body></html>'''
@@ -342,15 +378,19 @@ def main():
         render_png(sp, os.path.join(prev_dir, name + ".png"))
         made.append(name)
 
-    # gallery for multi-device review
+    # static render-gallery fallback
     order = [n for n in made if n.startswith("poster")] + \
             [n for n in made if n.startswith("stack")] + \
             [n for n in made if n.startswith("concept")] + \
             [n for n in made if n.startswith("tile")]
-    with open(os.path.join(here, "index.html"), "w") as f:
-        f.write(build_gallery(prev_dir, order))
+    with open(os.path.join(here, "gallery.html"), "w") as f:
+        f.write(build_gallery(order))
 
-    print(f"Generated {len(made)} designs + index.html")
+    # interactive site (the main deliverable)
+    with open(os.path.join(here, "index.html"), "w") as f:
+        f.write(build_site())
+
+    print(f"Generated {len(made)} designs + index.html (interactive) + gallery.html")
 
 
 if __name__ == "__main__":
