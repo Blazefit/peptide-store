@@ -323,35 +323,47 @@ function garmentSVG(g,color,artSVG){
   if(luminance(color)>0.6){
     artSVG=artSVG.replace(/#fff(?![0-9a-f])/gi,"#14141c").replace(/#ffffff/gi,"#14141c");
   }
-  // art is placed as a nested svg in the chest area
-  const inner = `<svg x="ART_X" y="ART_Y" width="ART_W" height="ART_H" viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid meet">${artSVG.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')}</svg>`;
-  const stroke="#000", sw=4;
-  const lighter = shade(color,18), darker=shade(color,-22);
-  const place=(x,y,w)=>inner.replace("ART_X",x).replace("ART_Y",y).replace("ART_W",w).replace("ART_H",Math.round(w*1.1667));
-  if(g==="hoodie"){
-    const art=place("345","330","410");
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1200">
-      <path d="M250 230 L420 150 Q550 250 680 150 L850 230 L1010 360 L900 470 L860 430 L860 1080 Q550 1130 240 1080 L240 430 L200 470 L90 360 Z" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-      <path d="M420 150 Q550 320 680 150 L660 250 Q550 360 440 250 Z" fill="${darker}"/>
-      <rect x="430" y="820" width="240" height="150" rx="18" fill="${darker}" opacity=".55"/>
-      <path d="M250 230 L240 430 L200 470 L90 360 Z" fill="${lighter}" opacity=".5"/>
-      ${art}
+  const inner=(x,y,w)=>`<svg x="${x}" y="${y}" width="${w}" height="${Math.round(w*1.1667)}" viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid meet">${artSVG.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')}</svg>`;
+  const stroke="#000", sw=5;
+  const lighter=shade(color,20), darker=shade(color,-26), rib=shade(color,-40);
+  // all three share one 1000x1150 coordinate space so they're visually comparable
+  if(g==="long"){
+    const body="M388 150 Q500 232 612 150 L672 168 L838 238 L884 1000 L792 1006 L700 440 L702 1044 Q500 1090 298 1044 L300 440 L208 1006 L116 1000 L162 238 L328 168 Z";
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1150">
+      <path d="${body}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+      <path d="M396 158 Q500 252 604 158 Q500 314 396 158 Z" fill="${darker}"/>
+      <path d="M781 946 L880 940 L884 1002 L792 1008 Z" fill="${rib}"/>
+      <path d="M120 940 L219 946 L208 1008 L116 1002 Z" fill="${rib}"/>
+      ${inner(320,440,360)}
     </svg>`;
   }
-  if(g==="long"){
-    const art=place("390","320","400");
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 1200">
-      <path d="M360 170 Q590 280 820 170 L980 250 L1120 470 L1010 560 L940 500 L940 1090 Q590 1140 240 1090 L240 500 L170 560 L60 470 L200 250 Z" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-      <path d="M360 170 Q590 300 820 170 L800 250 Q590 360 380 250 Z" fill="${darker}"/>
-      ${art}
+  if(g==="hoodie"){
+    const hoodOut="M300 300 Q300 108 500 108 Q700 108 700 300 Q610 206 500 206 Q390 206 300 300 Z";
+    const hoodIn="M362 276 Q362 168 500 168 Q638 168 638 276 Q576 220 500 220 Q424 220 362 276 Z";
+    const body="M388 250 Q500 332 612 250 L690 235 L862 300 L910 1006 L812 1012 L712 470 L716 1050 Q500 1098 284 1050 L288 470 L188 1012 L90 1006 L138 300 L310 235 Z";
+    const pocket="M352 838 L648 838 L666 980 Q500 1014 334 980 Z";
+    const hem="M288 1006 Q500 1054 716 1006 L716 1050 Q500 1098 284 1050 Z";
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1150">
+      <path d="${hoodOut}" fill="${darker}" stroke="${stroke}" stroke-width="${sw}"/>
+      <path d="${hoodIn}" fill="${rib}"/>
+      <path d="${body}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+      <path d="${hem}" fill="${darker}"/>
+      <path d="M806 950 L905 944 L910 1008 L812 1014 Z" fill="${rib}"/>
+      <path d="M95 944 L194 950 L188 1014 L90 1008 Z" fill="${rib}"/>
+      <line x1="468" y1="300" x2="470" y2="476" stroke="${rib}" stroke-width="9"/>
+      <line x1="532" y1="300" x2="530" y2="476" stroke="${rib}" stroke-width="9"/>
+      <circle cx="470" cy="482" r="11" fill="${rib}"/><circle cx="530" cy="482" r="11" fill="${rib}"/>
+      <path d="${pocket}" fill="${darker}" opacity=".85"/>
+      ${inner(345,510,310)}
     </svg>`;
   }
   // tee
-  const art=place("390","345","400");
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 1100">
-    <path d="M360 160 Q590 270 820 160 L980 240 L1100 430 L990 520 L920 460 L920 1010 Q590 1060 260 1010 L260 460 L190 520 L80 430 L200 240 Z" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-    <path d="M360 160 Q590 290 820 160 L800 235 Q590 345 380 235 Z" fill="${darker}"/>
-    ${art}
+  const body="M388 150 Q500 232 612 150 L672 168 L856 258 L806 442 L688 398 L700 1040 Q500 1086 300 1040 L312 398 L194 442 L144 258 L328 168 Z";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1150">
+    <path d="${body}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <path d="M396 158 Q500 252 604 158 Q500 314 396 158 Z" fill="${darker}"/>
+    <path d="M328 168 L312 398 L194 442 L144 258 Z" fill="${lighter}" opacity=".25"/>
+    ${inner(320,440,360)}
   </svg>`;
 }
 function shade(hex,pct){
