@@ -20,8 +20,8 @@ Outputs SVGs to ./mythic_svg, PNG previews to ./mythic_preview (both styles),
 and builds mythic.html (gallery) + home.html (hub linking both series).
 """
 
-import os, subprocess, json, math
-from generate_tiles import ELEMENTS, STACKS
+import base64, os, subprocess, json, math
+from generate_tiles import BLENDS, ELEMENTS, STACKS
 
 SANS  = "'Segoe UI',system-ui,-apple-system,sans-serif"
 SERIF = "'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif"
@@ -97,6 +97,7 @@ EVO = {
     "WORKHORSE":        ("titan",     "bronze",   "It shows up. Every single day."),
     "PRIME":            ("titan",     "gold",     "Held at the very peak of condition."),
     "THE HOLY TRINITY": ("ascendant", "gold",     "Three powers. Nothing more is needed."),
+    "THE OVERHAUL":     ("colossus",  "verdigris","Rebuilt from scratch, every weak link replaced."),
     "BLACK LABEL":      ("colossus",  "obsidian", "Top shelf only. Reserved for the few."),
     "OLD GUARD":        ("titan",     "bronze",   "Earned across years. Never simply given."),
     "GREEK GOD":        ("titan",     "marble",   "Carved from marble in a forgotten age."),
@@ -274,8 +275,66 @@ def silhouette(kind, cx, top, bot, fill, edge):
     return f'<g>{"".join(parts)}</g>'
 
 # ---------------------------------------------------------------------------
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+PNG_IEND = b"\x00\x00\x00\x00IEND\xaeB\x60\x82"
+
+def art_file_style(style):
+    return "anime" if style == "arcane" else style
+
+def stack_art_key(name):
+    return name.upper().replace(" ", "_")
+
+def art_path_for(here, key, style):
+    return os.path.join(here, "mythic_art", f"art_{key}_{art_file_style(style)}.png")
+
+def png_image_href(path):
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None
+    if not data.startswith(PNG_SIGNATURE) or not data.endswith(PNG_IEND):
+        return None
+    return "../mythic_art/" + os.path.basename(path)
+
+def png_data_uri(path):
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None
+    if not data.startswith(PNG_SIGNATURE) or not data.endswith(PNG_IEND):
+        return None
+    return "data:image/png;base64," + base64.b64encode(data).decode("ascii")
+
+def svg_for_preview(svg, here):
+    """librsvg does not load external local images here, so inline only for preview rendering."""
+    art_dir = os.path.join(here, "mythic_art")
+    for filename in os.listdir(art_dir):
+        href = f"../mythic_art/{filename}"
+        if href not in svg:
+            continue
+        uri = png_data_uri(os.path.join(art_dir, filename))
+        if uri:
+            return svg.replace(f'href="{href}"', f'href="{uri}"')
+    return svg
+
+def portrait_art(art_path, px, py, pw, ph, archetype, fig_fill, fig_edge):
+    href = png_image_href(art_path)
+    if not href:
+        return silhouette(archetype, 600, py+70, py+ph-55, fig_fill, fig_edge), False
+    return (
+        f'<image x="{px}" y="{py}" width="{pw}" height="{ph}" href="{esc(href)}" '
+        f'preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>',
+        True,
+    )
+
 def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
-         chain_label, chain_text, style="mythic"):
+         chain_label, chain_text, style="mythic", art_path=None):
     acc = AURAS.get(aura_key, AURAS["gold"])
     M = (style == "mythic")
     fx, fy, fw, fh = 60, 60, 1080, 1280   # outer frame
@@ -315,9 +374,18 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
     pw_rx    = 8 if M else 26
     sub_caps = real_name.upper()
     pf = f"{power_val}"
+    portrait, has_art = portrait_art(art_path, px, py, pw, ph, archetype, fig_fill, fig_edge)
+    gem_before = "" if has_art else gem
+    gem_after = gem if has_art else ""
+    portrait_frame = ""
+    if has_art:
+        portrait_frame = f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" fill="none" stroke="{frame_in}" stroke-width="4"/>'
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" ry="{pw_rx}"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="{g0}"/><stop offset="100%" stop-color="{g1}"/>
     </radialGradient>
@@ -339,8 +407,10 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
   <text x="600" y="{fy+178}" font-family="{MONO}" font-size="26" letter-spacing="5" text-anchor="middle" fill="{acc}">{esc(sub_caps)}</text>
 
   <rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" fill="url(#port)" stroke="{frame_in}" stroke-width="4"/>
-  {gem}
-  {silhouette(archetype, 600, py+70, py+ph-55, fig_fill, fig_edge)}
+  {gem_before}
+  {portrait}
+  {gem_after}
+  {portrait_frame}
 
   <text x="600" y="{py+ph+70}" font-family="{name_font}" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="{txt}">{esc(archetype.upper())}</text>
   <text x="600" y="{py+ph+112}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_key.upper())} AURA &#183; {esc(power_label)} {esc(pf)}</text>
@@ -377,7 +447,12 @@ def build_data():
     for s in STACKS:
         name, sub, comps, tag, extras = s
         arch, aura, lore = EVO.get(name, ("titan", "gold", tag))
-        forged = " + ".join(MYTHIC[c][0].replace("THE ", "") for c in comps if c in MYTHIC)
+        blend_names = {b[0]: b[1] for b in BLENDS}
+        forged = " + ".join(
+            (MYTHIC[c][0] if c in MYTHIC else blend_names[c]).replace("THE ", "")
+            for c in comps
+            if c in MYTHIC or c in blend_names
+        )
         evolutions.append({
             "name": name, "sub": sub, "comps": comps, "arch": arch, "aura": aura,
             "lore": lore, "tag": tag, "forged": forged, "extras": extras,
@@ -401,21 +476,25 @@ def main():
         chain = ("EVOLVES INTO", c["evo"]) if c["evo"] else ("BASE FORM", "—")
         for style in ("mythic", "arcane"):
             svg = card(c["title"], c["real"], c["arch"], c["aura"], c["lore"],
-                       c["plabel"], c["pval"], chain[0], chain[1], style)
+                       c["plabel"], c["pval"], chain[0], chain[1], style,
+                       art_path_for(here, c["sym"], style))
             base = f"c_{c['sym']}_{style}"
-            with open(os.path.join(svg_dir, base + ".svg"), "w") as f:
+            svg_path = os.path.join(svg_dir, base + ".svg")
+            with open(svg_path, "w") as f:
                 f.write(svg)
-            render(svg, os.path.join(prev_dir, base + ".png"),
+            render(svg_for_preview(svg, here), os.path.join(prev_dir, base + ".png"),
                    "#0c0a08" if style == "mythic" else "#0f1118")
             made += 1
     for e in evolutions:
         for style in ("mythic", "arcane"):
             svg = card(e["name"], e["sub"], e["arch"], e["aura"], e["lore"],
-                       "TIER", len(e["comps"]), "FORGED FROM", e["forged"], style)
+                       "TIER", len(e["comps"]), "FORGED FROM", e["forged"], style,
+                       art_path_for(here, stack_art_key(e["name"]), style))
             base = f"e_{e['name'].replace(' ', '_')}_{style}"
-            with open(os.path.join(svg_dir, base + ".svg"), "w") as f:
+            svg_path = os.path.join(svg_dir, base + ".svg")
+            with open(svg_path, "w") as f:
                 f.write(svg)
-            render(svg, os.path.join(prev_dir, base + ".png"),
+            render(svg_for_preview(svg, here), os.path.join(prev_dir, base + ".png"),
                    "#0c0a08" if style == "mythic" else "#0f1118")
             made += 1
 

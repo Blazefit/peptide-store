@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="8" ry="8"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#31373f"/><stop offset="100%" stop-color="#060504"/>
     </radialGradient>
@@ -23,7 +26,9 @@
 
   <rect x="150" y="300" width="900" height="690" rx="8" fill="url(#port)" stroke="#525c69" stroke-width="4"/>
   
-  <g><polygon points="473.9,675.1 582.5,675.1 582.5,935.0 473.9,935.0" fill="#515861" stroke="#31373f" stroke-width="6" stroke-linejoin="round"/><polygon points="726.1,675.1 617.5,675.1 617.5,935.0 726.1,935.0" fill="#515861" stroke="#31373f" stroke-width="6" stroke-linejoin="round"/><polygon points="396.8,514.7 803.2,486.4 726.1,675.1 473.9,675.1" fill="#515861" stroke="#31373f" stroke-width="6" stroke-linejoin="round"/><polygon points="382.8,509.0 438.9,509.0 375.8,709.0 319.8,709.0" fill="#515861" stroke="#31373f" stroke-width="6" stroke-linejoin="round"/><polygon points="337.3,709.0 332.0,748.5 344.3,709.0" fill="#747981" stroke="#31373f" stroke-width="3"/><polygon points="319.8,709.0 314.5,748.5 326.8,709.0" fill="#747981" stroke="#31373f" stroke-width="3"/><polygon points="302.2,709.0 297.0,748.5 309.3,709.0" fill="#747981" stroke="#31373f" stroke-width="3"/><polygon points="817.2,509.0 761.1,509.0 824.2,709.0 880.2,709.0" fill="#515861" stroke="#31373f" stroke-width="6" stroke-linejoin="round"/><polygon points="862.7,709.0 868.0,748.5 855.7,709.0" fill="#747981" stroke="#31373f" stroke-width="3"/><polygon points="880.2,709.0 885.5,748.5 873.2,709.0" fill="#747981" stroke="#31373f" stroke-width="3"/><polygon points="897.8,709.0 903.0,748.5 890.7,709.0" fill="#747981" stroke="#31373f" stroke-width="3"/><circle cx="635.0" cy="445.2" r="44.1" fill="#515861" stroke="#31373f" stroke-width="6" stroke-linejoin="round"/></g>
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_WOLVERINE_mythic.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
+  
+  <rect x="150" y="300" width="900" height="690" rx="8" fill="none" stroke="#525c69" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#ece4d2">BERSERKER</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#998f78">STEEL AURA &#183; TIER 2</text>

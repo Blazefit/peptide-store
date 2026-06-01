@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="8" ry="8"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#1c4731"/><stop offset="100%" stop-color="#060504"/>
     </radialGradient>
@@ -23,7 +26,9 @@
 
   <rect x="150" y="300" width="900" height="690" rx="8" fill="url(#port)" stroke="#2e7652" stroke-width="4"/>
   
-  <g><polygon points="487.9,675.1 582.5,675.1 582.5,935.0 497.4,935.0" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><polygon points="712.1,675.1 617.5,675.1 617.5,935.0 702.6,935.0" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><polygon points="424.9,497.7 775.1,497.7 712.1,675.1 487.9,675.1" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><polygon points="424.9,503.4 382.8,509.0 389.8,686.4 431.9,686.4" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><polygon points="775.1,503.4 817.2,509.0 810.2,686.4 768.1,686.4" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="433.9" r="44.1" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><polygon points="586.8,389.8 600.0,345.8 613.2,389.8" fill="#316f4e" stroke="#1c4731" stroke-width="6" stroke-linejoin="round"/><path d="M494.9,509.0 L705.1,509.0 L705.1,629.9 L600.0,686.4 L494.9,629.9 Z" fill="#56896e" stroke="#1c4731" stroke-width="7"/><circle cx="600.0" cy="563.8" r="24.5" fill="#1c4731"/></g>
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_FIELD_REPAIR_mythic.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
+  
+  <rect x="150" y="300" width="900" height="690" rx="8" fill="none" stroke="#2e7652" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#ece4d2">WARDEN</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#998f78">EMERALD AURA &#183; TIER 2</text>

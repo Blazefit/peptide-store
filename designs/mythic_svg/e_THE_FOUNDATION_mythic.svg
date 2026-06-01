@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="8" ry="8"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#4c3615"/><stop offset="100%" stop-color="#060504"/>
     </radialGradient>
@@ -23,7 +26,9 @@
 
   <rect x="150" y="300" width="900" height="690" rx="8" fill="url(#port)" stroke="#7f5923" stroke-width="4"/>
   
-  <g><polygon points="480.9,675.1 582.5,675.1 582.5,935.0 480.9,935.0" fill="#775525" stroke="#4c3615" stroke-width="6" stroke-linejoin="round"/><polygon points="719.1,675.1 617.5,675.1 617.5,935.0 719.1,935.0" fill="#775525" stroke="#4c3615" stroke-width="6" stroke-linejoin="round"/><polygon points="389.8,497.7 810.2,497.7 719.1,675.1 480.9,675.1" fill="#775525" stroke="#4c3615" stroke-width="6" stroke-linejoin="round"/><polygon points="389.8,503.4 337.3,509.0 354.8,686.4 407.3,686.4" fill="#775525" stroke="#4c3615" stroke-width="6" stroke-linejoin="round"/><polygon points="810.2,503.4 862.7,509.0 845.2,686.4 792.7,686.4" fill="#775525" stroke="#4c3615" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="433.9" r="44.1" fill="#775525" stroke="#4c3615" stroke-width="6" stroke-linejoin="round"/></g>
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_THE_FOUNDATION_mythic.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
+  
+  <rect x="150" y="300" width="900" height="690" rx="8" fill="none" stroke="#7f5923" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#ece4d2">TITAN</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#998f78">BRONZE AURA &#183; TIER 2</text>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="26" ry="26"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#d2d7dd"/><stop offset="100%" stop-color="#9da5af"/>
     </radialGradient>
@@ -22,8 +25,10 @@
   <text x="600" y="238" font-family="ui-monospace,'Courier New',monospace" font-size="26" letter-spacing="5" text-anchor="middle" fill="#AEB7C2">EPITALON</text>
 
   <rect x="150" y="300" width="900" height="690" rx="26" fill="url(#port)" stroke="#AEB7C2" stroke-width="4"/>
+  
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_Ep_anime.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
   <circle cx="992" cy="358" r="40" fill="#bec5ce" stroke="#fff" stroke-width="5"/><circle cx="992" cy="358" r="40" fill="url(#gloss)"/>
-  <g><line x1="600.0" y1="320.9" x2="600.0" y2="264.4" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="656.5" y1="336.0" x2="684.8" y2="287.1" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="697.9" y1="377.4" x2="746.8" y2="349.2" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="713.0" y1="433.9" x2="769.5" y2="433.9" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="697.9" y1="490.4" x2="746.8" y2="518.7" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="656.5" y1="531.8" x2="684.8" y2="580.7" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="600.0" y1="546.9" x2="600.0" y2="603.4" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="543.5" y1="531.8" x2="515.2" y2="580.7" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="502.1" y1="490.4" x2="453.2" y2="518.7" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="487.0" y1="433.9" x2="430.5" y2="433.9" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="502.1" y1="377.4" x2="453.2" y2="349.2" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><line x1="543.5" y1="336.0" x2="515.2" y2="287.1" stroke="#c8ced6" stroke-width="5" stroke-opacity="0.7"/><circle cx="600.0" cy="433.9" r="83.7" fill="none" stroke="#ccd2d8" stroke-width="6" stroke-opacity="0.8"/><polygon points="505.4,675.1 582.5,675.1 582.5,912.4 524.3,912.4" fill="#b6bec8" stroke="#686e74" stroke-width="6" stroke-linejoin="round"/><polygon points="694.6,675.1 617.5,675.1 617.5,912.4 675.7,912.4" fill="#b6bec8" stroke="#686e74" stroke-width="6" stroke-linejoin="round"/><polygon points="452.9,497.7 747.1,497.7 694.6,675.1 505.4,675.1" fill="#b6bec8" stroke="#686e74" stroke-width="6" stroke-linejoin="round"/><polygon points="452.9,503.4 424.9,509.0 387.0,582.6 415.0,582.6" fill="#b6bec8" stroke="#686e74" stroke-width="6" stroke-linejoin="round"/><polygon points="747.1,503.4 775.1,509.0 813.0,582.6 785.0,582.6" fill="#b6bec8" stroke="#686e74" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="433.9" r="44.1" fill="#b6bec8" stroke="#686e74" stroke-width="6" stroke-linejoin="round"/></g>
+  <rect x="150" y="300" width="900" height="690" rx="26" fill="none" stroke="#AEB7C2" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#eef2f8">ASCENDANT</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">SILVER AURA &#183; ESSENCE 4</text>

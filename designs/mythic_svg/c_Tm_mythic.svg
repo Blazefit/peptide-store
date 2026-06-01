@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="8" ry="8"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#4e5257"/><stop offset="100%" stop-color="#060504"/>
     </radialGradient>
@@ -23,7 +26,9 @@
 
   <rect x="150" y="300" width="900" height="690" rx="8" fill="url(#port)" stroke="#828992" stroke-width="4"/>
   
-  <g><polygon points="508.9,675.1 582.5,675.1 582.5,935.0 527.3,935.0" fill="#7a7f84" stroke="#4e5257" stroke-width="6" stroke-linejoin="round"/><polygon points="691.1,675.1 617.5,675.1 617.5,935.0 672.7,935.0" fill="#7a7f84" stroke="#4e5257" stroke-width="6" stroke-linejoin="round"/><polygon points="459.9,497.7 740.1,497.7 691.1,675.1 508.9,675.1" fill="#7a7f84" stroke="#4e5257" stroke-width="6" stroke-linejoin="round"/><polygon points="459.9,503.4 433.6,509.0 424.9,686.4 451.1,686.4" fill="#7a7f84" stroke="#4e5257" stroke-width="6" stroke-linejoin="round"/><polygon points="740.1,503.4 766.4,509.0 775.1,686.4 748.9,686.4" fill="#7a7f84" stroke="#4e5257" stroke-width="6" stroke-linejoin="round"/><path d="M354.8,497.7 Q242.7,716.4 354.8,731.6" fill="none" stroke="#4e5257" stroke-width="9"/><line x1="354.8" y1="497.7" x2="354.8" y2="731.6" stroke="#7a7f84" stroke-width="4"/><circle cx="600.0" cy="433.9" r="44.1" fill="#7a7f84" stroke="#4e5257" stroke-width="6" stroke-linejoin="round"/></g>
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_Tm_mythic.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
+  
+  <rect x="150" y="300" width="900" height="690" rx="8" fill="none" stroke="#828992" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#ece4d2">HUNTER</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#998f78">SILVER AURA &#183; ESSENCE 44</text>

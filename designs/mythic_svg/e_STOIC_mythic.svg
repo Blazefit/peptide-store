@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="8" ry="8"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#45433c"/><stop offset="100%" stop-color="#060504"/>
     </radialGradient>
@@ -23,7 +26,9 @@
 
   <rect x="150" y="300" width="900" height="690" rx="8" fill="url(#port)" stroke="#746f64" stroke-width="4"/>
   
-  <g><polygon points="600.0,486.4 407.3,935.0 792.7,935.0" fill="#6d685d" stroke="#45433c" stroke-width="6" stroke-linejoin="round"/><polygon points="542.7,442.7 600.0,367.8 657.3,442.7" fill="#6d685d" stroke="#45433c" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="440.5" r="34.4" fill="#3c3933"/><line x1="775.1" y1="463.8" x2="775.1" y2="935.0" stroke="#45433c" stroke-width="10"/><circle cx="775.1" cy="458.2" r="21.0" fill="#99958e" stroke="#45433c" stroke-width="4"/></g>
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_STOIC_mythic.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
+  
+  <rect x="150" y="300" width="900" height="690" rx="8" fill="none" stroke="#746f64" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Cinzel','Trajan Pro',Georgia,'DejaVu Serif',serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#ece4d2">SAGE</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#998f78">STONE AURA &#183; TIER 1</text>

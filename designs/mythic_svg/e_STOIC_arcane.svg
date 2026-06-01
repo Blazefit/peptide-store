@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="26" ry="26"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#c7c4bc"/><stop offset="100%" stop-color="#8b8579"/>
     </radialGradient>
@@ -22,8 +25,10 @@
   <text x="600" y="238" font-family="ui-monospace,'Courier New',monospace" font-size="26" letter-spacing="5" text-anchor="middle" fill="#9A9486">COGNITIVE / NOOTROPIC</text>
 
   <rect x="150" y="300" width="900" height="690" rx="26" fill="url(#port)" stroke="#9A9486" stroke-width="4"/>
+  
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_STOIC_anime.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
   <circle cx="992" cy="358" r="40" fill="#aea99e" stroke="#fff" stroke-width="5"/><circle cx="992" cy="358" r="40" fill="url(#gloss)"/>
-  <g><polygon points="600.0,486.4 407.3,935.0 792.7,935.0" fill="#a49f92" stroke="#5c5950" stroke-width="6" stroke-linejoin="round"/><polygon points="542.7,442.7 600.0,367.8 657.3,442.7" fill="#a49f92" stroke="#5c5950" stroke-width="6" stroke-linejoin="round"/><circle cx="600.0" cy="440.5" r="34.4" fill="#5a5750"/><line x1="775.1" y1="463.8" x2="775.1" y2="935.0" stroke="#5c5950" stroke-width="10"/><circle cx="775.1" cy="458.2" r="21.0" fill="#bfbcb3" stroke="#5c5950" stroke-width="4"/></g>
+  <rect x="150" y="300" width="900" height="690" rx="26" fill="none" stroke="#9A9486" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#eef2f8">SAGE</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">STONE AURA &#183; TIER 1</text>

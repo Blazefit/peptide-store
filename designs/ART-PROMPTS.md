@@ -1299,3 +1299,23 @@ ANIME-FORM STYLE (keep identical for every character): a single heroic anime / c
 
 Subject: "THE VAULT" — the anime hero form of Mito / Longevity: an armored guardian-knight, big shield and crested helm, planted protective stance, glowing crest. Its signature element/energy color is pale silver-white (used boldly in the glow and effects). Essence: Longevity, sealed and locked away for keeps. It is an evolved fusion forged from THE CORE + THE WARD + THE CURRENT — make it feel like a higher, more powerful form.
 ```
+
+
+### THE OVERHAUL — Recomp / Repair
+archetype: **colossus** · aura: verdigris · forged from: THE PROGENITOR + THE TRIUNE + KLOW
+
+**MYTHIC form** → save as `art_THE_OVERHAUL_mythic.png`
+
+```
+MYTHIC-FORM STYLE (keep identical for every character): a single epic fantasy character, full body, centered, vertical 6:7 composition. Highly detailed digital oil painting, cinematic dramatic side lighting, deep shadows, weathered and ancient, mature and serious — NOT cartoon, NOT cute. Muted, desaturated, metallic palette (stone, iron, bronze, gold) with ONE restrained accent color of glowing energy. Plain dark stone/void background, subtle rim light. Mythic, legendary, Lord-of-the-Rings / Dark Souls energy. No text, no letters, no logos, no watermark, no border.
+
+Subject: "THE OVERHAUL" — the mythic embodiment of Recomp / Repair. Render as a massive rebuilt colossus-mechanic, half ancient stone titan and half surgical forge machine, with bolted armor plates, exposed repair cables, hydraulic shoulders, and verdigris-green healing light running through cracks. It should feel significantly bigger and more upgraded than the base characters: a full-body recomp engine rebuilt from scratch, carrying a forge hammer and a medical-mechanical gauntlet. Signature accent color verdigris teal-green (use sparingly, glowing highlights only; keep it dark and desaturated). Essence: Rebuilt from scratch, every weak link replaced. It is an evolved fusion forged from THE PROGENITOR + THE TRIUNE + KLOW — make it feel like a higher, more powerful form.
+```
+
+**ANIME form** → save as `art_THE_OVERHAUL_anime.png`
+
+```
+ANIME-FORM STYLE (keep identical for every character): a single heroic anime / collectible-creature character, full body, centered, vertical 6:7 composition. Clean cel-shaded anime illustration, bold confident line art, vibrant saturated colors, dynamic action pose, expressive and energetic, glowing elemental effects — like a premium trading-card creature. Simple complementary gradient background with a soft energy glow behind the figure. Polished, high-quality, NOT childish-chibi, NOT photoreal. No text, no letters, no logos, no watermark, no border.
+
+Subject: "THE OVERHAUL" — the anime hero form of Recomp / Repair: a huge rebuilt mechanic-colossus hero with oversized armored shoulders, teal-green repair circuitry, floating replacement armor plates, a giant forge hammer, and a glowing medical gauntlet that reassembles the body mid-battle. Its silhouette should be much bigger and more buffed than the base forms, clearly a complete upgrade/evolution. Signature element/energy color verdigris teal-green (used boldly in the glow and effects). Essence: Rebuilt from scratch, every weak link replaced. It is an evolved fusion forged from THE PROGENITOR + THE TRIUNE + KLOW — make it feel like a higher, more powerful form.
+```

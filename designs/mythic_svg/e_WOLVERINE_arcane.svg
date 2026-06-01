@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
+    <clipPath id="portraitClip">
+      <rect x="150" y="300" width="900" height="690" rx="26" ry="26"/>
+    </clipPath>
     <radialGradient id="port" cx="50%" cy="42%" r="75%">
       <stop offset="0%" stop-color="#afb6c0"/><stop offset="100%" stop-color="#636f7e"/>
     </radialGradient>
@@ -22,8 +25,10 @@
   <text x="600" y="238" font-family="ui-monospace,'Courier New',monospace" font-size="26" letter-spacing="5" text-anchor="middle" fill="#6E7B8C">RECOVERY / REPAIR</text>
 
   <rect x="150" y="300" width="900" height="690" rx="26" fill="url(#port)" stroke="#6E7B8C" stroke-width="4"/>
+  
+  <image x="150" y="300" width="900" height="690" href="../mythic_art/art_WOLVERINE_anime.png" preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>
   <circle cx="992" cy="358" r="40" fill="#8b95a3" stroke="#fff" stroke-width="5"/><circle cx="992" cy="358" r="40" fill="url(#gloss)"/>
-  <g><polygon points="473.9,675.1 582.5,675.1 582.5,935.0 473.9,935.0" fill="#7c8898" stroke="#424a54" stroke-width="6" stroke-linejoin="round"/><polygon points="726.1,675.1 617.5,675.1 617.5,935.0 726.1,935.0" fill="#7c8898" stroke="#424a54" stroke-width="6" stroke-linejoin="round"/><polygon points="396.8,514.7 803.2,486.4 726.1,675.1 473.9,675.1" fill="#7c8898" stroke="#424a54" stroke-width="6" stroke-linejoin="round"/><polygon points="382.8,509.0 438.9,509.0 375.8,709.0 319.8,709.0" fill="#7c8898" stroke="#424a54" stroke-width="6" stroke-linejoin="round"/><polygon points="337.3,709.0 332.0,748.5 344.3,709.0" fill="#96a0ad" stroke="#424a54" stroke-width="3"/><polygon points="319.8,709.0 314.5,748.5 326.8,709.0" fill="#96a0ad" stroke="#424a54" stroke-width="3"/><polygon points="302.2,709.0 297.0,748.5 309.3,709.0" fill="#96a0ad" stroke="#424a54" stroke-width="3"/><polygon points="817.2,509.0 761.1,509.0 824.2,709.0 880.2,709.0" fill="#7c8898" stroke="#424a54" stroke-width="6" stroke-linejoin="round"/><polygon points="862.7,709.0 868.0,748.5 855.7,709.0" fill="#96a0ad" stroke="#424a54" stroke-width="3"/><polygon points="880.2,709.0 885.5,748.5 873.2,709.0" fill="#96a0ad" stroke="#424a54" stroke-width="3"/><polygon points="897.8,709.0 903.0,748.5 890.7,709.0" fill="#96a0ad" stroke="#424a54" stroke-width="3"/><circle cx="635.0" cy="445.2" r="44.1" fill="#7c8898" stroke="#424a54" stroke-width="6" stroke-linejoin="round"/></g>
+  <rect x="150" y="300" width="900" height="690" rx="26" fill="none" stroke="#6E7B8C" stroke-width="4"/>
 
   <text x="600" y="1060" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#eef2f8">BERSERKER</text>
   <text x="600" y="1102" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">STEEL AURA &#183; TIER 2</text>
