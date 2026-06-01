@@ -135,6 +135,7 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   .eyebrow{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:4px;color:var(--green);margin-bottom:10px;}
   .hero h1{font-size:clamp(2.1rem,5vw,5.6rem);line-height:.94;font-weight:900;letter-spacing:0;}
   .hero h1 span{color:var(--accent);}
+  .hero h1 .plus{color:var(--green);}
   .hero p{color:var(--text2);margin-top:14px;font-size:1rem;line-height:1.55;max-width:62ch;}
   .quicknav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
   .quicknav .btn{padding:10px 15px;}
@@ -279,9 +280,9 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
 <main>
   <section class="hero">
     <div>
-      <div class="eyebrow">HUMAN+ LEGEND LINE</div>
-      <h1>MYTHOS <span>APPAREL</span></h1>
-      <p>Choose a stack evolution or a single compound, preview it on apparel, then download the artwork.</p>
+      <div class="eyebrow">MYTHOS SERIES</div>
+      <h1>HUMAN<span class="plus">+</span> <span>APPAREL</span></h1>
+      <p>Choose a Mythos stack evolution or a single compound, preview it on apparel, then download the artwork.</p>
       <div class="studio-panel" id="studio">
         <div class="choice-toggle" id="designMode">
           <button data-mode="evo" class="on">STACK</button>

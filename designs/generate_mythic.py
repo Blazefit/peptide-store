@@ -129,6 +129,11 @@ def _mix(hex_a, hex_b, t):
 def lighten(hex_c, t): return _mix(hex_c, "#ffffff", t)
 def darken(hex_c, t):  return _mix(hex_c, "#000000", t)
 
+def fit_font(text, max_w, base, avg=0.62, floor=14):
+    if len(str(text)) * avg * base <= max_w:
+        return base
+    return max(floor, int(max_w / max(len(str(text)) * avg, 1)))
+
 def poly(pts, **a):
     d = " ".join(f"{k.replace('_','-')}=\"{v}\"" for k, v in a.items())
     p = " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
@@ -375,6 +380,7 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
     pw_rx    = 8 if M else 26
     sub_caps = real_name.upper()
     pf = f"{power_val}"
+    chain_fs = fit_font(chain_text, 940, 30, 0.62, 16)
     portrait, has_art = portrait_art(art_path, px, py, pw, ph, archetype, fig_fill, fig_edge)
     gem_before = "" if has_art else gem
     gem_after = gem if has_art else ""
@@ -417,10 +423,10 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
   <text x="600" y="{py+ph+112}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_key.upper())} AURA &#183; {esc(power_label)} {esc(pf)}</text>
 
   <text x="600" y="{py+ph+170}" font-family="{MONO}" font-size="23" letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(chain_label)}</text>
-  <text x="600" y="{py+ph+206}" font-family="{name_font}" font-size="30" font-weight="700" letter-spacing="2" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>
+  <text x="600" y="{py+ph+206}" font-family="{name_font}" font-size="{chain_fs}" font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>
 
   <text x="600" y="{fy+fh-86}" font-family="{name_font}" font-size="27" font-style="italic" text-anchor="middle" fill="{txt_dim}">{esc(lore)}</text>
-  <text x="600" y="{fy+fh-40}" font-family="{MONO}" font-size="22" letter-spacing="6" text-anchor="middle" fill="{txt_dim}" fill-opacity="0.8">HUMAN+ &#183; MYTHOS</text>
+  <text x="600" y="{fy+fh-40}" font-family="{MONO}" font-size="22" letter-spacing="6" text-anchor="middle" fill="{txt_dim}" fill-opacity="0.8">HUMAN+ APPAREL</text>
 </svg>'''
 
 # ---------------------------------------------------------------------------
@@ -448,11 +454,18 @@ def build_data():
     for s in STACKS:
         name, sub, comps, tag, extras = s
         arch, aura, lore = EVO.get(name, ("titan", "gold", tag))
-        blend_names = {b[0]: b[1] for b in BLENDS}
+        blend_comps = {b[0]: b[3] for b in BLENDS}
+        def compound_names(sym):
+            if sym in EL:
+                return [EL[sym][1]]
+            if sym in blend_comps:
+                return [EL[c][1] for c in blend_comps[sym] if c in EL]
+            return [sym]
+        forged_parts = []
+        for c in comps:
+            forged_parts.extend(compound_names(c))
         forged = " + ".join(
-            (MYTHIC[c][0] if c in MYTHIC else blend_names[c]).replace("THE ", "")
-            for c in comps
-            if c in MYTHIC or c in blend_names
+            forged_parts
         )
         evolutions.append({
             "name": name, "sub": sub, "comps": comps, "arch": arch, "aura": aura,
