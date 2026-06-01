@@ -99,69 +99,137 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HUMAN+ — MYTHOS</title>
 <style>
-  :root{--bg:#0b0805;--panel:#15100a;--border:#2c2418;--gold:#C9A24B;--text:#ece4d2;--dim:#998f78;}
+  :root{
+    --bg:#0d0d12;--surface:#16161f;--surface2:#1e1e2c;--border:#2a2a40;
+    --text:#e6e6f2;--text2:#9393b0;--green:#2BE8B0;--amber:#FFB020;
+    --violet:#7C5CFC;--blue:#38BDF8;--accent:#C9A24B;
+  }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
   body{background:
-      radial-gradient(120% 60% at 80% -5%, rgba(201,162,75,.10), transparent 60%),
-      var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
-  body.arcane{--bg:#0a0c12;--panel:#10131b;--border:#222838;--gold:#52c0ff;--text:#eef2f8;--dim:#9aa3b5;
-    background:radial-gradient(120% 60% at 80% -5%, rgba(82,192,255,.12), transparent 60%),#0a0c12;}
-  header{position:sticky;top:0;z-index:40;background:rgba(11,8,5,.92);backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:14px;justify-content:space-between;}
-  body.arcane header{background:rgba(10,12,18,.92);}
-  .brand{font-family:'Cinzel',Georgia,serif;font-size:1.5rem;font-weight:800;letter-spacing:3px;}
-  .brand span{color:var(--gold);}
-  body.arcane .brand{font-family:'Segoe UI',system-ui,sans-serif;letter-spacing:1px;}
-  .nav{display:flex;gap:8px;align-items:center;}
+      radial-gradient(110% 70% at 78% -12%, rgba(201,162,75,.14), transparent 58%),
+      radial-gradient(90% 60% at 10% 10%, rgba(43,232,176,.08), transparent 60%),
+      var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;overflow-x:hidden;}
+  body.arcane{--accent:var(--blue);
+    background:radial-gradient(110% 70% at 78% -12%, rgba(56,189,248,.16), transparent 58%),
+      radial-gradient(90% 60% at 10% 10%, rgba(43,232,176,.08), transparent 60%),var(--bg);}
+  a{color:inherit;}
+  header{position:sticky;top:0;z-index:50;background:rgba(13,13,18,.92);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:12px;justify-content:space-between;}
+  .logo{font-size:1.5rem;font-weight:800;letter-spacing:1px;text-decoration:none;white-space:nowrap;}
+  .logo span{color:var(--green);}
+  .series-pill{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--text2);
+    border:1px solid var(--border);border-radius:999px;padding:7px 11px;white-space:nowrap;}
+  .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
   .btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:9px;
     padding:8px 13px;font-size:.8rem;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;transition:border-color .15s,background .15s;}
-  .btn:hover{border-color:var(--gold);}
+  .btn:hover{border-color:var(--accent);background:rgba(255,255,255,.03);}
   .toggle{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-  .toggle button{border:none;background:transparent;color:var(--dim);padding:8px 14px;font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:1px;}
-  .toggle button.on{background:var(--gold);color:#1a1306;}
+  .toggle button{border:none;background:transparent;color:var(--text2);padding:8px 14px;font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:1px;}
+  .toggle button.on{background:var(--accent);color:#120f08;}
   body.arcane .toggle button.on{color:#03121c;}
-  main{max-width:1400px;margin:0 auto;padding:20px 18px 80px;}
-  .hero{text-align:center;padding:18px 0 6px;}
-  .hero h1{font-family:'Cinzel',Georgia,serif;font-size:2.2rem;letter-spacing:4px;font-weight:800;}
-  body.arcane .hero h1{font-family:'Segoe UI',system-ui,sans-serif;letter-spacing:1px;}
-  .hero p{color:var(--dim);margin-top:8px;font-size:.92rem;}
-  h2.sec{font-family:'Cinzel',Georgia,serif;font-size:1.25rem;letter-spacing:2px;margin:28px 0 4px;border-bottom:1px solid var(--border);padding-bottom:8px;}
-  body.arcane h2.sec{font-family:'Segoe UI',system-ui,sans-serif;}
-  .muted{color:var(--dim);font-size:.85rem;margin-bottom:10px;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;margin-top:12px;}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;
+  main{max-width:1440px;margin:0 auto;padding:22px 18px 84px;}
+  .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center;padding:12px 0 18px;}
+  @media(min-width:940px){.hero{grid-template-columns:minmax(0,.82fr) minmax(560px,1.18fr);}}
+  .eyebrow{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:4px;color:var(--green);margin-bottom:10px;}
+  .hero h1{font-size:clamp(2.1rem,5vw,5.6rem);line-height:.94;font-weight:900;letter-spacing:0;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{color:var(--text2);margin-top:14px;font-size:1rem;line-height:1.55;max-width:62ch;}
+  .quicknav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .quicknav .btn{padding:10px 15px;}
+  .product-stage{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media(min-width:640px){.product-stage{grid-template-columns:minmax(270px,.9fr) minmax(260px,1fr);}}
+  .panel{background:rgba(22,22,31,.82);border:1px solid var(--border);border-radius:14px;overflow:hidden;min-width:0;}
+  .tee-panel{min-height:420px;display:flex;align-items:center;justify-content:center;padding:22px;position:relative;}
+  .tee{position:relative;width:min(100%,360px);aspect-ratio:.74/1;}
+  .tee-body{position:absolute;left:18%;right:18%;top:13%;bottom:2%;background:linear-gradient(180deg,#171821,#090a0f);
+    border:1px solid #303044;border-radius:46% 46% 10% 10%;box-shadow:0 28px 80px rgba(0,0,0,.55);}
+  .tee-sleeve{position:absolute;top:19%;width:27%;height:29%;background:#101119;border:1px solid #303044;border-radius:22px;z-index:1;}
+  .tee-sleeve.left{left:3%;transform:rotate(18deg);} .tee-sleeve.right{right:3%;transform:rotate(-18deg);}
+  .tee-neck{position:absolute;left:39%;right:39%;top:12%;height:11%;background:var(--bg);border:1px solid #303044;
+    border-radius:0 0 999px 999px;z-index:4;}
+  .tee-print{position:absolute;left:31%;top:31%;width:38%;z-index:5;border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 12px 34px rgba(0,0,0,.55);background:#050506;}
+  .tee-print img{display:block;width:100%;aspect-ratio:6/7;object-fit:cover;}
+  .feature-panel{display:grid;grid-template-rows:1fr auto;background:linear-gradient(180deg,rgba(30,30,44,.94),rgba(13,13,18,.94));}
+  .feature-panel img{width:100%;height:100%;max-height:520px;object-fit:contain;background:#050506;padding:14px;}
+  .feature-meta{border-top:1px solid var(--border);padding:13px 14px;}
+  .feature-meta .k{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--accent);}
+  .feature-meta .n{font-size:1.2rem;font-weight:850;margin-top:3px;}
+  .jumpbar{position:sticky;top:66px;z-index:30;display:flex;gap:8px;flex-wrap:wrap;background:rgba(13,13,18,.88);
+    backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:13px;padding:8px;margin:8px 0 24px;}
+  .jumpbar a{font-family:ui-monospace,monospace;font-size:.72rem;letter-spacing:2px;text-decoration:none;color:var(--text2);
+    border-radius:9px;padding:8px 10px;}
+  .jumpbar a:hover{color:var(--text);background:var(--surface2);}
+  .section{margin-top:28px;}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;}
+  h2.sec{font-size:1.12rem;letter-spacing:1px;font-weight:800;}
+  .muted{color:var(--text2);font-size:.86rem;line-height:1.45;max-width:72ch;}
+  .feature-rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:16px;margin-top:12px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;
     transition:transform .14s,box-shadow .14s,border-color .14s;}
-  .card:hover{transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,.6);border-color:var(--gold);}
+  .card.evo{border-color:color-mix(in srgb,var(--accent) 45%,var(--border));}
+  .card.feature{background:linear-gradient(180deg,rgba(30,30,44,.95),rgba(18,18,25,.95));}
+  .card:hover{transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,.6);border-color:var(--accent);}
   .card img{width:100%;display:block;aspect-ratio:6/7;object-fit:cover;background:#000;}
-  .card .cap{padding:9px 11px;}
-  .card .cn{font-family:'Cinzel',Georgia,serif;font-weight:700;font-size:.92rem;letter-spacing:1px;}
-  body.arcane .card .cn{font-family:'Segoe UI',system-ui,sans-serif;}
-  .card .cr{font-family:ui-monospace,monospace;font-size:.64rem;color:var(--dim);letter-spacing:2px;margin-top:2px;}
-  .card .ce{font-family:ui-monospace,monospace;font-size:.62rem;color:var(--gold);margin-top:5px;}
+  .card .cap{padding:10px 11px 11px;}
+  .card .cn{font-weight:800;font-size:.94rem;letter-spacing:1px;}
+  .card .cr{font-family:ui-monospace,monospace;font-size:.63rem;color:var(--text2);letter-spacing:2px;margin-top:3px;}
+  .card .ce{font-family:ui-monospace,monospace;font-size:.64rem;color:var(--accent);margin-top:7px;font-weight:700;}
+  .card .kind{display:inline-block;font-family:ui-monospace,monospace;font-size:.56rem;letter-spacing:2px;color:var(--text2);
+    border:1px solid var(--border);border-radius:999px;padding:4px 7px;margin-top:8px;}
   /* lightbox */
-  .lb{position:fixed;inset:0;z-index:90;background:rgba(4,3,2,.92);display:none;align-items:center;justify-content:center;padding:20px;}
+  .lb{position:fixed;inset:0;z-index:90;background:rgba(4,4,8,.94);display:none;align-items:flex-start;justify-content:center;
+    padding:24px;overflow:auto;}
   .lb.show{display:flex;}
-  .lb-inner{max-width:1100px;width:100%;display:grid;grid-template-columns:1fr;gap:18px;}
-  @media(min-width:760px){.lb-inner{grid-template-columns:minmax(0,420px) 1fr;align-items:center;}}
-  .lb img{width:100%;border-radius:14px;border:1px solid var(--border);background:#000;}
-  .lb .meta{}
-  .lb .meta h3{font-family:'Cinzel',Georgia,serif;font-size:2rem;letter-spacing:2px;}
-  body.arcane .lb .meta h3{font-family:'Segoe UI',system-ui,sans-serif;}
-  .lb .meta .sub{color:var(--gold);font-family:ui-monospace,monospace;letter-spacing:3px;margin:6px 0 16px;}
+  .lb-inner{max-width:1180px;width:100%;display:grid;grid-template-columns:1fr;gap:18px;margin:auto 0;}
+  @media(min-width:820px){.lb-inner{grid-template-columns:minmax(300px,430px) minmax(0,1fr);align-items:start;}}
+  .lb-card{width:100%;max-height:72vh;object-fit:contain;border-radius:14px;border:1px solid var(--border);background:#000;}
+  .lb .meta{padding:4px 0 24px;}
+  .lb .meta h3{font-size:clamp(2rem,5vw,4rem);line-height:.94;letter-spacing:0;font-weight:900;}
+  .lb .meta .sub{color:var(--accent);font-family:ui-monospace,monospace;letter-spacing:3px;margin:8px 0 16px;}
   .lb .meta .lore{font-style:italic;color:var(--text);font-size:1.05rem;margin-bottom:18px;line-height:1.5;}
   .lb .meta .stat{display:flex;gap:10px;margin:7px 0;font-size:.9rem;}
-  .lb .meta .stat b{color:var(--dim);font-family:ui-monospace,monospace;font-size:.72rem;letter-spacing:2px;min-width:120px;text-transform:uppercase;}
+  .lb .meta .stat b{color:var(--text2);font-family:ui-monospace,monospace;font-size:.72rem;letter-spacing:2px;min-width:120px;text-transform:uppercase;}
   .lb .chain{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
-  .lb .chain .lab{font-family:ui-monospace,monospace;font-size:.7rem;letter-spacing:3px;color:var(--dim);}
-  .lb .chain .to{font-family:'Cinzel',Georgia,serif;font-size:1.3rem;font-weight:700;margin-top:4px;}
-  body.arcane .lb .chain .to{font-family:'Segoe UI',system-ui,sans-serif;}
-  .lb .x{position:absolute;top:16px;right:20px;font-size:2rem;color:var(--dim);cursor:pointer;background:none;border:none;}
+  .lb .chain .lab{font-family:ui-monospace,monospace;font-size:.7rem;letter-spacing:3px;color:var(--text2);}
+  .lb .chain .to{font-size:1.3rem;font-weight:800;margin-top:4px;}
+  .lb .x{position:fixed;top:14px;right:18px;font-size:2rem;color:var(--text2);cursor:pointer;background:none;border:none;z-index:95;}
+  .mock-mini{margin-top:20px;display:grid;grid-template-columns:105px 1fr;gap:13px;align-items:center;background:rgba(22,22,31,.75);
+    border:1px solid var(--border);border-radius:12px;padding:12px;max-width:440px;}
+  .mock-mini .tee{width:96px;}
+  .mock-mini .copy{font-size:.86rem;color:var(--text2);line-height:1.4;}
+  .mock-mini .copy b{display:block;color:var(--text);font-size:.95rem;margin-bottom:2px;}
   .dlrow{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;}
+  @media(max-width:760px){
+    header{display:grid;grid-template-columns:1fr;align-items:flex-start;gap:8px;padding:14px 18px;}
+    main{max-width:100%;padding:18px 14px 76px;overflow:hidden;}
+    .series-pill{order:3;width:100%;text-align:center;}
+    .nav{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .nav .btn{text-align:center;padding:8px 6px;}
+    .toggle{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;}
+    .toggle button{flex:1;}
+    .hero{gap:16px;}
+    .hero p{max-width:100%;}
+    .quicknav{display:grid;grid-template-columns:1fr 1fr;width:100%;}
+    .quicknav .btn{text-align:center;padding:10px 8px;}
+    .quicknav .btn:last-child{grid-column:1 / -1;}
+    .tee-panel{min-height:360px;padding:14px;}
+    .tee{width:min(100%,300px);}
+    .jumpbar{top:116px;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:12px;}
+    .feature-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+    .lb{padding:52px 14px 20px;}
+    .lb-card{max-height:58vh;}
+    .mock-mini{grid-template-columns:92px 1fr;}
+  }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">MYTHOS<span>+</span></div>
+  <a class="logo" href="home.html">HUMAN<span>+</span></a>
+  <div class="series-pill">MYTHOS SERIES</div>
   <div class="nav">
     <div class="toggle" id="styleToggle">
       <button data-s="mythic" class="on">MYTHIC</button>
@@ -172,25 +240,77 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   </div>
 </header>
 <main>
-  <div class="hero">
-    <h1>THE MYTHOS SERIES</h1>
-    <p>Every compound, reborn as a legend. Every stack, its evolution. Toggle
-       <b>MYTHIC</b> (forged in stone &amp; gold) or <b>ARCANE</b> (the bright energy-typed cut).</p>
-  </div>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">HUMAN+ LEGEND LINE</div>
+      <h1>MYTHOS <span>APPAREL</span></h1>
+      <p>Compound cards and stack evolutions for the HUMAN+ product line. The gallery now leads with the larger evolved forms, then moves into the base compounds.</p>
+      <div class="quicknav">
+        <a class="btn" href="#evolutions">Stack Evolutions</a>
+        <a class="btn" href="#bases">Base Forms</a>
+        <a class="btn" href="index.html">Periodic Builder</a>
+      </div>
+    </div>
+    <div class="product-stage">
+      <div class="panel tee-panel">
+        <div class="tee" aria-label="T-shirt preview">
+          <div class="tee-sleeve left"></div><div class="tee-sleeve right"></div>
+          <div class="tee-body"></div><div class="tee-neck"></div>
+          <div class="tee-print"><img id="shirtPrint" alt=""></div>
+        </div>
+      </div>
+      <div class="panel feature-panel">
+        <img id="featureCard" alt="">
+        <div class="feature-meta">
+          <div class="k" id="featureKind">STACK EVOLUTION</div>
+          <div class="n" id="featureName"></div>
+          <div class="muted" id="featureSub"></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h2 class="sec">BASE FORMS &mdash; THE COMPOUNDS</h2>
-  <p class="muted">Each peptide, hormone &amp; molecule as a single mythic figure. Tap a card for its lore and evolution.</p>
-  <div class="grid" id="compGrid"></div>
+  <nav class="jumpbar">
+    <a href="#featured">FEATURED EVOLUTIONS</a>
+    <a href="#evolutions">ALL STACKS</a>
+    <a href="#bases">BASE COMPOUNDS</a>
+  </nav>
 
-  <h2 class="sec">EVOLUTIONS &mdash; THE STACKS</h2>
-  <p class="muted">When compounds combine, they ascend. Forged from their base forms.</p>
-  <div class="grid" id="evoGrid"></div>
+  <section class="section" id="featured">
+    <div class="sec-head">
+      <div>
+        <h2 class="sec">Featured Stack Evolutions</h2>
+        <p class="muted">The larger forged forms are surfaced first so the line reads as apparel, not just a card archive.</p>
+      </div>
+    </div>
+    <div class="feature-rail" id="featureRail"></div>
+  </section>
+
+  <section class="section" id="evolutions">
+    <div class="sec-head">
+      <div>
+        <h2 class="sec">All Stack Evolutions</h2>
+        <p class="muted">When compounds combine, they ascend. These are the bigger forged forms that anchor the MYTHOS series.</p>
+      </div>
+    </div>
+    <div class="grid" id="evoGrid"></div>
+  </section>
+
+  <section class="section" id="bases">
+    <div class="sec-head">
+      <div>
+        <h2 class="sec">Base Compound Forms</h2>
+        <p class="muted">Each peptide, hormone and molecule as a single HUMAN+ character card with its stack evolution called out.</p>
+      </div>
+    </div>
+    <div class="grid" id="compGrid"></div>
+  </section>
 </main>
 
 <div class="lb" id="lb">
   <button class="x" id="lbX">&times;</button>
   <div class="lb-inner">
-    <img id="lbImg" alt="">
+    <img class="lb-card" id="lbImg" alt="">
     <div class="meta">
       <h3 id="lbName"></h3>
       <div class="sub" id="lbSub"></div>
@@ -202,6 +322,14 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
         <div class="lab" id="lbChainLab"></div>
         <div class="to" id="lbChainTo"></div>
       </div>
+      <div class="mock-mini">
+        <div class="tee" aria-label="T-shirt preview">
+          <div class="tee-sleeve left"></div><div class="tee-sleeve right"></div>
+          <div class="tee-body"></div><div class="tee-neck"></div>
+          <div class="tee-print"><img id="lbPrint" alt=""></div>
+        </div>
+        <div class="copy"><b>Product view</b><span id="lbProductCopy">Card artwork placed as a front chest print.</span></div>
+      </div>
       <div class="dlrow">
         <a class="btn" id="lbDl" download>Download artwork (SVG)</a>
       </div>
@@ -212,61 +340,87 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
 <script>
 const DB = /*__DATA__*/;
 let style = "mythic";
+let activeItem = null;
+const featuredNames = ["THE OVERHAUL","WORKHORSE","PRIME","THE VAULT","PHOENIX","ADAMANTIUM"];
 const cImg = (sym)=>`mythic_preview/c_${sym}_${style}.png`;
 const cSvg = (sym)=>`mythic_svg/c_${sym}_${style}.svg`;
 const eImg = (name)=>`mythic_preview/e_${name.replace(/ /g,"_")}_${style}.png`;
 const eSvg = (name)=>`mythic_svg/e_${name.replace(/ /g,"_")}_${style}.svg`;
+const byEvoName = new Map(DB.evolutions.map(e=>[e.name,e]));
+
+function featuredEvolutions(){
+  const picked = featuredNames.map(n=>byEvoName.get(n)).filter(Boolean);
+  const seen = new Set(picked.map(e=>e.name));
+  return picked.concat(DB.evolutions.filter(e=>!seen.has(e.name))).slice(0,6);
+}
+
+function setFeature(e){
+  if(!e) return;
+  const src=eImg(e.name);
+  document.getElementById('shirtPrint').src=src;
+  document.getElementById('featureCard').src=src;
+  document.getElementById('featureName').textContent=e.name;
+  document.getElementById('featureSub').textContent=`${e.sub.toUpperCase()} · TIER ${e.comps.length}`;
+}
+
+function makeCard(kind,item,featured=false){
+  const d=document.createElement('div');
+  d.className=`card ${kind==='evo'?'evo':''} ${featured?'feature':''}`;
+  if(kind==='evo'){
+    d.innerHTML=`<img loading="lazy" src="${eImg(item.name)}" alt="${item.name}">
+      <div class="cap"><div class="cn">${item.name}</div>
+      <div class="cr">${item.sub.toUpperCase()}</div>
+      <div class="ce">TIER ${item.comps.length}</div>
+      <div class="kind">STACK EVOLUTION</div></div>`;
+    d.onclick=()=>openItem('evo',item);
+    d.onmouseenter=()=>setFeature(item);
+  } else {
+    d.innerHTML=`<img loading="lazy" src="${cImg(item.sym)}" alt="${item.title}">
+      <div class="cap"><div class="cn">${item.title}</div>
+      <div class="cr">${item.real.toUpperCase()}</div>
+      ${item.evo?`<div class="ce">EVOLVES INTO ${item.evo}</div>`:`<div class="ce">BASE FORM</div>`}
+      <div class="kind">COMPOUND FORM</div></div>`;
+    d.onclick=()=>openItem('compound',item);
+  }
+  return d;
+}
 
 function renderGrids(){
-  const cg=document.getElementById('compGrid');cg.innerHTML="";
-  DB.compounds.forEach(c=>{
-    const d=document.createElement('div');d.className="card";
-    d.innerHTML=`<img loading="lazy" src="${cImg(c.sym)}" alt="${c.title}">
-      <div class="cap"><div class="cn">${c.title}</div>
-      <div class="cr">${c.real.toUpperCase()}</div>
-      ${c.evo?`<div class="ce">&#9650; ${c.evo}</div>`:`<div class="ce">BASE FORM</div>`}</div>`;
-    d.onclick=()=>openComp(c);cg.appendChild(d);
-  });
+  const fg=document.getElementById('featureRail');fg.innerHTML="";
+  featuredEvolutions().forEach(e=>fg.appendChild(makeCard('evo',e,true)));
   const eg=document.getElementById('evoGrid');eg.innerHTML="";
-  DB.evolutions.forEach(e=>{
-    const d=document.createElement('div');d.className="card";
-    d.innerHTML=`<img loading="lazy" src="${eImg(e.name)}" alt="${e.name}">
-      <div class="cap"><div class="cn">${e.name}</div>
-      <div class="cr">${e.sub.toUpperCase()}</div>
-      <div class="ce">TIER ${e.comps.length}</div></div>`;
-    d.onclick=()=>openEvo(e);eg.appendChild(d);
-  });
+  DB.evolutions.forEach(e=>eg.appendChild(makeCard('evo',e)));
+  const cg=document.getElementById('compGrid');cg.innerHTML="";
+  DB.compounds.forEach(c=>cg.appendChild(makeCard('compound',c)));
+  setFeature(featuredEvolutions()[0] || DB.evolutions[0]);
 }
 
-function openComp(c){
-  document.getElementById('lbImg').src=cImg(c.sym);
-  document.getElementById('lbName').textContent=c.title;
-  document.getElementById('lbSub').textContent=c.real.toUpperCase();
-  document.getElementById('lbLore').textContent='"'+c.lore+'"';
-  document.getElementById('lbArch').textContent=c.arch.toUpperCase();
-  document.getElementById('lbAura').textContent=c.aura.toUpperCase();
-  document.getElementById('lbPlab').textContent=c.plabel;
-  document.getElementById('lbPval').textContent=c.pval;
-  const cw=document.getElementById('lbChainWrap');
-  document.getElementById('lbChainLab').textContent=c.evo?"EVOLVES INTO":"BASE FORM";
-  document.getElementById('lbChainTo').textContent=c.evo||"—";
-  cw.style.display="";
-  const dl=document.getElementById('lbDl');dl.href=cSvg(c.sym);dl.download=`mythos_${c.sym}_${style}.svg`;
-  document.getElementById('lb').classList.add('show');
+function applyLightbox(){
+  if(!activeItem) return;
+  const {kind,item}=activeItem;
+  const isEvo=kind==='evo';
+  const png=isEvo?eImg(item.name):cImg(item.sym);
+  const svg=isEvo?eSvg(item.name):cSvg(item.sym);
+  document.getElementById('lbImg').src=png;
+  document.getElementById('lbPrint').src=png;
+  document.getElementById('lbName').textContent=isEvo?item.name:item.title;
+  document.getElementById('lbSub').textContent=(isEvo?item.sub:item.real).toUpperCase();
+  document.getElementById('lbLore').textContent='"'+item.lore+'"';
+  document.getElementById('lbArch').textContent=item.arch.toUpperCase();
+  document.getElementById('lbAura').textContent=item.aura.toUpperCase();
+  document.getElementById('lbPlab').textContent=isEvo?"TIER":item.plabel;
+  document.getElementById('lbPval').textContent=isEvo?item.comps.length:item.pval;
+  document.getElementById('lbChainLab').textContent=isEvo?"FORGED FROM":(item.evo?"EVOLVES INTO":"BASE FORM");
+  document.getElementById('lbChainTo').textContent=isEvo?item.forged:(item.evo||"-");
+  document.getElementById('lbProductCopy').textContent=isEvo?"Evolution artwork placed as a front print.":"Base form artwork placed as a front print.";
+  const dl=document.getElementById('lbDl');
+  dl.href=svg;
+  dl.download=isEvo?`mythos_${item.name.replace(/ /g,'_')}_${style}.svg`:`mythos_${item.sym}_${style}.svg`;
 }
-function openEvo(e){
-  document.getElementById('lbImg').src=eImg(e.name);
-  document.getElementById('lbName').textContent=e.name;
-  document.getElementById('lbSub').textContent=e.sub.toUpperCase();
-  document.getElementById('lbLore').textContent='"'+e.lore+'"';
-  document.getElementById('lbArch').textContent=e.arch.toUpperCase();
-  document.getElementById('lbAura').textContent=e.aura.toUpperCase();
-  document.getElementById('lbPlab').textContent="TIER";
-  document.getElementById('lbPval').textContent=e.comps.length;
-  document.getElementById('lbChainLab').textContent="FORGED FROM";
-  document.getElementById('lbChainTo').textContent=e.forged;
-  document.getElementById('lbChainWrap').style.display="";
-  const dl=document.getElementById('lbDl');dl.href=eSvg(e.name);dl.download=`mythos_${e.name.replace(/ /g,'_')}_${style}.svg`;
+
+function openItem(kind,item){
+  activeItem={kind,item};
+  applyLightbox();
   document.getElementById('lb').classList.add('show');
 }
 
@@ -278,10 +432,7 @@ document.querySelectorAll('#styleToggle button').forEach(b=>b.onclick=()=>{
   document.body.classList.toggle('arcane',style==='arcane');
   renderGrids();
   if(document.getElementById('lb').classList.contains('show')){
-    // refresh open lightbox image to new style
-    const img=document.getElementById('lbImg');
-    img.src=img.src.replace(/_(mythic|arcane)\.png/,`_${style}.png`);
-    const dl=document.getElementById('lbDl');dl.href=dl.href.replace(/_(mythic|arcane)\.svg/,`_${style}.svg`);
+    applyLightbox();
   }
 });
 renderGrids();

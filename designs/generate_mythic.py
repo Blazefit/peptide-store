@@ -329,7 +329,7 @@ def portrait_art(art_path, px, py, pw, ph, archetype, fig_fill, fig_edge):
         return silhouette(archetype, 600, py+70, py+ph-55, fig_fill, fig_edge), False
     return (
         f'<image x="{px}" y="{py}" width="{pw}" height="{ph}" href="{esc(href)}" '
-        f'preserveAspectRatio="xMidYMid slice" clip-path="url(#portraitClip)"/>',
+        f'preserveAspectRatio="xMidYMin meet" clip-path="url(#portraitClip)"/>',
         True,
     )
 
@@ -338,8 +338,9 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
     acc = AURAS.get(aura_key, AURAS["gold"])
     M = (style == "mythic")
     fx, fy, fw, fh = 60, 60, 1080, 1280   # outer frame
-    # portrait window
-    px, py, pw, ph = 150, 300, 900, 690
+    # Portrait art is generated tall; keep the full figure visible instead of
+    # slicing it through a short landscape crop.
+    px, py, pw, ph = 350, 255, 500, 750
     name_font = SERIF if M else SANS
     body_bg   = "#0c0a08" if M else "#0f1118"
     frame_in  = darken(acc, 0.25) if M else acc
