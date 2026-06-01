@@ -88,6 +88,8 @@ MYTHIC = {
 
 # Per-stack evolution identity:  STACK NAME -> (archetype, aura, lore)
 EVO = {
+    "KLOW":             ("colossus",  "verdigris","The complete repair blend, plated and rebuilt."),
+    "GLOW":             ("seraph",    "verdigris","Skin, strand and tissue lit from within."),
     "WOLVERINE":        ("berserker", "steel",    "Heals as fast as it tears. It does not stop."),
     "ADAMANTIUM":       ("colossus",  "steel",    "Forged unbreakable, bone laced with metal."),
     "SPARTAN":          ("berserker", "bronze",   "No retreat. No surrender. Only the line."),
@@ -387,7 +389,7 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
     portrait_frame = ""
     if has_art:
         portrait_frame = f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" fill="none" stroke="{frame_in}" stroke-width="4"/>'
-    return f'''<?xml version="1.0" encoding="UTF-8"?>
+    svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
     <clipPath id="portraitClip">
@@ -419,24 +421,87 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
   {gem_after}
   {portrait_frame}
 
-  <text x="600" y="{py+ph+70}" font-family="{name_font}" font-size="40" font-weight="700" letter-spacing="4" text-anchor="middle" fill="{txt}">{esc(archetype.upper())}</text>
-  <text x="600" y="{py+ph+112}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_key.upper())} AURA &#183; {esc(power_label)} {esc(pf)}</text>
+  <text x="600" y="{py+ph+82}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_key.upper())} AURA &#183; {esc(power_label)} {esc(pf)}</text>
 
-  <text x="600" y="{py+ph+170}" font-family="{MONO}" font-size="23" letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(chain_label)}</text>
-  <text x="600" y="{py+ph+206}" font-family="{name_font}" font-size="{chain_fs}" font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>
+  <text x="600" y="{py+ph+150}" font-family="{MONO}" font-size="23" letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(chain_label)}</text>
+  <text x="600" y="{py+ph+188}" font-family="{name_font}" font-size="{chain_fs}" font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>
 
   <text x="600" y="{fy+fh-86}" font-family="{name_font}" font-size="27" font-style="italic" text-anchor="middle" fill="{txt_dim}">{esc(lore)}</text>
   <text x="600" y="{fy+fh-40}" font-family="{MONO}" font-size="22" letter-spacing="6" text-anchor="middle" fill="{txt_dim}" fill-opacity="0.8">HUMAN+ APPAREL</text>
 </svg>'''
+    return "\n".join(line.rstrip() for line in svg.splitlines()) + "\n"
 
 # ---------------------------------------------------------------------------
+def blend_maps():
+    by_sym = {b[0]: {"name": b[1], "sub": b[2], "comps": b[3], "tag": b[5]} for b in BLENDS}
+    by_name = {b[1]: {"sym": b[0], "sub": b[2], "comps": b[3], "tag": b[5]} for b in BLENDS}
+    return by_sym, by_name
+
+def expanded_comp_symbols(comps, blend_by_sym):
+    out = []
+    for sym in comps:
+        if sym in blend_by_sym:
+            out.extend(blend_by_sym[sym]["comps"])
+        else:
+            out.append(sym)
+    return out
+
+def compact_forged(comps, EL, blend_by_sym):
+    """Keep forged labels chemically grounded, but collapse known blend recipes."""
+    known = [
+        ("KLOW", ["Bp", "Tb", "Gk", "Kp"]),
+        ("GLOW", ["Bp", "Tb", "Gk"]),
+        ("WOLVERINE", ["Bp", "Tb"]),
+    ]
+    expanded = expanded_comp_symbols(comps, blend_by_sym)
+    if all(c not in blend_by_sym for c in comps):
+        expanded_set = set(expanded)
+        for label, recipe in known:
+            if expanded_set == set(recipe) and len(expanded) == len(recipe):
+                return label
+
+    labels = []
+    i = 0
+    while i < len(comps):
+        sym = comps[i]
+        if sym in blend_by_sym:
+            labels.append(blend_by_sym[sym]["name"])
+            i += 1
+            continue
+        matched = False
+        for label, recipe in known:
+            n = len(recipe)
+            if comps[i:i+n] == recipe:
+                labels.append(label)
+                i += n
+                matched = True
+                break
+        if matched:
+            continue
+        labels.append(EL[sym][1] if sym in EL else sym)
+        i += 1
+    return " + ".join(labels)
+
+def evolution_sources():
+    """Blend cards become first-class MYTHOS stacks unless a curated stack exists."""
+    existing = {s[0] for s in STACKS}
+    out = []
+    for bsym, bfull, bsub, bcomps, _accent, btag in BLENDS:
+        if bfull not in existing:
+            out.append((bfull, bsub, bcomps, btag, ""))
+    out.extend(STACKS)
+    return out
+
 def build_data():
     """Assemble compound + evolution records, resolving evolution chains."""
     EL = {e[0]: e for e in ELEMENTS}
+    blend_by_sym, _blend_by_name = blend_maps()
     # which stack each compound first evolves into
     first_evo = {}
-    for s in STACKS:
-        for sym in s[2]:
+    priority_names = ["WOLVERINE", "GLOW", "KLOW"]
+    first_sources = sorted(evolution_sources(), key=lambda s: priority_names.index(s[0]) if s[0] in priority_names else 99)
+    for s in first_sources:
+        for sym in expanded_comp_symbols(s[2], blend_by_sym):
             first_evo.setdefault(sym, s[0])
     compounds = []
     for e in ELEMENTS:
@@ -451,25 +516,14 @@ def build_data():
             "evo": first_evo.get(sym, ""),
         })
     evolutions = []
-    for s in STACKS:
+    for s in evolution_sources():
         name, sub, comps, tag, extras = s
         arch, aura, lore = EVO.get(name, ("titan", "gold", tag))
-        blend_comps = {b[0]: b[3] for b in BLENDS}
-        def compound_names(sym):
-            if sym in EL:
-                return [EL[sym][1]]
-            if sym in blend_comps:
-                return [EL[c][1] for c in blend_comps[sym] if c in EL]
-            return [sym]
-        forged_parts = []
-        for c in comps:
-            forged_parts.extend(compound_names(c))
-        forged = " + ".join(
-            forged_parts
-        )
+        forged = compact_forged(comps, EL, blend_by_sym)
         evolutions.append({
             "name": name, "sub": sub, "comps": comps, "arch": arch, "aura": aura,
             "lore": lore, "tag": tag, "forged": forged, "extras": extras,
+            "compound_syms": expanded_comp_symbols(comps, blend_by_sym),
         })
     return compounds, evolutions
 
@@ -521,7 +575,8 @@ def main():
                       for c in compounds],
         "evolutions": [{"name": e["name"], "sub": e["sub"], "comps": e["comps"],
                         "arch": e["arch"], "aura": e["aura"], "lore": e["lore"],
-                        "tag": e["tag"], "forged": e["forged"], "extras": e["extras"]}
+                        "tag": e["tag"], "forged": e["forged"], "extras": e["extras"],
+                        "compoundSyms": e["compound_syms"]}
                        for e in evolutions],
         "auras": AURAS,
     }
