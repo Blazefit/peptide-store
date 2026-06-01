@@ -22,7 +22,7 @@ clean site assets without compound evolution text to ./mythic_svg_clean and
 linking both series).
 """
 
-import base64, os, subprocess, json, math
+import base64, os, subprocess, json, math, sys
 from generate_tiles import BLENDS, ELEMENTS, STACKS
 
 SANS  = "'Segoe UI',system-ui,-apple-system,sans-serif"
@@ -490,6 +490,11 @@ def compact_forged(comps, EL, blend_by_sym):
         i += 1
     return " + ".join(labels)
 
+def compound_recipe(comps, EL, blend_by_sym):
+    """Spell out the actual compounds for the card art caption."""
+    return " + ".join(EL[sym][1] if sym in EL else sym
+                      for sym in expanded_comp_symbols(comps, blend_by_sym))
+
 def evolution_sources():
     """Blend cards become first-class MYTHOS stacks unless a curated stack exists."""
     existing = {s[0] for s in STACKS}
@@ -528,9 +533,11 @@ def build_data():
         name, sub, comps, tag, extras = s
         arch, aura, lore = EVO.get(name, ("titan", "gold", tag))
         forged = compact_forged(comps, EL, blend_by_sym)
+        recipe = compound_recipe(comps, EL, blend_by_sym)
         evolutions.append({
             "name": name, "sub": sub, "comps": comps, "arch": arch, "aura": aura,
             "lore": lore, "tag": tag, "forged": forged, "extras": extras,
+            "recipe": recipe,
             "compound_syms": expanded_comp_symbols(comps, blend_by_sym),
         })
     return compounds, evolutions
@@ -559,7 +566,7 @@ def main():
     compounds, evolutions = build_data()
     made = 0
     for c in compounds:
-        chain = ("EVOLVES INTO", c["evo"]) if c["evo"] else ("BASE FORM", "—")
+        chain = ("COMPOUND", c["real"])
         for style in ("mythic", "arcane"):
             bg = "#0c0a08" if style == "mythic" else "#0f1118"
             svg = card(c["title"], c["real"], c["arch"], c["aura"], c["lore"],
@@ -568,7 +575,7 @@ def main():
             base = f"c_{c['sym']}_{style}"
             write_card_assets(svg, svg_dir, prev_dir, base, bg, here)
             clean_svg = card(c["title"], c["real"], c["arch"], c["aura"], c["lore"],
-                             c["plabel"], c["pval"], "", "", style,
+                             c["plabel"], c["pval"], chain[0], chain[1], style,
                              art_path_for(here, c["sym"], style))
             write_card_assets(clean_svg, clean_svg_dir, clean_prev_dir, base, bg, here)
             made += 1
@@ -576,7 +583,7 @@ def main():
         for style in ("mythic", "arcane"):
             bg = "#0c0a08" if style == "mythic" else "#0f1118"
             svg = card(e["name"], e["sub"], e["arch"], e["aura"], e["lore"],
-                       "TIER", len(e["comps"]), "FORGED FROM", e["forged"], style,
+                       "TIER", len(e["comps"]), "COMPOUNDS", e["recipe"], style,
                        art_path_for(here, stack_art_key(e["name"]), style))
             base = f"e_{e['name'].replace(' ', '_')}_{style}"
             write_card_assets(svg, svg_dir, prev_dir, base, bg, here)
@@ -597,15 +604,18 @@ def main():
                        for e in evolutions],
         "auras": AURAS,
     }
-    from mythic_template import MYTHIC_TEMPLATE, HOME_TEMPLATE
-    html = MYTHIC_TEMPLATE.replace("/*__DATA__*/", json.dumps(db))
-    with open(os.path.join(here, "mythic.html"), "w") as f:
-        f.write(html)
-    with open(os.path.join(here, "home.html"), "w") as f:
-        f.write(HOME_TEMPLATE)
+    # --no-html: regenerate card assets only, without rebuilding the page
+    # (the live mythic.html is maintained separately and must not be clobbered).
+    if "--no-html" not in sys.argv:
+        from mythic_template import MYTHIC_TEMPLATE, HOME_TEMPLATE
+        html = MYTHIC_TEMPLATE.replace("/*__DATA__*/", json.dumps(db))
+        with open(os.path.join(here, "mythic.html"), "w") as f:
+            f.write(html)
+        with open(os.path.join(here, "home.html"), "w") as f:
+            f.write(HOME_TEMPLATE)
+        print("Built mythic.html + home.html")
 
     print(f"MYTHOS: {made} card PNGs ({len(compounds)} compounds + {len(evolutions)} evolutions, 2 styles)")
-    print("Built mythic.html + home.html")
 
 if __name__ == "__main__":
     main()
