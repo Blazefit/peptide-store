@@ -141,12 +141,13 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   .quicknav .btn{padding:10px 15px;}
   .studio-panel{margin-top:18px;background:rgba(22,22,31,.72);border:1px solid var(--border);border-radius:14px;padding:14px;
     min-width:0;max-width:100%;}
-  .choice-toggle,.garment-toggle{display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);
+  .choice-toggle,.garment-toggle,.compound-filter{display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);
     border-radius:10px;overflow:hidden;min-width:0;max-width:100%;}
-  .choice-toggle button,.garment-toggle button{border:none;background:transparent;color:var(--text2);padding:10px 12px;font-weight:800;
+  .compound-filter{grid-template-columns:repeat(4,1fr);margin-top:10px;}
+  .choice-toggle button,.garment-toggle button,.compound-filter button{border:none;background:transparent;color:var(--text2);padding:10px 12px;font-weight:800;
     cursor:pointer;font-size:.78rem;letter-spacing:1px;min-width:0;white-space:normal;line-height:1.15;overflow:hidden;}
-  .choice-toggle button.on,.garment-toggle button.on{background:var(--accent);color:#120f08;}
-  body.arcane .choice-toggle button.on,body.arcane .garment-toggle button.on{color:#03121c;}
+  .choice-toggle button.on,.garment-toggle button.on,.compound-filter button.on{background:var(--accent);color:#120f08;}
+  body.arcane .choice-toggle button.on,body.arcane .garment-toggle button.on,body.arcane .compound-filter button.on{color:#03121c;}
   .selected-summary{margin:13px 0 12px;padding:12px;border:1px solid var(--border);border-radius:11px;background:rgba(13,13,18,.58);}
   .selected-summary .k{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--accent);}
   .selected-summary .n{font-size:1.35rem;font-weight:900;margin-top:3px;}
@@ -252,7 +253,7 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
     .studio-panel{padding:12px;margin-top:14px;}
     .picker-grid{display:flex;overflow-x:auto;overflow-y:hidden;max-height:none;padding-bottom:4px;}
     .pick-card{min-width:112px;}
-    .choice-toggle button,.garment-toggle button{padding:10px 7px;font-size:.7rem;letter-spacing:.5px;}
+    .choice-toggle button,.garment-toggle button,.compound-filter button{padding:10px 7px;font-size:.7rem;letter-spacing:.5px;}
     .tee-panel{min-height:360px;padding:14px;}
     .tee{width:min(100%,300px);}
     .jumpbar{top:116px;}
@@ -282,11 +283,17 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
     <div>
       <div class="eyebrow">MYTHOS SERIES</div>
       <h1>HUMAN<span class="plus">+</span> <span>APPAREL</span></h1>
-      <p>Choose a Mythos stack evolution or a single compound, preview it on apparel, then download the artwork.</p>
+      <p>Choose a peptide or compound first, see its Mythos figure on apparel, then switch to stack evolutions when you want the combined form.</p>
       <div class="studio-panel" id="studio">
         <div class="choice-toggle" id="designMode">
-          <button data-mode="evo" class="on">STACK</button>
-          <button data-mode="compound">COMPOUND</button>
+          <button data-mode="compound" class="on">COMPOUND</button>
+          <button data-mode="evo">STACK</button>
+        </div>
+        <div class="compound-filter" id="compoundFilter">
+          <button data-fam="PEP" class="on">PEPTIDES</button>
+          <button data-fam="HOR">HORMONES</button>
+          <button data-fam="MOL">MOLECULES</button>
+          <button data-fam="ALL">ALL</button>
         </div>
         <div class="selected-summary">
           <div class="k" id="selectedKind"></div>
@@ -400,9 +407,11 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
 const DB = /*__DATA__*/;
 let style = "mythic";
 let activeItem = null;
-let mode = "evo";
+let mode = "compound";
+let compoundFilter = "PEP";
 let garment = "tee";
 const featuredNames = ["THE OVERHAUL","WORKHORSE","PRIME","THE VAULT","PHOENIX","ADAMANTIUM"];
+const peptideFirst = ["Bp","Tb","Gk","Kp","Gh","Cj","Ip","Sg","Tz","Re"];
 const cImg = (sym)=>`mythic_preview/c_${sym}_${style}.png`;
 const cSvg = (sym)=>`mythic_svg/c_${sym}_${style}.svg`;
 const eImg = (name)=>`mythic_preview/e_${name.replace(/ /g,"_")}_${style}.png`;
@@ -422,12 +431,26 @@ function orderedEvolutions(){
   return picked.concat(DB.evolutions.filter(e=>!seen.has(e.name)));
 }
 
+function orderedCompounds(){
+  const filtered = DB.compounds.filter(c=>compoundFilter==='ALL' || c.fam===compoundFilter);
+  if(compoundFilter!=='PEP') return filtered;
+  const priority = peptideFirst.map(sym=>byCompoundSym.get(sym)).filter(c=>c && filtered.includes(c));
+  const seen = new Set(priority.map(c=>c.sym));
+  return priority.concat(filtered.filter(c=>!seen.has(c.sym)));
+}
+
 function itemKey(kind,item){return kind==='evo'?item.name:item.sym;}
 function imgFor(kind,item){return kind==='evo'?eImg(item.name):cImg(item.sym);}
 function svgFor(kind,item){return kind==='evo'?eSvg(item.name):cSvg(item.sym);}
-function titleFor(kind,item){return kind==='evo'?item.name:item.title;}
-function subFor(kind,item){return kind==='evo'?`${item.sub.toUpperCase()} · TIER ${item.comps.length}`:item.real.toUpperCase();}
-function kindFor(kind){return kind==='evo'?'STACK EVOLUTION':'SINGLE COMPOUND';}
+function familyLabel(fam){return fam==='PEP'?'PEPTIDE':(fam==='HOR'?'HORMONE':'MOLECULE');}
+function mythicLabel(item){return item.title.replace(/^THE /,'');}
+function titleFor(kind,item){return kind==='evo'?item.name:item.real;}
+function subFor(kind,item){
+  return kind==='evo'
+    ? `${item.sub.toUpperCase()} · TIER ${item.comps.length}`
+    : `${familyLabel(item.fam)} · MYTHOS FIGURE: ${item.title}`;
+}
+function kindFor(kind,item){return kind==='evo'?'STACK EVOLUTION':`${familyLabel(item.fam)} COMPOUND`;}
 function chainFor(kind,item){return kind==='evo'?`FORGED FROM ${item.forged}`:(item.evo?`EVOLVES INTO ${item.evo}`:'BASE FORM');}
 
 function setGarment(next){
@@ -446,10 +469,10 @@ function setSelected(kind,item){
   const svg = svgFor(kind,item);
   document.getElementById('shirtPrint').src = png;
   document.getElementById('featureCard').src = png;
-  document.getElementById('featureKind').textContent = kindFor(kind);
+  document.getElementById('featureKind').textContent = kindFor(kind,item);
   document.getElementById('featureName').textContent = titleFor(kind,item);
   document.getElementById('featureSub').textContent = subFor(kind,item);
-  document.getElementById('selectedKind').textContent = kindFor(kind);
+  document.getElementById('selectedKind').textContent = kindFor(kind,item);
   document.getElementById('selectedName').textContent = titleFor(kind,item);
   document.getElementById('selectedSub').textContent = subFor(kind,item);
   document.getElementById('selectedChain').textContent = chainFor(kind,item);
@@ -462,24 +485,25 @@ function setSelected(kind,item){
 }
 
 function defaultItemForMode(){
-  return mode==='evo'
-    ? (byEvoName.get('THE OVERHAUL') || DB.evolutions[0])
-    : (byCompoundSym.get('Gh') || DB.compounds[0]);
+  if(mode==='evo') return byEvoName.get('THE OVERHAUL') || DB.evolutions[0];
+  if(compoundFilter==='PEP' && byCompoundSym.get('Bp')) return byCompoundSym.get('Bp');
+  return DB.compounds.find(c=>compoundFilter==='ALL' || c.fam===compoundFilter) || DB.compounds[0];
 }
 
 function renderPicker(){
   const pg=document.getElementById('pickerGrid');
   pg.innerHTML="";
   const kind=mode==='evo'?'evo':'compound';
-  const items=mode==='evo'?orderedEvolutions():DB.compounds;
+  const items=mode==='evo' ? orderedEvolutions() : orderedCompounds();
+  document.getElementById('compoundFilter').style.display = mode==='compound' ? 'grid' : 'none';
   items.forEach(item=>{
     const d=document.createElement('div');
     d.className='pick-card';
     d.dataset.kind=kind;
     d.dataset.key=itemKey(kind,item);
-    d.innerHTML=`<img loading="lazy" src="${imgFor(kind,item)}" alt="${titleFor(kind,item)}">
-      <div class="pname">${titleFor(kind,item)}</div>
-      <div class="psub">${kind==='evo'?`TIER ${item.comps.length}`:(item.evo || 'BASE')}</div>`;
+    d.innerHTML=`<div class="pname">${titleFor(kind,item)}</div>
+      <div class="psub">${kind==='evo'?`TIER ${item.comps.length}`:`${item.sym} · ${mythicLabel(item)}`}</div>
+      <img loading="lazy" src="${imgFor(kind,item)}" alt="${titleFor(kind,item)}">`;
     d.onclick=()=>setSelected(kind,item);
     pg.appendChild(d);
   });
@@ -501,9 +525,9 @@ function makeCard(kind,item,featured=false){
       <div class="kind">STACK EVOLUTION</div></div>`;
     d.onclick=()=>openItem('evo',item);
   } else {
-    d.innerHTML=`<img loading="lazy" src="${cImg(item.sym)}" alt="${item.title}">
-      <div class="cap"><div class="cn">${item.title}</div>
-      <div class="cr">${item.real.toUpperCase()}</div>
+    d.innerHTML=`<img loading="lazy" src="${cImg(item.sym)}" alt="${item.real}">
+      <div class="cap"><div class="cn">${item.real}</div>
+      <div class="cr">${familyLabel(item.fam)} · ${item.title.toUpperCase()}</div>
       ${item.evo?`<div class="ce">EVOLVES INTO ${item.evo}</div>`:`<div class="ce">BASE FORM</div>`}
       <div class="kind">COMPOUND FORM</div></div>`;
     d.onclick=()=>openItem('compound',item);
@@ -531,7 +555,7 @@ function applyLightbox(){
   document.getElementById('lbImg').src=png;
   document.getElementById('lbPrint').src=png;
   document.getElementById('lbName').textContent=titleFor(kind,item);
-  document.getElementById('lbSub').textContent=isEvo?item.sub.toUpperCase():item.real.toUpperCase();
+  document.getElementById('lbSub').textContent=isEvo?item.sub.toUpperCase():`${familyLabel(item.fam)} · ${item.title.toUpperCase()}`;
   document.getElementById('lbLore').textContent='"'+item.lore+'"';
   document.getElementById('lbArch').textContent=item.arch.toUpperCase();
   document.getElementById('lbAura').textContent=item.aura.toUpperCase();
@@ -539,7 +563,7 @@ function applyLightbox(){
   document.getElementById('lbPval').textContent=isEvo?item.comps.length:item.pval;
   document.getElementById('lbChainLab').textContent=isEvo?"FORGED FROM":(item.evo?"EVOLVES INTO":"BASE FORM");
   document.getElementById('lbChainTo').textContent=isEvo?item.forged:(item.evo||"-");
-  document.getElementById('lbProductCopy').textContent=isEvo?"Evolution artwork placed as a front print.":"Base form artwork placed as a front print.";
+  document.getElementById('lbProductCopy').textContent=isEvo?"Evolution artwork placed as a front print.":"Compound figure artwork placed as a front print.";
   const dl=document.getElementById('lbDl');
   dl.href=svg;
   dl.download=isEvo?`mythos_${item.name.replace(/ /g,'_')}_${style}.svg`:`mythos_${item.sym}_${style}.svg`;
@@ -547,7 +571,9 @@ function applyLightbox(){
 
 function openItem(kind,item){
   mode=kind==='evo'?'evo':'compound';
+  if(kind==='compound') compoundFilter=item.fam || 'PEP';
   document.querySelectorAll('#designMode button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
+  document.querySelectorAll('#compoundFilter button').forEach(b=>b.classList.toggle('on',b.dataset.fam===compoundFilter));
   activeItem={kind,item};
   renderPicker();
   setSelected(kind,item);
@@ -569,6 +595,14 @@ document.querySelectorAll('#styleToggle button').forEach(b=>b.onclick=()=>{
 document.querySelectorAll('#designMode button').forEach(b=>b.onclick=()=>{
   mode=b.dataset.mode;
   document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x===b));
+  renderPicker();
+});
+document.querySelectorAll('#compoundFilter button').forEach(b=>b.onclick=()=>{
+  compoundFilter=b.dataset.fam;
+  document.querySelectorAll('#compoundFilter button').forEach(x=>x.classList.toggle('on',x===b));
+  mode='compound';
+  document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x.dataset.mode==='compound'));
+  activeItem=null;
   renderPicker();
 });
 document.querySelectorAll('#garmentToggle button').forEach(b=>b.onclick=()=>setGarment(b.dataset.g));

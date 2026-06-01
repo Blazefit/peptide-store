@@ -447,7 +447,7 @@ def build_data():
         power_label = "ESSENCE" if e[3] == "PEP" else "MASS"
         compounds.append({
             "sym": sym, "title": name, "real": e[1], "arch": arch, "aura": aura,
-            "lore": lore, "plabel": power_label, "pval": e[5],
+            "lore": lore, "fam": e[3], "plabel": power_label, "pval": e[5],
             "evo": first_evo.get(sym, ""),
         })
     evolutions = []
@@ -516,6 +516,7 @@ def main():
     db = {
         "compounds": [{"sym": c["sym"], "title": c["title"], "real": c["real"],
                        "arch": c["arch"], "aura": c["aura"], "lore": c["lore"],
+                       "fam": c["fam"],
                        "plabel": c["plabel"], "pval": c["pval"], "evo": c["evo"]}
                       for c in compounds],
         "evolutions": [{"name": e["name"], "sub": e["sub"], "comps": e["comps"],
