@@ -120,16 +120,17 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   .logo span{color:var(--green);}
   .series-pill{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--text2);
     border:1px solid var(--border);border-radius:999px;padding:7px 11px;white-space:nowrap;}
-  .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+  .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;min-width:0;}
   .btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:9px;
     padding:8px 13px;font-size:.8rem;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;transition:border-color .15s,background .15s;}
   .btn:hover{border-color:var(--accent);background:rgba(255,255,255,.03);}
-  .toggle{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-  .toggle button{border:none;background:transparent;color:var(--text2);padding:8px 14px;font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:1px;}
+  .toggle{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0;}
+  .toggle button{border:none;background:transparent;color:var(--text2);padding:8px 14px;font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:1px;min-width:0;overflow:hidden;}
   .toggle button.on{background:var(--accent);color:#120f08;}
   body.arcane .toggle button.on{color:#03121c;}
   main{max-width:1440px;margin:0 auto;padding:22px 18px 84px;}
   .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center;padding:12px 0 18px;}
+  .hero>*{min-width:0;}
   @media(min-width:940px){.hero{grid-template-columns:minmax(0,.82fr) minmax(560px,1.18fr);}}
   .eyebrow{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:4px;color:var(--green);margin-bottom:10px;}
   .hero h1{font-size:clamp(2.1rem,5vw,5.6rem);line-height:.94;font-weight:900;letter-spacing:0;}
@@ -137,6 +138,29 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   .hero p{color:var(--text2);margin-top:14px;font-size:1rem;line-height:1.55;max-width:62ch;}
   .quicknav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
   .quicknav .btn{padding:10px 15px;}
+  .studio-panel{margin-top:18px;background:rgba(22,22,31,.72);border:1px solid var(--border);border-radius:14px;padding:14px;
+    min-width:0;max-width:100%;}
+  .choice-toggle,.garment-toggle{display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);
+    border-radius:10px;overflow:hidden;min-width:0;max-width:100%;}
+  .choice-toggle button,.garment-toggle button{border:none;background:transparent;color:var(--text2);padding:10px 12px;font-weight:800;
+    cursor:pointer;font-size:.78rem;letter-spacing:1px;min-width:0;white-space:normal;line-height:1.15;overflow:hidden;}
+  .choice-toggle button.on,.garment-toggle button.on{background:var(--accent);color:#120f08;}
+  body.arcane .choice-toggle button.on,body.arcane .garment-toggle button.on{color:#03121c;}
+  .selected-summary{margin:13px 0 12px;padding:12px;border:1px solid var(--border);border-radius:11px;background:rgba(13,13,18,.58);}
+  .selected-summary .k{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--accent);}
+  .selected-summary .n{font-size:1.35rem;font-weight:900;margin-top:3px;}
+  .selected-summary .s{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:2px;color:var(--text2);margin-top:2px;}
+  .selected-summary .c{font-size:.78rem;color:var(--text2);line-height:1.4;margin-top:8px;}
+  .garment-toggle{grid-template-columns:repeat(3,1fr);margin-bottom:12px;}
+  .picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;max-height:292px;overflow:auto;padding-right:2px;min-width:0;max-width:100%;}
+  .pick-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;
+    transition:border-color .14s,transform .14s,box-shadow .14s;}
+  .pick-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .pick-card.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent);}
+  .pick-card img{width:100%;display:block;aspect-ratio:6/7;object-fit:cover;background:#000;}
+  .pick-card .pname{font-size:.68rem;font-weight:800;line-height:1.15;padding:7px 7px 2px;min-height:38px;}
+  .pick-card .psub{font-family:ui-monospace,monospace;font-size:.55rem;color:var(--text2);letter-spacing:1px;padding:0 7px 7px;}
+  .studio-actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;}
   .product-stage{display:grid;grid-template-columns:1fr;gap:12px;}
   @media(min-width:640px){.product-stage{grid-template-columns:minmax(270px,.9fr) minmax(260px,1fr);}}
   .panel{background:rgba(22,22,31,.82);border:1px solid var(--border);border-radius:14px;overflow:hidden;min-width:0;}
@@ -151,6 +175,15 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   .tee-print{position:absolute;left:31%;top:31%;width:38%;z-index:5;border:1px solid rgba(255,255,255,.14);
     box-shadow:0 12px 34px rgba(0,0,0,.55);background:#050506;}
   .tee-print img{display:block;width:100%;aspect-ratio:6/7;object-fit:cover;}
+  .hood{display:none;position:absolute;left:30%;right:30%;top:3%;height:22%;border:1px solid #303044;background:#101119;
+    border-radius:46% 46% 18% 18%;z-index:0;}
+  .tee-pocket{display:none;position:absolute;left:35%;right:35%;bottom:17%;height:12%;border:1px solid #303044;
+    background:rgba(255,255,255,.025);border-radius:8px;z-index:6;}
+  .garment.hoodie .hood,.garment.hoodie .tee-pocket{display:block;}
+  .garment.hoodie .tee-body{top:17%;border-radius:34% 34% 10% 10%;}
+  .garment.long .tee-sleeve{top:19%;height:54%;border-radius:24px 24px 16px 16px;}
+  .garment.long .tee-sleeve.left{left:0;transform:rotate(12deg);}
+  .garment.long .tee-sleeve.right{right:0;transform:rotate(-12deg);}
   .feature-panel{display:grid;grid-template-rows:1fr auto;background:linear-gradient(180deg,rgba(30,30,44,.94),rgba(13,13,18,.94));}
   .feature-panel img{width:100%;height:100%;max-height:520px;object-fit:contain;background:#050506;padding:14px;}
   .feature-meta{border-top:1px solid var(--border);padding:13px 14px;}
@@ -204,7 +237,7 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   .dlrow{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;}
   @media(max-width:760px){
     header{display:grid;grid-template-columns:1fr;align-items:flex-start;gap:8px;padding:14px 18px;}
-    main{max-width:100%;padding:18px 14px 76px;overflow:hidden;}
+    main{max-width:100%;padding:18px 14px 76px;}
     .series-pill{order:3;width:100%;text-align:center;}
     .nav{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
     .nav .btn{text-align:center;padding:8px 6px;}
@@ -215,6 +248,10 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
     .quicknav{display:grid;grid-template-columns:1fr 1fr;width:100%;}
     .quicknav .btn{text-align:center;padding:10px 8px;}
     .quicknav .btn:last-child{grid-column:1 / -1;}
+    .studio-panel{padding:12px;margin-top:14px;}
+    .picker-grid{display:flex;overflow-x:auto;overflow-y:hidden;max-height:none;padding-bottom:4px;}
+    .pick-card{min-width:112px;}
+    .choice-toggle button,.garment-toggle button{padding:10px 7px;font-size:.7rem;letter-spacing:.5px;}
     .tee-panel{min-height:360px;padding:14px;}
     .tee{width:min(100%,300px);}
     .jumpbar{top:116px;}
@@ -233,7 +270,7 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
   <div class="nav">
     <div class="toggle" id="styleToggle">
       <button data-s="mythic" class="on">MYTHIC</button>
-      <button data-s="arcane">ANIME FORM</button>
+      <button data-s="arcane">ANIME</button>
     </div>
     <a class="btn" href="home.html">&#8962; Hub</a>
     <a class="btn" href="index.html">Periodic &rarr;</a>
@@ -244,18 +281,37 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
     <div>
       <div class="eyebrow">HUMAN+ LEGEND LINE</div>
       <h1>MYTHOS <span>APPAREL</span></h1>
-      <p>Compound cards and stack evolutions for the HUMAN+ product line. The gallery now leads with the larger evolved forms, then moves into the base compounds.</p>
-      <div class="quicknav">
-        <a class="btn" href="#evolutions">Stack Evolutions</a>
-        <a class="btn" href="#bases">Base Forms</a>
-        <a class="btn" href="index.html">Periodic Builder</a>
+      <p>Choose a stack evolution or a single compound, preview it on apparel, then download the artwork.</p>
+      <div class="studio-panel" id="studio">
+        <div class="choice-toggle" id="designMode">
+          <button data-mode="evo" class="on">STACK</button>
+          <button data-mode="compound">COMPOUND</button>
+        </div>
+        <div class="selected-summary">
+          <div class="k" id="selectedKind"></div>
+          <div class="n" id="selectedName"></div>
+          <div class="s" id="selectedSub"></div>
+          <div class="c" id="selectedChain"></div>
+        </div>
+        <div class="garment-toggle" id="garmentToggle">
+          <button data-g="tee" class="on">TEE</button>
+          <button data-g="hoodie">HOODIE</button>
+          <button data-g="long">LONG</button>
+        </div>
+        <div class="picker-grid" id="pickerGrid"></div>
+        <div class="studio-actions">
+          <button class="btn" id="viewDetails">View details</button>
+          <a class="btn" id="downloadCurrent" download>Download artwork (SVG)</a>
+        </div>
       </div>
     </div>
     <div class="product-stage">
       <div class="panel tee-panel">
-        <div class="tee" aria-label="T-shirt preview">
+        <div class="tee garment" id="productGarment" aria-label="Garment preview">
+          <div class="hood"></div>
           <div class="tee-sleeve left"></div><div class="tee-sleeve right"></div>
           <div class="tee-body"></div><div class="tee-neck"></div>
+          <div class="tee-pocket"></div>
           <div class="tee-print"><img id="shirtPrint" alt=""></div>
         </div>
       </div>
@@ -323,9 +379,11 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
         <div class="to" id="lbChainTo"></div>
       </div>
       <div class="mock-mini">
-        <div class="tee" aria-label="T-shirt preview">
+        <div class="tee garment" id="lbGarment" aria-label="Garment preview">
+          <div class="hood"></div>
           <div class="tee-sleeve left"></div><div class="tee-sleeve right"></div>
           <div class="tee-body"></div><div class="tee-neck"></div>
+          <div class="tee-pocket"></div>
           <div class="tee-print"><img id="lbPrint" alt=""></div>
         </div>
         <div class="copy"><b>Product view</b><span id="lbProductCopy">Card artwork placed as a front chest print.</span></div>
@@ -341,12 +399,15 @@ MYTHIC_TEMPLATE = r"""<!DOCTYPE html>
 const DB = /*__DATA__*/;
 let style = "mythic";
 let activeItem = null;
+let mode = "evo";
+let garment = "tee";
 const featuredNames = ["THE OVERHAUL","WORKHORSE","PRIME","THE VAULT","PHOENIX","ADAMANTIUM"];
 const cImg = (sym)=>`mythic_preview/c_${sym}_${style}.png`;
 const cSvg = (sym)=>`mythic_svg/c_${sym}_${style}.svg`;
 const eImg = (name)=>`mythic_preview/e_${name.replace(/ /g,"_")}_${style}.png`;
 const eSvg = (name)=>`mythic_svg/e_${name.replace(/ /g,"_")}_${style}.svg`;
 const byEvoName = new Map(DB.evolutions.map(e=>[e.name,e]));
+const byCompoundSym = new Map(DB.compounds.map(c=>[c.sym,c]));
 
 function featuredEvolutions(){
   const picked = featuredNames.map(n=>byEvoName.get(n)).filter(Boolean);
@@ -354,13 +415,78 @@ function featuredEvolutions(){
   return picked.concat(DB.evolutions.filter(e=>!seen.has(e.name))).slice(0,6);
 }
 
-function setFeature(e){
-  if(!e) return;
-  const src=eImg(e.name);
-  document.getElementById('shirtPrint').src=src;
-  document.getElementById('featureCard').src=src;
-  document.getElementById('featureName').textContent=e.name;
-  document.getElementById('featureSub').textContent=`${e.sub.toUpperCase()} · TIER ${e.comps.length}`;
+function orderedEvolutions(){
+  const picked = featuredNames.map(n=>byEvoName.get(n)).filter(Boolean);
+  const seen = new Set(picked.map(e=>e.name));
+  return picked.concat(DB.evolutions.filter(e=>!seen.has(e.name)));
+}
+
+function itemKey(kind,item){return kind==='evo'?item.name:item.sym;}
+function imgFor(kind,item){return kind==='evo'?eImg(item.name):cImg(item.sym);}
+function svgFor(kind,item){return kind==='evo'?eSvg(item.name):cSvg(item.sym);}
+function titleFor(kind,item){return kind==='evo'?item.name:item.title;}
+function subFor(kind,item){return kind==='evo'?`${item.sub.toUpperCase()} · TIER ${item.comps.length}`:item.real.toUpperCase();}
+function kindFor(kind){return kind==='evo'?'STACK EVOLUTION':'SINGLE COMPOUND';}
+function chainFor(kind,item){return kind==='evo'?`FORGED FROM ${item.forged}`:(item.evo?`EVOLVES INTO ${item.evo}`:'BASE FORM');}
+
+function setGarment(next){
+  garment = next;
+  document.querySelectorAll('#garmentToggle button').forEach(b=>b.classList.toggle('on',b.dataset.g===garment));
+  ['productGarment','lbGarment'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.className=`tee garment ${garment}`;
+  });
+}
+
+function setSelected(kind,item){
+  if(!item) return;
+  activeItem = {kind,item};
+  const png = imgFor(kind,item);
+  const svg = svgFor(kind,item);
+  document.getElementById('shirtPrint').src = png;
+  document.getElementById('featureCard').src = png;
+  document.getElementById('featureKind').textContent = kindFor(kind);
+  document.getElementById('featureName').textContent = titleFor(kind,item);
+  document.getElementById('featureSub').textContent = subFor(kind,item);
+  document.getElementById('selectedKind').textContent = kindFor(kind);
+  document.getElementById('selectedName').textContent = titleFor(kind,item);
+  document.getElementById('selectedSub').textContent = subFor(kind,item);
+  document.getElementById('selectedChain').textContent = chainFor(kind,item);
+  const dl=document.getElementById('downloadCurrent');
+  dl.href=svg;
+  dl.download=kind==='evo'?`mythos_${item.name.replace(/ /g,'_')}_${style}.svg`:`mythos_${item.sym}_${style}.svg`;
+  document.querySelectorAll('#pickerGrid .pick-card').forEach(card=>{
+    card.classList.toggle('on',card.dataset.kind===kind && card.dataset.key===itemKey(kind,item));
+  });
+}
+
+function defaultItemForMode(){
+  return mode==='evo'
+    ? (byEvoName.get('THE OVERHAUL') || DB.evolutions[0])
+    : (byCompoundSym.get('Gh') || DB.compounds[0]);
+}
+
+function renderPicker(){
+  const pg=document.getElementById('pickerGrid');
+  pg.innerHTML="";
+  const kind=mode==='evo'?'evo':'compound';
+  const items=mode==='evo'?orderedEvolutions():DB.compounds;
+  items.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='pick-card';
+    d.dataset.kind=kind;
+    d.dataset.key=itemKey(kind,item);
+    d.innerHTML=`<img loading="lazy" src="${imgFor(kind,item)}" alt="${titleFor(kind,item)}">
+      <div class="pname">${titleFor(kind,item)}</div>
+      <div class="psub">${kind==='evo'?`TIER ${item.comps.length}`:(item.evo || 'BASE')}</div>`;
+    d.onclick=()=>setSelected(kind,item);
+    pg.appendChild(d);
+  });
+  if(!activeItem || activeItem.kind!==kind){
+    setSelected(kind,defaultItemForMode());
+  } else {
+    setSelected(activeItem.kind,activeItem.item);
+  }
 }
 
 function makeCard(kind,item,featured=false){
@@ -373,7 +499,6 @@ function makeCard(kind,item,featured=false){
       <div class="ce">TIER ${item.comps.length}</div>
       <div class="kind">STACK EVOLUTION</div></div>`;
     d.onclick=()=>openItem('evo',item);
-    d.onmouseenter=()=>setFeature(item);
   } else {
     d.innerHTML=`<img loading="lazy" src="${cImg(item.sym)}" alt="${item.title}">
       <div class="cap"><div class="cn">${item.title}</div>
@@ -392,19 +517,20 @@ function renderGrids(){
   DB.evolutions.forEach(e=>eg.appendChild(makeCard('evo',e)));
   const cg=document.getElementById('compGrid');cg.innerHTML="";
   DB.compounds.forEach(c=>cg.appendChild(makeCard('compound',c)));
-  setFeature(featuredEvolutions()[0] || DB.evolutions[0]);
+  renderPicker();
+  setGarment(garment);
 }
 
 function applyLightbox(){
   if(!activeItem) return;
   const {kind,item}=activeItem;
   const isEvo=kind==='evo';
-  const png=isEvo?eImg(item.name):cImg(item.sym);
-  const svg=isEvo?eSvg(item.name):cSvg(item.sym);
+  const png=imgFor(kind,item);
+  const svg=svgFor(kind,item);
   document.getElementById('lbImg').src=png;
   document.getElementById('lbPrint').src=png;
-  document.getElementById('lbName').textContent=isEvo?item.name:item.title;
-  document.getElementById('lbSub').textContent=(isEvo?item.sub:item.real).toUpperCase();
+  document.getElementById('lbName').textContent=titleFor(kind,item);
+  document.getElementById('lbSub').textContent=isEvo?item.sub.toUpperCase():item.real.toUpperCase();
   document.getElementById('lbLore').textContent='"'+item.lore+'"';
   document.getElementById('lbArch').textContent=item.arch.toUpperCase();
   document.getElementById('lbAura').textContent=item.aura.toUpperCase();
@@ -419,7 +545,11 @@ function applyLightbox(){
 }
 
 function openItem(kind,item){
+  mode=kind==='evo'?'evo':'compound';
+  document.querySelectorAll('#designMode button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
   activeItem={kind,item};
+  renderPicker();
+  setSelected(kind,item);
   applyLightbox();
   document.getElementById('lb').classList.add('show');
 }
@@ -435,6 +565,13 @@ document.querySelectorAll('#styleToggle button').forEach(b=>b.onclick=()=>{
     applyLightbox();
   }
 });
+document.querySelectorAll('#designMode button').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x===b));
+  renderPicker();
+});
+document.querySelectorAll('#garmentToggle button').forEach(b=>b.onclick=()=>setGarment(b.dataset.g));
+document.getElementById('viewDetails').onclick=()=>{if(activeItem) openItem(activeItem.kind,activeItem.item);};
 renderGrids();
 </script>
 </body>
