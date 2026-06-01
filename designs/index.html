@@ -70,10 +70,11 @@
     padding:10px 12px;font-size:.88rem;}
   .presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:8px;margin:10px 0 22px;max-height:360px;overflow:auto;padding-right:3px;}
   .preset{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 11px;cursor:pointer;
-    transition:border-color .15s,background .15s;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;}
+    transition:border-color .15s,background .15s;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;}
   .preset:hover{border-color:var(--green);background:#1a1a24;}
   .preset .pn{font-size:.9rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .preset .pc{font-size:.66rem;color:var(--text2);font-family:ui-monospace,monospace;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .preset .pc{font-size:.66rem;color:var(--text2);font-family:ui-monospace,monospace;margin-top:3px;line-height:1.4;
+    white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
   .preset .badge{font-family:ui-monospace,monospace;font-size:.58rem;color:var(--green);border:1px solid currentColor;border-radius:999px;padding:4px 7px;}
   .preset .badge.blend{color:#E7CB7E;}
   .empty{border:1px dashed var(--border);border-radius:10px;padding:14px;color:var(--text2);font-size:.85rem;}
@@ -1046,13 +1047,18 @@ function garmentSVG(g,color,artSVG){
   const lighter=shade(color,20), darker=shade(color,-26), rib=shade(color,-40);
   // all three share one 1000x1150 coordinate space so they're visually comparable
   if(g==="long"){
-    const body="M388 150 Q500 232 612 150 L672 168 L838 238 L884 1000 L792 1006 L700 440 L702 1044 Q500 1090 298 1044 L300 440 L208 1006 L116 1000 L162 238 L328 168 Z";
+    // separate torso + two full tapering sleeves so it clearly reads as long-sleeve
+    const torso="M360 250 Q500 326 640 250 L660 250 L700 470 L700 1044 Q500 1090 300 1044 L300 470 L340 250 Z";
+    const sleeveR="M636 256 L716 232 L862 300 L900 980 L788 992 L690 478 Q664 366 636 256 Z";
+    const sleeveL="M364 256 L284 232 L138 300 L100 980 L212 992 L310 478 Q336 366 364 256 Z";
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1150">
-      <path d="${body}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-      <path d="M396 158 Q500 252 604 158 Q500 314 396 158 Z" fill="${darker}"/>
-      <path d="M781 946 L880 940 L884 1002 L792 1008 Z" fill="${rib}"/>
-      <path d="M120 940 L219 946 L208 1008 L116 1002 Z" fill="${rib}"/>
-      ${inner(320,440,360)}
+      <path d="${sleeveR}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+      <path d="${sleeveL}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+      <path d="${torso}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+      <path d="M368 256 Q500 340 632 256 Q500 398 368 256 Z" fill="${darker}"/>
+      <path d="M787 936 L900 928 L900 982 L788 992 Z" fill="${rib}"/>
+      <path d="M100 928 L213 936 L212 992 L100 982 Z" fill="${rib}"/>
+      ${inner(330,470,340)}
     </svg>`;
   }
   if(g==="hoodie"){
