@@ -1081,13 +1081,16 @@ function garmentSVG(g,color,artSVG){
       ${inner(345,510,310)}
     </svg>`;
   }
-  // tee
-  const body="M388 150 Q500 232 612 150 L672 168 L856 258 L806 442 L688 398 L700 1040 Q500 1086 300 1040 L312 398 L194 442 L144 258 L328 168 Z";
+  // tee: torso + two short cap sleeves with rounded hems (matches long-sleeve build)
+  const torso="M360 250 Q500 326 640 250 L660 250 L700 470 L700 1044 Q500 1090 300 1044 L300 470 L340 250 Z";
+  const sleeveR="M634 254 L728 230 L856 332 Q812 432 720 446 Q700 360 634 254 Z";
+  const sleeveL="M366 254 L272 230 L144 332 Q188 432 280 446 Q300 360 366 254 Z";
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1150">
-    <path d="${body}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-    <path d="M396 158 Q500 252 604 158 Q500 314 396 158 Z" fill="${darker}"/>
-    <path d="M328 168 L312 398 L194 442 L144 258 Z" fill="${lighter}" opacity=".25"/>
-    ${inner(320,440,360)}
+    <path d="${sleeveR}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <path d="${sleeveL}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <path d="${torso}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <path d="M368 256 Q500 340 632 256 Q500 398 368 256 Z" fill="${darker}"/>
+    ${inner(330,470,340)}
   </svg>`;
 }
 function shade(hex,pct){
