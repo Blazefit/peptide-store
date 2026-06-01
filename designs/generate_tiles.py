@@ -113,6 +113,7 @@ STACKS = [
     ("PRIME",           "Hormone Performance", ["Te", "Gh", "Hc"],       "PEAK CONDITION",         ""),
     # --- Advanced body composition ---
     ("THE HOLY TRINITY","Body Composition",    ["Te", "Gh", "Re"],       "THREE IS ALL YOU NEED",  ""),
+    ("THE OVERHAUL",    "Recomp / Repair",     ["Gh", "Re", "Kl"],       "REBUILD FROM SCRATCH",   ""),
     ("BLACK LABEL",     "Body Composition",    ["Te", "Gh", "Ig", "Re"], "TOP SHELF ONLY",         "KLOW blend"),
     ("OLD GUARD",       "Body Composition",    ["Te", "Nd", "Gh", "Re"], "EARNED NOT GIVEN",       "KLOW blend"),
     ("GREEK GOD",       "Body Composition",    ["Te", "Gh", "Cj"],       "CARVED FROM MARBLE",     "GH peptide support"),
@@ -132,6 +133,18 @@ STACKS = [
     ("THE VAULT",       "Mito / Longevity",    ["Mc", "Ss", "Na"],       "LOCK IN LONGEVITY",      ""),
 ]
 STACK_COLORS = ["#2BE8B0", "#7C5CFC", "#FF5C8A", "#38BDF8", "#FFB020"]
+
+# Blend tiles: a "stack within a tile". Each is selectable like a single compound
+# but expands to several. Symbol is TWO CAPITAL letters so it reads as a blend
+# (KL, WO, GL) vs a normal element (Bp, Te). Used to keep big stacks from getting
+# scrunched: e.g. GH + Reta + KLOW = 3 tiles instead of 6.
+# (sym, full, subtitle, [component symbols], accent, tagline)
+BLENDS = [
+    ("Kl", "KLOW",      "Full Repair Blend", ["Bp", "Tb", "Gk", "Kp"], "#3FA7B8", "THE COMPLETE OVERHAUL"),
+    ("Wo", "WOLVERINE", "Recovery / Repair", ["Bp", "Tb"],             "#6E7B8C", "REGENERATE EVERYTHING"),
+    ("Gl", "GLOW",      "Skin / Hair / Recovery", ["Gk", "Bp", "Tb"],  "#2BE8B0", "FROM THE INSIDE OUT"),
+]
+BLEND_SYMS = {b[0] for b in BLENDS}
 
 # ----------------------------------------------------------------------------
 PALETTE = {
@@ -299,36 +312,57 @@ def fit_text(text, max_w, base_fs, avg=0.82):
     return fs, ""
 
 
+def comp_display(csym):
+    """Display fields for a stack component, whether an element or a blend.
+    Returns (symbol, full_name, third_line)."""
+    for e in ELEMENTS:
+        if e[0] == csym:
+            return e[0], e[1], (f"{e[5]}aa" if e[3] == "PEP" else f"{e[5]}")
+    for b in BLENDS:
+        if b[0] == csym:
+            return b[0], b[1], "BLEND"
+    raise KeyError(f"unknown stack component {csym!r}")
+
+
+def _fit(text, max_w, base, avg):
+    """Shrink font-size only as needed so `text` fits `max_w` (librsvg has no
+    textLength), so mini-tile names never bleed past their box at high counts."""
+    return base if len(text) * avg * base <= max_w else max(12, int(max_w / (len(text) * avg)))
+
+
 def stack_tile(name, subtitle, comps, tagline, extras=""):
-    """A combined 'stack' tile: big name + a row of component mini element-tiles.
-    `extras` is a free-text list of supportive ingredients with no element tile
-    (supplements / blends), shown as a small "+ ..." line under the tiles."""
-    lut = {e[0]: e for e in ELEMENTS}
+    """A combined 'stack' tile: big name + a row of component mini-tiles.
+    Components may be elements OR blends (KL/WO/GL). `extras` is a free-text list
+    of supportive ingredients with no tile, shown as a small "+ ..." line."""
     n = len(comps)
-    # size mini-tiles + gaps to always fit within a 1100px content band
-    gap = 80
-    bw = min(230, int((1100 - (n - 1) * gap) / n))
+    # wider band + tighter gaps at high counts so 5-6 tiles don't get scrunched
+    band = 1120
+    gap = 70 if n <= 4 else 40
+    bw = min(230, int((band - (n - 1) * gap) / n))
     total = n * bw + (n - 1) * gap
     start = 600 - total / 2
     box_y, box_h = 640, 300
-    sym_fs = min(120, int(bw * 0.62))
+    sym_fs = min(116, int(bw * 0.60))
     minis = []
     stops = []
     for i, csym in enumerate(comps):
-        e = lut[csym]
+        sy, full, third = comp_display(csym)
         col = STACK_COLORS[i % len(STACK_COLORS)]
         x = start + i * (bw + gap)
         cxm = x + bw / 2
+        name_fs = _fit(full, bw - 14, 30, 0.55)      # mixed-case bold
+        third_fs = _fit(third, bw - 14, 22, 0.62)
         stops.append(f'<stop offset="{int(i*100/(max(n-1,1)))}%" stop-color="{col}"/>')
         minis.append(f'''
   <rect x="{x}" y="{box_y}" width="{bw}" height="{box_h}" rx="14" fill="none" stroke="{col}" stroke-width="7"/>
-  <text x="{cxm}" y="{box_y+150}" font-family="{SANS}" font-size="{sym_fs}" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(e[0])}</text>
-  <text x="{cxm}" y="{box_y+215}" font-family="{SANS}" font-size="30" font-weight="700" text-anchor="middle" fill="{col}">{esc(e[1])}</text>
-  <text x="{cxm}" y="{box_y+258}" font-family="{MONO}" font-size="22" text-anchor="middle" fill="{WHITE}" fill-opacity="0.6">{e[5]}{'aa' if e[3]=='PEP' else ''}</text>''')
+  <text x="{cxm}" y="{box_y+150}" font-family="{SANS}" font-size="{sym_fs}" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(sy)}</text>
+  <text x="{cxm}" y="{box_y+212}" font-family="{SANS}" font-size="{name_fs}" font-weight="700" text-anchor="middle" fill="{col}">{esc(full)}</text>
+  <text x="{cxm}" y="{box_y+255}" font-family="{MONO}" font-size="{third_fs}" text-anchor="middle" fill="{WHITE}" fill-opacity="0.6">{esc(third)}</text>''')
         if i < n - 1:
-            # brand-style "+" : green, bold, centered cleanly in the gap between tiles
+            # brand-style "+" : green, bold, scaled to the gap so it never overlaps
             plus_x = x + bw + gap / 2
-            minis.append(f'<text x="{plus_x}" y="{box_y+box_h/2+30}" font-family="{SANS}" font-size="88" font-weight="800" text-anchor="middle" fill="{BRAND_GREEN}">+</text>')
+            pfs = min(80, gap + 20)
+            minis.append(f'<text x="{plus_x}" y="{box_y+box_h/2+30}" font-family="{SANS}" font-size="{pfs}" font-weight="800" text-anchor="middle" fill="{BRAND_GREEN}">+</text>')
     name_fs, name_len = fit_text(name, 1080, 200)
     extras_svg = ""
     if extras:
@@ -361,7 +395,9 @@ def build_site():
         for e in ELEMENTS
     ]
     stacks = [{"name": s[0], "sub": s[1], "comps": s[2], "tag": s[3], "extras": s[4]} for s in STACKS]
-    data = json.dumps({"elements": els, "stacks": stacks,
+    blends = [{"sym": b[0], "full": b[1], "sub": b[2], "comps": b[3],
+               "accent": b[4], "tag": b[5], "blend": True} for b in BLENDS]
+    data = json.dumps({"elements": els, "stacks": stacks, "blends": blends,
                        "palette": PALETTE, "green": BRAND_GREEN,
                        "stackColors": STACK_COLORS}, indent=0)
     return SITE_TEMPLATE.replace("/*__DATA__*/", data)
@@ -465,6 +501,21 @@ def main():
     for name, subtitle, comps, tagline, extras in STACKS:
         svg = stack_tile(name, subtitle, comps, tagline, extras)
         base = f"stack_{name.replace(' ', '_')}"
+        sp = os.path.join(svg_dir, base + ".svg")
+        with open(sp, "w") as f:
+            f.write(svg)
+        render_png(sp, os.path.join(prev_dir, base + ".png"))
+        render_print(svg, os.path.join(print_dir, base + ".png"))
+        render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
+        printed += 1
+        made.append(base)
+
+    # blend cards (a stack-within-a-tile, rendered as its own stack card)
+    for bsym, bfull, bsub, bcomps, baccent, btag in BLENDS:
+        base = f"stack_{bfull.replace(' ', '_')}"
+        if base in made:          # already produced by STACKS (e.g. WOLVERINE)
+            continue
+        svg = stack_tile(bfull, bsub, bcomps, btag, "")
         sp = os.path.join(svg_dir, base + ".svg")
         with open(sp, "w") as f:
             f.write(svg)

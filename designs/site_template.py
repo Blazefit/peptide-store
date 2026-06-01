@@ -45,6 +45,9 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
   .cell .sym{font-size:1.7rem;font-weight:800;text-align:center;line-height:1;margin:auto 0;}
   .cell .nm{font-size:.55rem;font-weight:700;text-align:center;}
   .cell.pep .nm{color:var(--green);} .cell.hor .nm{color:var(--amber);} .cell.mol .nm{color:var(--violet);}
+  .cell.blend{border-color:#C9A24B;border-style:double;border-width:3px;}
+  .cell.blend.sel{box-shadow:0 0 0 3px #C9A24B inset,0 8px 28px rgba(201,162,75,.28);}
+  .cell.blend .num,.cell.blend .nm,.cell.blend .sym{color:#E7CB7E;}
   .cell .chk{position:absolute;top:4px;left:50%;transform:translateX(-50%);opacity:0;font-weight:800;color:var(--green);}
   .cell.sel .chk{opacity:1;}
   /* sticky tray */
@@ -114,6 +117,10 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
     <p class="muted">Or start from a curated protocol, then customize.</p>
     <div class="presets" id="presets"></div>
 
+    <h2 style="margin-top:18px;">Combo Blends</h2>
+    <p class="muted">One tile = a whole sub-protocol (KLOW, GLOW, WOLVERINE). Add a blend like any single compound to keep big stacks clean.</p>
+    <div class="grid" id="blendGrid"></div>
+
     <h2>The Periodic Table of Enhancement</h2>
     <div class="grid" id="grid"></div>
     <div class="pad-bottom"></div>
@@ -180,6 +187,8 @@ const DB = /*__DATA__*/;
 const SANS = "'Segoe UI',system-ui,-apple-system,sans-serif";
 const MONO = "ui-monospace,'Courier New',monospace";
 const EL = {}; DB.elements.forEach(e=>EL[e.sym]=e);
+// blends (KL/WO/GL) act like single selectable compounds but expand into several
+(DB.blends||[]).forEach(b=>{EL[b.sym]=Object.assign({fam:"BLEND",count:b.comps.length},b);});
 let selected = [];     // array of symbols
 let garment = "tee";
 let garmentColor = "#0d0d12";
@@ -226,24 +235,30 @@ function fitFS(text,maxW,base,avg=0.82){
   return Math.floor(maxW/(text.length*avg));
 }
 
+/* fit font-size to a width (mirrors python _fit) */
+function fitW(t,maxW,base,avg){return (t.length*avg*base<=maxW)?base:Math.max(12,Math.floor(maxW/(t.length*avg)));}
+/* component display fields, element OR blend (mirrors comp_display) */
+function compDisp(cs){const e=EL[cs];const third=e.blend?"BLEND":(e.count+(e.fam==="PEP"?"aa":""));return [e.sym,e.full,third];}
+
 /* live stack tile (mirrors stack_tile) */
 function stackTileSVG(name,sub,comps,tag,extras){
   const cols=DB.stackColors;
-  const n=comps.length, gap=80;
-  const bw=Math.min(230,Math.floor((1100-(n-1)*gap)/n));
+  const n=comps.length, gap=n<=4?70:40, band=1120;
+  const bw=Math.min(230,Math.floor((band-(n-1)*gap)/n));
   const total=n*bw+(n-1)*gap, start=600-total/2, boxY=640,boxH=300;
-  const symFS=Math.min(120,Math.floor(bw*0.62));
+  const symFS=Math.min(116,Math.floor(bw*0.60));
   let stops="",minis="";
   comps.forEach((cs,i)=>{
-    const e=EL[cs], col=cols[i%cols.length];
+    const [sy,full,third]=compDisp(cs), col=cols[i%cols.length];
     const x=start+i*(bw+gap), cxm=x+bw/2;
+    const nameFs=fitW(full,bw-14,30,0.55), thirdFs=fitW(third,bw-14,22,0.62);
     stops+=`<stop offset="${Math.floor(i*100/Math.max(n-1,1))}%" stop-color="${col}"/>`;
     minis+=`<rect x="${x}" y="${boxY}" width="${bw}" height="${boxH}" rx="14" fill="none" stroke="${col}" stroke-width="7"/>
-      <text x="${cxm}" y="${boxY+150}" font-family="${SANS}" font-size="${symFS}" font-weight="800" text-anchor="middle" fill="#fff">${esc(e.sym)}</text>
-      <text x="${cxm}" y="${boxY+215}" font-family="${SANS}" font-size="30" font-weight="700" text-anchor="middle" fill="${col}">${esc(e.full)}</text>
-      <text x="${cxm}" y="${boxY+258}" font-family="${MONO}" font-size="22" text-anchor="middle" fill="#fff" fill-opacity=".6">${e.count}${e.fam==="PEP"?"aa":""}</text>`;
-    if(i<n-1){const px=x+bw+gap/2;
-      minis+=`<text x="${px}" y="${boxY+boxH/2+30}" font-family="${SANS}" font-size="88" font-weight="800" text-anchor="middle" fill="${DB.green}">+</text>`;}
+      <text x="${cxm}" y="${boxY+150}" font-family="${SANS}" font-size="${symFS}" font-weight="800" text-anchor="middle" fill="#fff">${esc(sy)}</text>
+      <text x="${cxm}" y="${boxY+212}" font-family="${SANS}" font-size="${nameFs}" font-weight="700" text-anchor="middle" fill="${col}">${esc(full)}</text>
+      <text x="${cxm}" y="${boxY+255}" font-family="${MONO}" font-size="${thirdFs}" text-anchor="middle" fill="#fff" fill-opacity=".6">${esc(third)}</text>`;
+    if(i<n-1){const px=x+bw+gap/2, pfs=Math.min(80,gap+20);
+      minis+=`<text x="${px}" y="${boxY+boxH/2+30}" font-family="${SANS}" font-size="${pfs}" font-weight="800" text-anchor="middle" fill="${DB.green}">+</text>`;}
   });
   const nameFS=fitFS(name,1080,200);
   let extrasSVG="";
@@ -268,9 +283,13 @@ function stackTileSVG(name,sub,comps,tag,extras){
 function currentDesignSVG(){
   const name=(document.getElementById('stackName')?.value)||"";
   const tag=(document.getElementById('stackTag')?.value)||"";
+  // a single blend selected -> show its expanded blend card (KLOW etc.)
+  if(selected.length===1){const e=EL[selected[0]];
+    if(e.blend) return stackTileSVG(name||e.full, e.sub, e.comps, tag||e.tag, "");
+    if(!presetMeta) return heroTileSVG(e);
+  }
   if(presetMeta)
     return stackTileSVG(name||presetMeta.name, presetMeta.sub, selected, tag||presetMeta.tag, presetMeta.extras||"");
-  if(selected.length===1) return heroTileSVG(EL[selected[0]]);
   return stackTileSVG(name||"MY STACK","CUSTOM PROTOCOL",selected,tag||"BUILT DIFFERENT","");
 }
 
@@ -335,8 +354,26 @@ function renderGrid(){
     g.appendChild(d);
   });
 }
+function renderBlends(){
+  const g=document.getElementById('blendGrid');if(!g)return;g.innerHTML="";
+  (DB.blends||[]).forEach(b=>{
+    const d=document.createElement('div');
+    d.className="cell blend"+(selected.includes(b.sym)?" sel":"");
+    d.innerHTML=`<span class="chk">&#10003;</span>
+      <div class="num">${b.comps.length}</div><div class="unit">BLEND</div>
+      <div class="sym">${esc(b.sym)}</div><div class="nm">${esc(b.full)}</div>`;
+    d.onclick=()=>toggle(b.sym);
+    g.appendChild(d);
+  });
+}
 function renderPresets(){
   const p=document.getElementById('presets');p.innerHTML="";
+  (DB.blends||[]).forEach(b=>{
+    const d=document.createElement('div');d.className="preset";
+    d.innerHTML=`<div class="pn">${esc(b.full)} <span style="font-size:.6rem;color:var(--gold,#C9A24B);border:1px solid currentColor;border-radius:4px;padding:0 4px;vertical-align:middle;">BLEND</span></div><div class="pc">${esc(b.comps.map(c=>EL[c].full).join(" + "))}</div>`;
+    d.onclick=()=>{selected=[b.sym];presetMeta={name:b.full,tag:b.tag,sub:b.sub,extras:""};renderGrid();renderBlends();renderTray();window.scrollTo({top:0,behavior:'smooth'});};
+    p.appendChild(d);
+  });
   DB.stacks.forEach(s=>{
     const d=document.createElement('div');d.className="preset";
     let recipe=s.comps.map(c=>EL[c].full).join(" + ");
@@ -350,7 +387,7 @@ let presetMeta=null;
 function toggle(sym){
   const i=selected.indexOf(sym);
   if(i>=0)selected.splice(i,1);else{if(selected.length>=6){alert("Max 6 per stack");return;}selected.push(sym);}
-  presetMeta=null;renderGrid();renderTray();
+  presetMeta=null;renderGrid();renderBlends();renderTray();
 }
 function renderTray(){
   const tray=document.getElementById('tray'),chips=document.getElementById('chips');
@@ -366,6 +403,11 @@ function renderTray(){
 }
 function renderGallery(){
   const g=document.getElementById('galleryGrid');g.innerHTML="";
+  (DB.blends||[]).forEach(b=>{
+    const w=document.createElement('div');w.style.cssText="background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--border);";
+    w.innerHTML=stackTileSVG(b.full,b.sub,b.comps,b.tag,"");
+    g.appendChild(w);
+  });
   DB.stacks.forEach(s=>{
     const w=document.createElement('div');w.style.cssText="background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--border);";
     w.innerHTML=stackTileSVG(s.name,s.sub,s.comps,s.tag,s.extras);
@@ -405,7 +447,7 @@ document.getElementById('visualizeBtn').onclick=()=>{
   else if(selected.length>1){document.getElementById('stackName').value="MY STACK";document.getElementById('stackTag').value="BUILT DIFFERENT";}
   buildGarmentPage();show('pageGarment');
 };
-document.getElementById('clearBtn').onclick=()=>{selected=[];presetMeta=null;renderGrid();renderTray();};
+document.getElementById('clearBtn').onclick=()=>{selected=[];presetMeta=null;renderGrid();renderBlends();renderTray();};
 document.getElementById('backBtn').onclick=()=>show('pageBuild');
 document.getElementById('backBtn2').onclick=()=>show('pageBuild');
 document.getElementById('navGallery').onclick=()=>{renderGallery();show('pageGallery');};
@@ -418,7 +460,7 @@ document.getElementById('downloadBtn').onclick=()=>{
 };
 document.getElementById('addCartBtn').onclick=()=>alert("Demo only — this is where checkout would go.\n\nStack: "+selected.join(" + "));
 
-renderGrid();renderPresets();renderTray();
+renderGrid();renderBlends();renderPresets();renderTray();
 </script>
 </body>
 </html>"""
