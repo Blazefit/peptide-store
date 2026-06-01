@@ -64,12 +64,24 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
   .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
   .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
   .btn:hover:not(:disabled){filter:brightness(1.08);}
-  /* preset stacks */
-  .presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0 20px;}
-  .preset{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s;}
-  .preset:hover{border-color:var(--green);}
-  .preset .pn{font-size:1.1rem;font-weight:800;}
-  .preset .pc{font-size:.7rem;color:var(--text2);font-family:ui-monospace,monospace;margin-top:4px;}
+  /* compact stack shortcuts */
+  .stack-tools{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0;}
+  @media(min-width:860px){.stack-tools{grid-template-columns:minmax(0,1fr) 260px;align-items:center;}}
+  .stack-filters{display:flex;gap:6px;flex-wrap:wrap;}
+  .stack-filters button{border:1px solid var(--border);background:var(--surface2);color:var(--text2);
+    border-radius:8px;padding:8px 10px;font-family:ui-monospace,monospace;font-size:.65rem;font-weight:800;letter-spacing:1px;cursor:pointer;}
+  .stack-filters button.on{background:var(--green);color:#08110d;border-color:var(--green);}
+  .stack-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);
+    padding:10px 12px;font-size:.88rem;}
+  .presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:8px;margin:10px 0 22px;max-height:360px;overflow:auto;padding-right:3px;}
+  .preset{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 11px;cursor:pointer;
+    transition:border-color .15s,background .15s;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;}
+  .preset:hover{border-color:var(--green);background:#1a1a24;}
+  .preset .pn{font-size:.9rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .preset .pc{font-size:.66rem;color:var(--text2);font-family:ui-monospace,monospace;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .preset .badge{font-family:ui-monospace,monospace;font-size:.58rem;color:var(--green);border:1px solid currentColor;border-radius:999px;padding:4px 7px;}
+  .preset .badge.blend{color:#E7CB7E;}
+  .empty{border:1px dashed var(--border);border-radius:10px;padding:14px;color:var(--text2);font-size:.85rem;}
   /* builder / garment page */
   .two{display:grid;grid-template-columns:1fr;gap:20px;}
   @media(min-width:880px){.two{grid-template-columns:1fr 1fr;}}
@@ -113,16 +125,25 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
       <span><i style="background:var(--violet)"></i>MOLECULE (g/mol)</span>
     </div>
 
-    <h2 style="margin-top:18px;">Quick-Start Stacks</h2>
-    <p class="muted">Or start from a curated protocol, then customize.</p>
-    <div class="presets" id="presets"></div>
-
-    <h2 style="margin-top:18px;">Combo Blends</h2>
-    <p class="muted">One tile = a whole sub-protocol (KLOW, GLOW, WOLVERINE). Add a blend like any single compound to keep big stacks clean.</p>
-    <div class="grid" id="blendGrid"></div>
-
-    <h2>The Periodic Table of Enhancement</h2>
+    <h2>Compound Elements</h2>
+    <p class="muted">Pick individual compounds first. Your selected stack stays pinned at the bottom.</p>
     <div class="grid" id="grid"></div>
+
+    <h2 style="margin-top:22px;">Stack Shortcuts</h2>
+    <p class="muted">Compact presets for full protocols and blend tiles. Load one, then customize compounds above.</p>
+    <div class="stack-tools">
+      <div class="stack-filters" id="stackFilter">
+        <button data-cat="ALL" class="on">ALL</button>
+        <button data-cat="BLEND">BLENDS</button>
+        <button data-cat="REPAIR">REPAIR</button>
+        <button data-cat="HORMONE">HORMONE</button>
+        <button data-cat="BODY">BODY</button>
+        <button data-cat="COG">COG</button>
+        <button data-cat="MITO">MITO</button>
+      </div>
+      <input class="stack-search" id="stackSearch" type="search" placeholder="Search stacks">
+    </div>
+    <div class="presets" id="presets"></div>
     <div class="pad-bottom"></div>
   </main>
 
@@ -193,6 +214,8 @@ let selected = [];     // array of symbols
 let garment = "tee";
 let garmentColor = "#0d0d12";
 let accentColor = DB.green;
+let stackCategory = "ALL";
+let stackQuery = "";
 
 /* ---------- live SVG tile (mirrors generate_tiles.py hero_tile) ---------- */
 function esc(s){return (s+"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
@@ -366,20 +389,60 @@ function renderBlends(){
     g.appendChild(d);
   });
 }
-function renderPresets(){
-  const p=document.getElementById('presets');p.innerHTML="";
+function stackRecipe(item){
+  let recipe=item.comps.map(c=>EL[c]?.full||c).join(" + ");
+  if(item.extras) recipe+=" + "+item.extras;
+  return recipe;
+}
+function stackCat(item){
+  if(item.kind==="blend") return "BLEND";
+  const s=(item.sub||"").toLowerCase();
+  if(s.includes("hormone")) return "HORMONE";
+  if(s.includes("body")) return "BODY";
+  if(s.includes("cognitive")) return "COG";
+  if(s.includes("mito")) return "MITO";
+  if(s.includes("repair")||s.includes("recomp")||s.includes("recovery")) return "REPAIR";
+  return "OTHER";
+}
+function stackItems(){
+  const items=[], seen=new Set();
   (DB.blends||[]).forEach(b=>{
-    const d=document.createElement('div');d.className="preset";
-    d.innerHTML=`<div class="pn">${esc(b.full)} <span style="font-size:.6rem;color:var(--gold,#C9A24B);border:1px solid currentColor;border-radius:4px;padding:0 4px;vertical-align:middle;">BLEND</span></div><div class="pc">${esc(b.comps.map(c=>EL[c].full).join(" + "))}</div>`;
-    d.onclick=()=>{selected=[b.sym];presetMeta={name:b.full,tag:b.tag,sub:b.sub,extras:""};renderGrid();renderBlends();renderTray();window.scrollTo({top:0,behavior:'smooth'});};
-    p.appendChild(d);
+    seen.add(b.full.toUpperCase());
+    items.push({kind:"blend",key:b.sym,name:b.full,sub:b.sub,comps:b.comps,tag:b.tag,extras:""});
   });
   DB.stacks.forEach(s=>{
+    if(seen.has(s.name.toUpperCase())) return;
+    items.push({kind:"stack",name:s.name,sub:s.sub,comps:s.comps,tag:s.tag,extras:s.extras});
+  });
+  return items;
+}
+function renderPresets(){
+  const p=document.getElementById('presets');p.innerHTML="";
+  const q=stackQuery.trim().toLowerCase();
+  const items=stackItems().filter(item=>{
+    const cat=stackCat(item);
+    if(stackCategory!=="ALL"&&cat!==stackCategory) return false;
+    if(!q) return true;
+    const hay=[item.name,item.sub,item.tag,item.extras,stackRecipe(item)].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  if(!items.length){p.innerHTML=`<div class="empty">No stacks match that filter.</div>`;return;}
+  items.forEach(item=>{
     const d=document.createElement('div');d.className="preset";
-    let recipe=s.comps.map(c=>EL[c].full).join(" + ");
-    if(s.extras) recipe+=" + "+s.extras;
-    d.innerHTML=`<div class="pn">${esc(s.name)}</div><div class="pc">${esc(recipe)}</div>`;
-    d.onclick=()=>{selected=[...s.comps];presetMeta={name:s.name,tag:s.tag,sub:s.sub,extras:s.extras};renderGrid();renderTray();window.scrollTo({top:0,behavior:'smooth'});};
+    const cat=stackCat(item), recipe=stackRecipe(item);
+    d.innerHTML=`<div><div class="pn">${esc(item.name)}</div><div class="pc">${esc(item.sub)} &middot; ${esc(recipe)}</div></div>
+      <div class="badge ${item.kind==="blend"?"blend":""}">${cat}</div>`;
+    d.onclick=()=>{
+      if(item.kind==="blend"){
+        selected=[item.key];
+        presetMeta={name:item.name,tag:item.tag,sub:item.sub,extras:""};
+        renderBlends();
+      }else{
+        selected=[...item.comps];
+        presetMeta={name:item.name,tag:item.tag,sub:item.sub,extras:item.extras};
+      }
+      renderGrid();renderTray();window.scrollTo({top:0,behavior:'smooth'});
+    };
     p.appendChild(d);
   });
 }
@@ -452,6 +515,12 @@ document.getElementById('backBtn').onclick=()=>show('pageBuild');
 document.getElementById('backBtn2').onclick=()=>show('pageBuild');
 document.getElementById('navGallery').onclick=()=>{renderGallery();show('pageGallery');};
 document.querySelectorAll('#garmentSeg button').forEach(b=>b.onclick=()=>{garment=b.dataset.g;buildGarmentPage();});
+document.querySelectorAll('#stackFilter button').forEach(b=>b.onclick=()=>{
+  stackCategory=b.dataset.cat;
+  document.querySelectorAll('#stackFilter button').forEach(x=>x.classList.toggle('on',x===b));
+  renderPresets();
+});
+document.getElementById('stackSearch').addEventListener('input',e=>{stackQuery=e.target.value;renderPresets();});
 ['stackName','stackTag'].forEach(id=>document.getElementById(id).addEventListener('input',buildGarmentPage));
 document.getElementById('downloadBtn').onclick=()=>{
   const blob=new Blob([currentDesignSVG()],{type:"image/svg+xml"});
