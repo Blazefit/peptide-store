@@ -17,7 +17,9 @@ drop-in slot for commissioned / AI art later (same window, swap the <g>).
 
 Run:  python3 generate_mythic.py
 Outputs SVGs to ./mythic_svg, PNG previews to ./mythic_preview (both styles),
-and builds mythic.html (gallery) + home.html (hub linking both series).
+clean site assets without compound evolution text to ./mythic_svg_clean and
+./mythic_preview_clean, and builds mythic.html (gallery) + home.html (hub
+linking both series).
 """
 
 import base64, os, subprocess, json, math
@@ -389,6 +391,14 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
     portrait_frame = ""
     if has_art:
         portrait_frame = f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" fill="none" stroke="{frame_in}" stroke-width="4"/>'
+    chain_block = ""
+    if chain_label or chain_text:
+        chain_block = (
+            f'\n  <text x="600" y="{py+ph+150}" font-family="{MONO}" font-size="23" '
+            f'letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(chain_label)}</text>'
+            f'\n  <text x="600" y="{py+ph+188}" font-family="{name_font}" font-size="{chain_fs}" '
+            f'font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>'
+        )
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs>
@@ -422,9 +432,7 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
   {portrait_frame}
 
   <text x="600" y="{py+ph+82}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_key.upper())} AURA &#183; {esc(power_label)} {esc(pf)}</text>
-
-  <text x="600" y="{py+ph+150}" font-family="{MONO}" font-size="23" letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(chain_label)}</text>
-  <text x="600" y="{py+ph+188}" font-family="{name_font}" font-size="{chain_fs}" font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>
+  {chain_block}
 
   <text x="600" y="{fy+fh-86}" font-family="{name_font}" font-size="27" font-style="italic" text-anchor="middle" fill="{txt_dim}">{esc(lore)}</text>
   <text x="600" y="{fy+fh-40}" font-family="{MONO}" font-size="22" letter-spacing="6" text-anchor="middle" fill="{txt_dim}" fill-opacity="0.8">HUMAN+ APPAREL</text>
@@ -531,39 +539,48 @@ def render(svg, png_path, bg):
     subprocess.run(["rsvg-convert", "-b", bg, "-w", "760", "-o", png_path],
                    input=svg.encode("utf-8"), check=True)
 
+def write_card_assets(svg, svg_dir, prev_dir, base, bg, here):
+    svg_path = os.path.join(svg_dir, base + ".svg")
+    with open(svg_path, "w") as f:
+        f.write(svg)
+    render(svg_for_preview(svg, here), os.path.join(prev_dir, base + ".png"), bg)
+
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     svg_dir = os.path.join(here, "mythic_svg")
     prev_dir = os.path.join(here, "mythic_preview")
+    clean_svg_dir = os.path.join(here, "mythic_svg_clean")
+    clean_prev_dir = os.path.join(here, "mythic_preview_clean")
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
+    os.makedirs(clean_svg_dir, exist_ok=True)
+    os.makedirs(clean_prev_dir, exist_ok=True)
 
     compounds, evolutions = build_data()
     made = 0
     for c in compounds:
         chain = ("EVOLVES INTO", c["evo"]) if c["evo"] else ("BASE FORM", "—")
         for style in ("mythic", "arcane"):
+            bg = "#0c0a08" if style == "mythic" else "#0f1118"
             svg = card(c["title"], c["real"], c["arch"], c["aura"], c["lore"],
                        c["plabel"], c["pval"], chain[0], chain[1], style,
                        art_path_for(here, c["sym"], style))
             base = f"c_{c['sym']}_{style}"
-            svg_path = os.path.join(svg_dir, base + ".svg")
-            with open(svg_path, "w") as f:
-                f.write(svg)
-            render(svg_for_preview(svg, here), os.path.join(prev_dir, base + ".png"),
-                   "#0c0a08" if style == "mythic" else "#0f1118")
+            write_card_assets(svg, svg_dir, prev_dir, base, bg, here)
+            clean_svg = card(c["title"], c["real"], c["arch"], c["aura"], c["lore"],
+                             c["plabel"], c["pval"], "", "", style,
+                             art_path_for(here, c["sym"], style))
+            write_card_assets(clean_svg, clean_svg_dir, clean_prev_dir, base, bg, here)
             made += 1
     for e in evolutions:
         for style in ("mythic", "arcane"):
+            bg = "#0c0a08" if style == "mythic" else "#0f1118"
             svg = card(e["name"], e["sub"], e["arch"], e["aura"], e["lore"],
                        "TIER", len(e["comps"]), "FORGED FROM", e["forged"], style,
                        art_path_for(here, stack_art_key(e["name"]), style))
             base = f"e_{e['name'].replace(' ', '_')}_{style}"
-            svg_path = os.path.join(svg_dir, base + ".svg")
-            with open(svg_path, "w") as f:
-                f.write(svg)
-            render(svg_for_preview(svg, here), os.path.join(prev_dir, base + ".png"),
-                   "#0c0a08" if style == "mythic" else "#0f1118")
+            write_card_assets(svg, svg_dir, prev_dir, base, bg, here)
+            write_card_assets(svg, clean_svg_dir, clean_prev_dir, base, bg, here)
             made += 1
 
     # embed data for the live page

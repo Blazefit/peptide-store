@@ -415,10 +415,10 @@ let query = "";
 let printMode = "card";
 const featuredNames = ["GLOW","KLOW","WOLVERINE","THE HOLY TRINITY","THE OVERHAUL","PRIME"];
 const peptideFirst = ["Bp","Tb","Gk","Kp","Gh","Cj","Ip","Sg","Tz","Re"];
-const cImg = (sym)=>`mythic_preview/c_${sym}_${style}.png`;
-const cSvg = (sym)=>`mythic_svg/c_${sym}_${style}.svg`;
-const eImg = (name)=>`mythic_preview/e_${name.replace(/ /g,"_")}_${style}.png`;
-const eSvg = (name)=>`mythic_svg/e_${name.replace(/ /g,"_")}_${style}.svg`;
+const cImg = (sym)=>`mythic_preview_clean/c_${sym}_${style}.png`;
+const cSvg = (sym)=>`mythic_svg_clean/c_${sym}_${style}.svg`;
+const eImg = (name)=>`mythic_preview_clean/e_${name.replace(/ /g,"_")}_${style}.png`;
+const eSvg = (name)=>`mythic_svg_clean/e_${name.replace(/ /g,"_")}_${style}.svg`;
 const artStyle = ()=>style==='arcane'?'anime':'mythic';
 const artImg = (kind,item)=>kind==='evo'
   ? `mythic_art/art_${item.name.replace(/ /g,"_")}_${artStyle()}.png`
@@ -465,7 +465,7 @@ function subFor(kind,item){
     : `${familyLabel(item.fam)} · ${item.title}`;
 }
 function kindFor(kind,item){return kind==='evo'?'STACK EVOLUTION':`${familyLabel(item.fam)} COMPOUND`;}
-function chainFor(kind,item){return kind==='evo'?`FORGED FROM ${item.forged}`:(item.evo?`EVOLVES INTO ${item.evo}`:'BASE FORM');}
+function chainFor(kind,item){return kind==='evo'?`FORGED FROM ${item.forged}`:(item.evo?`RELATED STACK ${item.evo}`:'BASE COMPOUND');}
 function evoSyms(item){return item.compoundSyms || item.comps || [];}
 function searchText(kind,item){
   if(kind==='evo') return [item.name,item.sub,item.forged,item.tag,item.extras,evoSyms(item).join(" ")].join(" ").toLowerCase();
@@ -655,7 +655,7 @@ function applyLightbox(){
   document.getElementById('lbAura').textContent=item.aura.toUpperCase();
   document.getElementById('lbPlab').textContent=isEvo?"TIER":item.plabel;
   document.getElementById('lbPval').textContent=isEvo?item.comps.length:item.pval;
-  document.getElementById('lbChainLab').textContent=isEvo?"FORGED FROM":(item.evo?"EVOLVES INTO":"BASE FORM");
+  document.getElementById('lbChainLab').textContent=isEvo?"FORGED FROM":(item.evo?"RELATED STACK":"BASE COMPOUND");
   document.getElementById('lbChainTo').textContent=isEvo?item.forged:(item.evo||"-");
   document.getElementById('lbProductCopy').textContent=isEvo?"Back graphic preview with HUMAN+ / MYTHOS on the front.":"Compound figure preview with HUMAN+ / MYTHOS on the front.";
   const dl=document.getElementById('lbDl');
