@@ -16,13 +16,14 @@ They are deliberately iconic, not painted — they hold the layout and are a
 drop-in slot for commissioned / AI art later (same window, swap the <g>).
 
 Run:  python3 generate_mythic.py
+Export one design: python3 generate_mythic.py export --sym Bp --style mythic --element card --format eps
 Outputs SVGs to ./mythic_svg, PNG previews to ./mythic_preview (both styles),
 clean site assets without compound evolution text to ./mythic_svg_clean and
-./mythic_preview_clean, and builds mythic.html (gallery) + home.html (hub
-linking both series).
+./mythic_preview_clean. The live mythic.html is hand-maintained separately and
+is not rebuilt by this script.
 """
 
-import base64, os, subprocess, json, math, sys
+import argparse, base64, os, shutil, subprocess, json, math, sys, tempfile
 from generate_tiles import BLENDS, ELEMENTS, STACKS
 
 SANS  = "'Segoe UI',system-ui,-apple-system,sans-serif"
@@ -320,6 +321,20 @@ def png_data_uri(path):
         return None
     return "data:image/png;base64," + base64.b64encode(data).decode("ascii")
 
+def png_dimensions(path):
+    with open(path, "rb") as f:
+        data = f.read(24)
+    if not data.startswith(PNG_SIGNATURE) or len(data) < 24:
+        raise ValueError(f"Not a valid PNG: {path}")
+    return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+
+def inline_art(svg, art_path):
+    href = "../mythic_art/" + os.path.basename(art_path)
+    uri = png_data_uri(art_path)
+    if not uri:
+        raise FileNotFoundError(f"Missing or invalid deity art PNG: {art_path}")
+    return svg.replace(f'href="{href}"', f'href="{uri}"')
+
 def svg_for_preview(svg, here):
     """librsvg does not load external local images here, so inline only for preview rendering."""
     art_dir = os.path.join(here, "mythic_art")
@@ -343,7 +358,9 @@ def portrait_art(art_path, px, py, pw, ph, archetype, fig_fill, fig_edge):
     )
 
 def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
-         chain_label, chain_text, style="mythic", art_path=None):
+         chain_label, chain_text, style="mythic", art_path=None,
+         title_text=None, subtitle_text=None, aura_text=None, essence_text=None,
+         caption_label=None, caption_text=None, lore_text=None, footer_text=None):
     acc = AURAS.get(aura_key, AURAS["gold"])
     M = (style == "mythic")
     fx, fy, fw, fh = 60, 60, 1080, 1280   # outer frame
@@ -382,9 +399,15 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
 
     frame_rx = 10 if M else 34
     pw_rx    = 8 if M else 26
-    sub_caps = real_name.upper()
-    pf = f"{power_val}"
-    chain_fs = fit_font(chain_text, 940, 30, 0.62, 16)
+    title_text = title if title_text is None else title_text
+    subtitle_text = real_name.upper() if subtitle_text is None else subtitle_text
+    aura_text = aura_key.upper() if aura_text is None else aura_text
+    essence_text = f"{power_label} {power_val}" if essence_text is None else essence_text
+    caption_label = chain_label if caption_label is None else caption_label
+    caption_text = chain_text if caption_text is None else caption_text
+    lore_text = lore if lore_text is None else lore_text
+    footer_text = "HUMAN+ APPAREL" if footer_text is None else footer_text
+    caption_fs = fit_font(caption_text, 940, 30, 0.62, 16)
     portrait, has_art = portrait_art(art_path, px, py, pw, ph, archetype, fig_fill, fig_edge)
     gem_before = "" if has_art else gem
     gem_after = gem if has_art else ""
@@ -392,12 +415,12 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
     if has_art:
         portrait_frame = f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" fill="none" stroke="{frame_in}" stroke-width="4"/>'
     chain_block = ""
-    if chain_label or chain_text:
+    if caption_label or caption_text:
         chain_block = (
             f'\n  <text x="600" y="{py+ph+150}" font-family="{MONO}" font-size="23" '
-            f'letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(chain_label)}</text>'
-            f'\n  <text x="600" y="{py+ph+188}" font-family="{name_font}" font-size="{chain_fs}" '
-            f'font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(chain_text)}</text>'
+            f'letter-spacing="3" text-anchor="middle" fill="{acc}">{esc(caption_label)}</text>'
+            f'\n  <text x="600" y="{py+ph+188}" font-family="{name_font}" font-size="{caption_fs}" '
+            f'font-weight="700" letter-spacing="1" text-anchor="middle" fill="{txt}">{esc(caption_text)}</text>'
         )
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
@@ -422,8 +445,8 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
   <rect x="{fx+12}" y="{fy+12}" width="{fw-24}" height="{fh-24}" rx="{max(frame_rx-4,4)}" fill="none" stroke="{frame_in}" stroke-width="2" stroke-opacity="0.7"/>
   {corners}
 
-  <text x="600" y="{fy+128}" font-family="{name_font}" font-size="74" font-weight="800" letter-spacing="{6 if M else 2}" text-anchor="middle" fill="{txt}">{esc(title)}</text>
-  <text x="600" y="{fy+178}" font-family="{MONO}" font-size="26" letter-spacing="5" text-anchor="middle" fill="{acc}">{esc(sub_caps)}</text>
+  <text x="600" y="{fy+128}" font-family="{name_font}" font-size="74" font-weight="800" letter-spacing="{6 if M else 2}" text-anchor="middle" fill="{txt}">{esc(title_text)}</text>
+  <text x="600" y="{fy+178}" font-family="{MONO}" font-size="26" letter-spacing="5" text-anchor="middle" fill="{acc}">{esc(subtitle_text)}</text>
 
   <rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="{pw_rx}" fill="url(#port)" stroke="{frame_in}" stroke-width="4"/>
   {gem_before}
@@ -431,11 +454,11 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
   {gem_after}
   {portrait_frame}
 
-  <text x="600" y="{py+ph+82}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_key.upper())} AURA &#183; {esc(power_label)} {esc(pf)}</text>
+  <text x="600" y="{py+ph+82}" font-family="{MONO}" font-size="24" letter-spacing="4" text-anchor="middle" fill="{txt_dim}">{esc(aura_text)} AURA &#183; {esc(essence_text)}</text>
   {chain_block}
 
-  <text x="600" y="{fy+fh-86}" font-family="{name_font}" font-size="27" font-style="italic" text-anchor="middle" fill="{txt_dim}">{esc(lore)}</text>
-  <text x="600" y="{fy+fh-40}" font-family="{MONO}" font-size="22" letter-spacing="6" text-anchor="middle" fill="{txt_dim}" fill-opacity="0.8">HUMAN+ APPAREL</text>
+  <text x="600" y="{fy+fh-86}" font-family="{name_font}" font-size="27" font-style="italic" text-anchor="middle" fill="{txt_dim}">{esc(lore_text)}</text>
+  <text x="600" y="{fy+fh-40}" font-family="{MONO}" font-size="22" letter-spacing="6" text-anchor="middle" fill="{txt_dim}" fill-opacity="0.8">{esc(footer_text)}</text>
 </svg>'''
     return "\n".join(line.rstrip() for line in svg.splitlines()) + "\n"
 
@@ -552,7 +575,172 @@ def write_card_assets(svg, svg_dir, prev_dir, base, bg, here):
         f.write(svg)
     render(svg_for_preview(svg, here), os.path.join(prev_dir, base + ".png"), bg)
 
+def export_key(text):
+    return str(text).strip().upper().replace(" ", "_")
+
+def export_records():
+    compounds, evolutions = build_data()
+    records = []
+    for c in compounds:
+        records.append({
+            "kind": "compound",
+            "key": c["sym"],
+            "aliases": {export_key(c["sym"]), export_key(c["real"]), export_key(c["title"])},
+            "title": c["title"],
+            "subtitle": c["real"],
+            "arch": c["arch"],
+            "aura": c["aura"],
+            "lore": c["lore"],
+            "power_label": c["plabel"],
+            "power_val": c["pval"],
+            "caption_label": "COMPOUND",
+            "caption": c["real"],
+            "art_key": c["sym"],
+        })
+    for e in evolutions:
+        key = stack_art_key(e["name"])
+        records.append({
+            "kind": "evolution",
+            "key": key,
+            "aliases": {export_key(key), export_key(e["name"]), export_key(e["sub"])},
+            "title": e["name"],
+            "subtitle": e["sub"],
+            "arch": e["arch"],
+            "aura": e["aura"],
+            "lore": e["lore"],
+            "power_label": "TIER",
+            "power_val": len(e["comps"]),
+            "caption_label": "COMPOUNDS",
+            "caption": e["recipe"],
+            "art_key": key,
+        })
+    return records
+
+def find_export_record(key):
+    needle = export_key(key)
+    for record in export_records():
+        if needle in record["aliases"]:
+            return record
+    choices = ", ".join(r["key"] for r in export_records())
+    raise SystemExit(f"Unknown MYTHOS key '{key}'. Known keys include: {choices}")
+
+def deity_svg(art_path):
+    uri = png_data_uri(art_path)
+    if not uri:
+        raise FileNotFoundError(f"Missing or invalid deity art PNG: {art_path}")
+    width, height = png_dimensions(art_path)
+    return "\n".join(line.rstrip() for line in f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">
+  <image x="0" y="0" width="{width}" height="{height}" href="{uri}" preserveAspectRatio="xMidYMid meet"/>
+</svg>'''.splitlines()) + "\n"
+
+def card_svg_for_export(here, record, style, args):
+    art_path = art_path_for(here, record["art_key"], style)
+    svg = card(
+        record["title"], record["subtitle"], record["arch"], record["aura"], record["lore"],
+        record["power_label"], record["power_val"], record["caption_label"], record["caption"],
+        style, art_path,
+        title_text=args.title,
+        subtitle_text=args.sub,
+        aura_text=args.aura,
+        essence_text=args.essence,
+        caption_label=args.caption_label,
+        caption_text=args.caption,
+        lore_text=args.lore,
+        footer_text=args.footer,
+    )
+    return inline_art(svg, art_path)
+
+def ensure_tool(name):
+    path = shutil.which(name)
+    if not path:
+        raise SystemExit(f"Required export tool is not installed or not on PATH: {name}")
+    return path
+
+def write_text(path, text):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(text)
+
+def render_export_png(svg, out_path, width):
+    ensure_tool("rsvg-convert")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    subprocess.run(["rsvg-convert", "-w", str(width), "-o", out_path],
+                   input=svg.encode("utf-8"), check=True)
+
+def render_export_eps(svg, out_path):
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    if shutil.which("rsvg-convert") and shutil.which("pdftops"):
+        with tempfile.TemporaryDirectory() as td:
+            pdf_path = os.path.join(td, "export.pdf")
+            subprocess.run(["rsvg-convert", "-f", "pdf", "-o", pdf_path],
+                           input=svg.encode("utf-8"), check=True)
+            subprocess.run(["pdftops", "-eps", pdf_path, out_path], check=True)
+        return
+    if shutil.which("inkscape"):
+        with tempfile.TemporaryDirectory() as td:
+            svg_path = os.path.join(td, "export.svg")
+            write_text(svg_path, svg)
+            subprocess.run(["inkscape", svg_path, "--export-type=eps",
+                            "--export-filename", out_path], check=True)
+        return
+    try:
+        import cairosvg
+    except Exception as exc:
+        raise SystemExit("EPS export needs rsvg-convert+pdftops, inkscape, or Python cairosvg") from exc
+    cairosvg.svg2eps(bytestring=svg.encode("utf-8"), write_to=out_path)
+
+def write_export(svg, out_path, fmt, width):
+    if fmt == "svg":
+        write_text(out_path, svg)
+    elif fmt == "png":
+        render_export_png(svg, out_path, width)
+    elif fmt == "eps":
+        render_export_eps(svg, out_path)
+    else:
+        raise SystemExit(f"Unsupported export format: {fmt}")
+
+def export_one(args):
+    here = os.path.dirname(os.path.abspath(__file__))
+    record = find_export_record(args.sym)
+    style = args.style
+    element = args.element
+    fmt = args.format
+    art_path = art_path_for(here, record["art_key"], style)
+
+    if element == "deity":
+        svg = deity_svg(art_path)
+    else:
+        svg = card_svg_for_export(here, record, style, args)
+
+    out_dir = os.path.join(here, "mythic_exports", element)
+    out_path = os.path.join(out_dir, f"{record['key']}_{style}.{fmt}")
+    write_export(svg, out_path, fmt, args.width)
+    print(os.path.abspath(out_path))
+
+def export_parser():
+    parser = argparse.ArgumentParser(description="Export one HUMAN+ MYTHOS design.")
+    parser.add_argument("command", choices=["export"])
+    parser.add_argument("--sym", required=True, help="Compound symbol or stack key, e.g. Bp or WOLVERINE")
+    parser.add_argument("--style", choices=["mythic", "arcane"], default="mythic")
+    parser.add_argument("--element", choices=["deity", "card", "both"], default="card")
+    parser.add_argument("--format", choices=["svg", "png", "eps"], default="svg")
+    parser.add_argument("--width", type=int, default=2000, help="PNG export width in pixels")
+    parser.add_argument("--title", help="Override deity title")
+    parser.add_argument("--sub", help="Override subtitle / real compound name")
+    parser.add_argument("--aura", help="Override aura label only, e.g. EMERALD")
+    parser.add_argument("--essence", help='Override essence/mass/tier text, e.g. "ESSENCE 15 aa"')
+    parser.add_argument("--caption-label", help='Override caption label, e.g. "COMPOUNDS"')
+    parser.add_argument("--caption", help="Override compound caption under the art")
+    parser.add_argument("--lore", help="Override lore sentence")
+    parser.add_argument("--footer", help='Override footer text, default "HUMAN+ APPAREL"')
+    return parser
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "export":
+        export_one(export_parser().parse_args())
+        return
+
     here = os.path.dirname(os.path.abspath(__file__))
     svg_dir = os.path.join(here, "mythic_svg")
     prev_dir = os.path.join(here, "mythic_preview")
@@ -590,32 +778,8 @@ def main():
             write_card_assets(svg, clean_svg_dir, clean_prev_dir, base, bg, here)
             made += 1
 
-    # embed data for the live page
-    db = {
-        "compounds": [{"sym": c["sym"], "title": c["title"], "real": c["real"],
-                       "arch": c["arch"], "aura": c["aura"], "lore": c["lore"],
-                       "fam": c["fam"],
-                       "plabel": c["plabel"], "pval": c["pval"], "evo": c["evo"]}
-                      for c in compounds],
-        "evolutions": [{"name": e["name"], "sub": e["sub"], "comps": e["comps"],
-                        "arch": e["arch"], "aura": e["aura"], "lore": e["lore"],
-                        "tag": e["tag"], "forged": e["forged"], "extras": e["extras"],
-                        "compoundSyms": e["compound_syms"]}
-                       for e in evolutions],
-        "auras": AURAS,
-    }
-    # --no-html: regenerate card assets only, without rebuilding the page
-    # (the live mythic.html is maintained separately and must not be clobbered).
-    if "--no-html" not in sys.argv:
-        from mythic_template import MYTHIC_TEMPLATE, HOME_TEMPLATE
-        html = MYTHIC_TEMPLATE.replace("/*__DATA__*/", json.dumps(db))
-        with open(os.path.join(here, "mythic.html"), "w") as f:
-            f.write(html)
-        with open(os.path.join(here, "home.html"), "w") as f:
-            f.write(HOME_TEMPLATE)
-        print("Built mythic.html + home.html")
-
     print(f"MYTHOS: {made} card PNGs ({len(compounds)} compounds + {len(evolutions)} evolutions, 2 styles)")
+    print("Skipped mythic.html; live page is hand-maintained separately")
 
 if __name__ == "__main__":
     main()
