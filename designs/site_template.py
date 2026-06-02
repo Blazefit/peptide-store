@@ -78,6 +78,8 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
     transition:border-color .15s,background .15s;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;}
   .preset:hover{border-color:var(--green);background:#1a1a24;}
   .preset .pn{font-size:.9rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .preset .pt{font-size:.62rem;font-weight:700;letter-spacing:1.5px;color:var(--green);font-family:ui-monospace,monospace;
+    margin-top:2px;white-space:normal;overflow-wrap:anywhere;}
   .preset .pc{font-size:.66rem;color:var(--text2);font-family:ui-monospace,monospace;margin-top:3px;line-height:1.4;
     white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
   .preset .badge{font-family:ui-monospace,monospace;font-size:.58rem;color:var(--green);border:1px solid currentColor;border-radius:999px;padding:4px 7px;}
@@ -451,7 +453,7 @@ function renderPresets(){
   items.forEach(item=>{
     const d=document.createElement('div');d.className="preset";
     const cat=stackCat(item), recipe=stackRecipe(item);
-    d.innerHTML=`<div><div class="pn">${esc(item.name)}</div><div class="pc">${esc(item.sub)} &middot; ${esc(recipe)}</div></div>
+    d.innerHTML=`<div><div class="pn">${esc(item.name)}</div>${item.tag?`<div class="pt">${esc(item.tag)}</div>`:""}<div class="pc">${esc(item.sub)} &middot; ${esc(recipe)}</div></div>
       <div class="badge ${item.kind==="blend"?"blend":""}">${cat}</div>`;
     d.onclick=()=>{
       if(item.kind==="blend"){
