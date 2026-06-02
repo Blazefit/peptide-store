@@ -517,7 +517,8 @@ document.getElementById('viewDetails').onclick=()=>{if(activeItem) openItem(acti
 
 /* ---------- downloads: deity PNG, self-contained card SVG, card PNG ---------- */
 function baseName(kind,item){return kind==='evo'?item.name.replace(/ /g,'_'):item.sym;}
-function deityUrl(kind,item){return `mythic_art/art_${baseName(kind,item)}_${style}.png?v=${ASSET_V}`;}
+function artStyle(){return style==='arcane'?'anime':'mythic';}
+function deityUrl(kind,item){return `mythic_art/art_${baseName(kind,item)}_${artStyle()}.png?v=${ASSET_V}`;}
 function triggerDownload(href,name){const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove();}
 async function fetchDataURI(u){const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});}
 async function selfContainedCardSVG(kind,item){
@@ -527,8 +528,8 @@ async function selfContainedCardSVG(kind,item){
   return svg.replace(/(?:xlink:href|href)="[^"]*mythic_art[^"]*"/g,`href="${uri}"`);
 }
 async function downloadDeityPNG(kind,item){
-  try{const r=await fetch(deityUrl(kind,item));const b=await r.blob();const u=URL.createObjectURL(b);
-    triggerDownload(u,`humanplus_${baseName(kind,item)}_deity_${style}.png`);setTimeout(()=>URL.revokeObjectURL(u),1500);
+  try{const r=await fetch(deityUrl(kind,item));if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();const u=URL.createObjectURL(b);
+    triggerDownload(u,`humanplus_${baseName(kind,item)}_deity_${artStyle()}.png`);setTimeout(()=>URL.revokeObjectURL(u),1500);
   }catch(e){alert("Deity download failed: "+e.message);}
 }
 async function downloadCardSVG(kind,item){
