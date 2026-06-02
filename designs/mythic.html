@@ -261,6 +261,7 @@
         </div>
         <div class="studio-actions">
           <button class="btn" id="viewDetails">View details</button>
+          <button class="btn" id="clearChoices">Clear choices</button>
           <button class="btn" id="dlDeityPng">Deity PNG</button>
           <button class="btn" id="dlCardSvg">Card SVG</button>
           <button class="btn" id="dlCardPng">Card PNG</button>
@@ -389,8 +390,15 @@ function norm(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");}
 function uniqueParts(parts){return [...new Set(parts.filter(Boolean))];}
 function expandParts(parts){return uniqueParts(parts.flatMap(p=>BLEND_COMPS[p]||[p]));}
 function sameSet(a,b){a=expandParts(a);b=expandParts(b);return a.length===b.length && a.every(x=>b.includes(x));}
+function containsAllParts(candidate, required){candidate=expandParts(candidate);return expandParts(required).every(x=>candidate.includes(x));}
+function aliasesForSym(sym){return [...compoundAliases.entries()].filter(([,s])=>s===sym).map(([a])=>a);}
 function compLabel(sym){const c=byCompoundSym.get(sym);return c?c.real:(sym==="Kl"?"KLOW":sym==="Gl"?"GLOW":sym);}
 function partsLabel(parts){return expandParts(parts).map(compLabel).join(" + ");}
+function compoundResultName(c,q){
+  const key=norm(q);
+  const hit=aliasesForSym(c.sym).find(a=>a===key && a!==norm(c.real));
+  return hit ? `${String(q).trim().toUpperCase()} / ${c.real}` : c.real;
+}
 function assetNameFor(kind,item){return kind==='evo'?(item.assetName||item.name):item.sym;}
 function itemKey(kind,item){return kind==='evo'?(item.assetName||item.name):item.sym;}
 function imgFor(kind,item){return kind==='evo'?eImg(assetNameFor(kind,item)):cImg(item.sym);}
@@ -403,10 +411,12 @@ function kickFor(kind,item){return kind==='evo'?(item.custom?`CUSTOM ASCENSION Â
 function nameFor(kind,item){return kind==='evo'?item.name:item.title;}
 function subFor(kind,item){return kind==='evo'?(item.custom?item.forged:item.sub.toUpperCase()):item.real;}
 function matchItem(kind,item,q){
-  if(!q) return true; q=q.toLowerCase();
+  if(!q) return true;
+  const key=norm(q), text=q.toLowerCase();
   return kind==='evo'
-    ? (item.name+" "+item.sub+" "+item.forged).toLowerCase().includes(q)
-    : (item.real+" "+item.sym+" "+item.title+" "+familyLabel(item.fam)).toLowerCase().includes(q);
+    ? (item.name+" "+item.sub+" "+item.forged).toLowerCase().includes(text)
+    : (item.real+" "+item.sym+" "+item.title+" "+familyLabel(item.fam)+" "+aliasesForSym(item.sym).join(" ")).toLowerCase().includes(text)
+      || aliasesForSym(item.sym).some(a=>a.includes(key));
 }
 
 function resolveCompound(q){
@@ -506,6 +516,27 @@ function renderSelectedChips(){
   }
 }
 
+function clearSearchInput(){
+  const input=document.getElementById('mythosSearch');
+  if(input) input.value="";
+  pickerQuery="";
+}
+
+function setBuilderEmpty(){
+  activeItem=null;
+  const fc=document.getElementById('featureCard');
+  if(fc){fc.removeAttribute('src');fc.alt="";}
+  document.getElementById('featureKind').textContent = "STACK BUILDER";
+  document.getElementById('featureName').textContent = "Choose compounds";
+  document.getElementById('featureSub').textContent = "Type HGH, KLOW, BPC-157 or pick below";
+  document.getElementById('selectedKind').textContent = "STACK BUILDER";
+  document.getElementById('selectedName').textContent = "No compounds selected";
+  document.getElementById('selectedSub').textContent = "Add compounds one at a time";
+  document.getElementById('selectedChain').textContent = "Matching stack deities will appear only when they contain every selected compound.";
+  renderSelectedChips();
+  markPickerSelection();
+}
+
 function renderQuickPicks(){
   const qp=document.getElementById('quickPicks'); if(!qp) return;
   qp.innerHTML="";
@@ -523,15 +554,23 @@ function renderQuickPicks(){
 
 function chooseCompound(c){
   if(!c) return;
-  if(mode==='evo') addStackPart(c.sym);
-  else setSelected('compound',c);
+  if(mode==='evo'){
+    addStackPart(c.sym);
+    clearSearchInput();
+    renderPicker();
+  }else{
+    setSelected('compound',c);
+    clearSearchInput();
+    renderPicker();
+  }
 }
 
 function chooseStack(e){
   if(!e) return;
   selectedStackParts = expandParts(e.comps);
   setSelected('evo',e);
-  markPickerSelection();
+  clearSearchInput();
+  renderPicker();
 }
 
 function addStackPart(sym){
@@ -568,29 +607,48 @@ function chooseSearch(){
   renderPicker();
 }
 
+function clearChoices(){
+  clearSearchInput();
+  if(mode==='evo'){
+    selectedStackParts=[];
+    setBuilderEmpty();
+    renderPicker();
+  }else{
+    setSelected('compound',defaultItemForMode());
+    renderPicker();
+  }
+}
+
 function renderPicker(){
   const pg=document.getElementById('pickerGrid');
   pg.innerHTML="";
   renderQuickPicks();
   document.getElementById('compoundFilter').style.display = mode==='compound' ? 'grid' : 'none';
   const q=pickerQuery.trim();
-  const kind=mode==='evo'?'evo':'compound';
-  if(mode==='evo' && !selectedStackParts.length){
-    const def=defaultItemForMode();
-    selectedStackParts=expandParts(def.comps||[]);
-    setSelected('evo',def);
-  }
+  const requiredParts=expandParts(selectedStackParts);
   const base = mode==='evo'
-    ? (q ? orderedEvolutions().map(e=>({kind:'evo',item:e})).concat(DB.compounds.map(c=>({kind:'compound',item:c})))
-         : ["KLOW","GLOW","WOLVERINE","THE OVERHAUL","WORKHORSE","PRIME"].map(n=>byEvoName.get(n)).filter(Boolean).map(e=>({kind:'evo',item:e}))
-           .concat(["Gh","Bp","Tb","Gk","Kp","Re","Sg"].map(s=>byCompoundSym.get(s)).filter(Boolean).map(c=>({kind:'compound',item:c}))))
+    ? (q
+        ? orderedEvolutions()
+            .filter(e=>(!requiredParts.length || containsAllParts(e.comps,requiredParts)))
+            .map(e=>({kind:'evo',item:e}))
+            .concat(DB.compounds.filter(c=>!requiredParts.includes(c.sym)).map(c=>({kind:'compound',item:c})))
+        : (requiredParts.length
+            ? orderedEvolutions().filter(e=>containsAllParts(e.comps,requiredParts)).map(e=>({kind:'evo',item:e}))
+            : ["KLOW","GLOW","WOLVERINE","THE OVERHAUL","WORKHORSE","PRIME"].map(n=>byEvoName.get(n)).filter(Boolean).map(e=>({kind:'evo',item:e}))
+                .concat(["Gh","Bp","Tb","Gk","Kp","Re","Sg"].map(s=>byCompoundSym.get(s)).filter(Boolean).map(c=>({kind:'compound',item:c}))))
+      )
     : (q ? DB.compounds.slice() : orderedCompounds()).map(c=>({kind:'compound',item:c}));
   const items = base.filter(entry=>matchItem(entry.kind,entry.item,pickerQuery));
-  if(!items.length){pg.innerHTML=`<div class="pick-empty">No matches for that search.</div>`;return;}
+  if(!items.length){
+    pg.innerHTML=`<div class="pick-empty">${mode==='evo'&&requiredParts.length?'No existing stack contains every selected compound. The closest custom deity is shown above.':'No matches for that search.'}</div>`;
+    if(mode==='evo' && requiredParts.length) setSelected('evo', stackFromParts(requiredParts));
+    else if(mode==='evo') setBuilderEmpty();
+    return;
+  }
   items.forEach(entry=>{
     const item=entry.item;
     const entryKind=entry.kind;
-    const pname=entryKind==='evo'?item.name:item.real;
+    const pname=entryKind==='evo'?item.name:compoundResultName(item,pickerQuery);
     const psub=entryKind==='evo'?`${item.sub.toUpperCase()} Â· ${partsLabel(item.comps)}`:item.title;
     const d=document.createElement('div');
     d.className='pick-card';
@@ -608,7 +666,8 @@ function renderPicker(){
     if(inList) setSelected(activeItem.kind,activeItem.item);
     else setSelected('compound', items[0]?.item || defaultItemForMode());
   }else{
-    setSelected('evo', stackFromParts(selectedStackParts));
+    if(requiredParts.length) setSelected('evo', stackFromParts(requiredParts));
+    else setBuilderEmpty();
   }
   markPickerSelection();
 }
@@ -678,7 +737,10 @@ document.querySelectorAll('#styleToggle button').forEach(b=>b.onclick=()=>{
 });
 document.querySelectorAll('#designMode button').forEach(b=>b.onclick=()=>{
   mode=b.dataset.mode;
-  if(mode==='compound') selectedStackParts=[];
+  selectedStackParts=[];
+  clearSearchInput();
+  if(mode==='evo') setBuilderEmpty();
+  else activeItem=null;
   document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x===b));
   renderPicker();
 });
@@ -688,6 +750,7 @@ document.querySelectorAll('#compoundFilter button').forEach(b=>b.onclick=()=>{
   mode='compound';
   document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x.dataset.mode==='compound'));
   activeItem=null;
+  selectedStackParts=[];
   renderPicker();
 });
 document.getElementById('mythosSearch').addEventListener('input',e=>{pickerQuery=e.target.value;renderPicker();});
@@ -695,6 +758,7 @@ document.getElementById('mythosSearch').addEventListener('keydown',e=>{if(e.key=
 document.getElementById('featurePanel').onclick=()=>{if(activeItem) openItem(activeItem.kind,activeItem.item);};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('lb').classList.remove('show');});
 document.getElementById('viewDetails').onclick=()=>{if(activeItem) openItem(activeItem.kind,activeItem.item);};
+document.getElementById('clearChoices').onclick=clearChoices;
 
 /* ---------- downloads: deity PNG, self-contained card SVG, card PNG ---------- */
 function baseName(kind,item){return kind==='evo'?assetNameFor(kind,item).replace(/ /g,'_'):item.sym;}
