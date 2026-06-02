@@ -391,11 +391,9 @@ def card(title, real_name, archetype, aura_key, lore, power_label, power_val,
                         f'fill="none" stroke="{acc}" stroke-width="5"/>'
                         f'<circle cx="{ox+sx*30}" cy="{oy+sy*30}" r="6" fill="{acc}"/>')
 
-    # type gem (arcane) / sigil (mythic) top-right of portrait
+    # Keep generated deity artwork unobstructed; ANIME art previously had a
+    # top-right aura gem that covered the image.
     gem = ""
-    if not M:
-        gem = (f'<circle cx="{px+pw-58}" cy="{py+58}" r="40" fill="{lighten(acc,0.2)}" stroke="#fff" stroke-width="5"/>'
-               f'<circle cx="{px+pw-58}" cy="{py+58}" r="40" fill="url(#gloss)"/>')
 
     frame_rx = 10 if M else 34
     pw_rx    = 8 if M else 26

@@ -27,7 +27,7 @@
   <rect x="350" y="255" width="500" height="750" rx="26" fill="url(#port)" stroke="#A9772F" stroke-width="4"/>
 
   <image x="350" y="255" width="500" height="750" href="../mythic_art/art_WORKHORSE_anime.png" preserveAspectRatio="xMidYMin meet" clip-path="url(#portraitClip)"/>
-  <circle cx="792" cy="313" r="40" fill="#ba9259" stroke="#fff" stroke-width="5"/><circle cx="792" cy="313" r="40" fill="url(#gloss)"/>
+
   <rect x="350" y="255" width="500" height="750" rx="26" fill="none" stroke="#A9772F" stroke-width="4"/>
 
   <text x="600" y="1087" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">BRONZE AURA &#183; TIER 2</text>

@@ -27,7 +27,7 @@
   <rect x="350" y="255" width="500" height="750" rx="26" fill="url(#port)" stroke="#C9A24B" stroke-width="4"/>
 
   <image x="350" y="255" width="500" height="750" href="../mythic_art/art_Ip_anime.png" preserveAspectRatio="xMidYMin meet" clip-path="url(#portraitClip)"/>
-  <circle cx="792" cy="313" r="40" fill="#d4b56f" stroke="#fff" stroke-width="5"/><circle cx="792" cy="313" r="40" fill="url(#gloss)"/>
+
   <rect x="350" y="255" width="500" height="750" rx="26" fill="none" stroke="#C9A24B" stroke-width="4"/>
 
   <text x="600" y="1087" font-family="ui-monospace,'Courier New',monospace" font-size="24" letter-spacing="4" text-anchor="middle" fill="#9aa3b5">GOLD AURA &#183; ESSENCE 5</text>
