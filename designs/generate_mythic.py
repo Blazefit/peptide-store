@@ -118,6 +118,21 @@ EVO = {
     "OVERDRIVE":        ("ascendant", "violet",   "The engine redlined past every safe limit."),
     "SHOWTIME":         ("seraph",    "bronze",   "Made to be seen. Made to steal the light."),
     "THE VAULT":        ("warden",    "silver",   "Longevity, sealed and locked away for keeps."),
+    # sexual health / hormone axis
+    "LIBIDO":           ("seraph",    "crimson",  "Three arrows of wanting, loosed as one."),
+    "THE CATALYST":     ("alchemist", "bronze",   "Strikes the spark that wakes the whole axis."),
+    "EQUILIBRIUM":      ("alchemist", "rose",     "Two forces held in perfect, ancient balance."),
+    # sleep / skin / gut / immune
+    "SANDMAN":          ("sage",      "violet",   "Pulls you down past dreaming into the deep."),
+    "BRONZED":          ("seraph",    "bronze",   "Sun-forged skin, healed and gilded."),
+    "GUT CHECK":        ("warden",    "emerald",  "Seals the inner wall against the fire."),
+    "FORTRESS":         ("warden",    "emerald",  "Two sentinels holding one unbroken wall."),
+    # GH-peptide secretagogue combos
+    "SECRETAGOGUE":     ("ascendant", "gold",     "Wakes the sleeping gland with a twin call."),
+    "PULSE WAVE":       ("ascendant", "gold",     "Two pulses stacked to their highest crest."),
+    "VISCERAL":         ("hunter",    "silver",   "Burns the hidden weight from deep within."),
+    "THE LADDER":       ("ascendant", "gold",     "Climbs the axis rung by rung, ever higher."),
+    "METABOLIC":        ("alchemist", "crimson",  "Twin furnaces lit, the engine running hot."),
 }
 
 # ---------------------------------------------------------------------------

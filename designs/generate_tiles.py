@@ -131,6 +131,21 @@ STACKS = [
     ("OVERDRIVE",       "Mito / Longevity",    ["Mc", "Mq", "Na"],       "REDLINE THE ENGINE",     ""),
     ("SHOWTIME",        "Mito / Aesthetic",    ["Gk", "Mt"],             "STEAL THE STAGE",        "aesthetic support"),
     ("THE VAULT",       "Mito / Longevity",    ["Mc", "Ss", "Na"],       "LOCK IN LONGEVITY",      ""),
+    # --- Sexual health / hormone axis ---
+    ("LIBIDO",          "Hormone Performance", ["Pt", "Ox", "Ks"],       "DESIRE UNCHAINED",       ""),
+    ("THE CATALYST",    "Hormone Performance", ["Gn", "Hc"],             "FIRE THE AXIS",          ""),
+    ("EQUILIBRIUM",     "Hormone Performance", ["Es", "Dh"],             "BALANCE RESTORED",       ""),
+    # --- Sleep / skin / gut / immune ---
+    ("SANDMAN",         "Recovery / Sleep",    ["Ds", "Ep", "Ml"],       "INTO THE DEEP",          ""),
+    ("BRONZED",         "Skin / Recovery",     ["Mt", "Gk"],             "SUN-FORGED",             ""),
+    ("GUT CHECK",       "Gut / Repair",        ["Kp", "Bp"],             "SEAL THE LINING",        ""),
+    ("FORTRESS",        "Immune / Repair",     ["Ta", "Bp"],             "HOLD THE WALL",          ""),
+    # --- GH-peptide secretagogue combos ---
+    ("SECRETAGOGUE",    "Body Composition",    ["Sr", "Gp"],             "WAKE THE GLAND",         ""),
+    ("PULSE WAVE",      "Body Composition",    ["Hx", "Ip"],             "MAX AMPLITUDE",          ""),
+    ("VISCERAL",        "Body Composition",    ["Tm", "Ad"],             "BURN THE CORE",          ""),
+    ("THE LADDER",      "Body Composition",    ["Sr", "Tm", "Cj"],       "CLIMB THE AXIS",         ""),
+    ("METABOLIC",       "Body Composition",    ["Tz", "T3"],             "FURNACE ONLINE",         ""),
 ]
 STACK_COLORS = ["#2BE8B0", "#7C5CFC", "#FF5C8A", "#38BDF8", "#FFB020"]
 
