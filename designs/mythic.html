@@ -129,10 +129,11 @@
   .lb{position:fixed;inset:0;z-index:90;background:rgba(4,4,8,.94);display:none;align-items:flex-start;justify-content:center;
     padding:24px;overflow:auto;}
   .lb.show{display:flex;}
-  .lb-inner{max-width:1180px;width:100%;display:grid;grid-template-columns:1fr;gap:18px;margin:auto 0;}
-  @media(min-width:820px){.lb-inner{grid-template-columns:minmax(300px,430px) minmax(0,1fr);align-items:start;}}
-  .lb-card{width:100%;max-height:72vh;object-fit:contain;border-radius:14px;border:1px solid var(--border);background:#000;}
-  .lb .meta{padding:4px 0 24px;}
+  .lb-inner{max-width:min(1540px,calc(100vw - 48px));width:100%;display:grid;grid-template-columns:1fr;gap:22px;margin:auto 0;}
+  @media(min-width:820px){.lb-inner{grid-template-columns:minmax(0,1fr) minmax(280px,360px);align-items:start;}}
+  .lb-card{display:block;width:min(760px,100%);max-width:100%;height:auto;margin:0 auto;object-fit:contain;border-radius:14px;
+    border:1px solid var(--border);background:#000;box-shadow:0 24px 70px rgba(0,0,0,.62);}
+  .lb .meta{align-self:center;padding:4px 0 24px;}
   .lb .meta h3{font-size:clamp(2rem,5vw,4rem);line-height:.94;letter-spacing:0;font-weight:900;}
   .lb .meta .sub{color:var(--accent);font-family:ui-monospace,monospace;letter-spacing:3px;margin:8px 0 16px;}
   .lb .meta .lore{font-style:italic;color:var(--text);font-size:1.05rem;margin-bottom:18px;line-height:1.5;}
@@ -171,7 +172,8 @@
     .grid{grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:12px;}
     .feature-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
     .lb{padding:52px 14px 20px;}
-    .lb-card{max-height:58vh;}
+    .lb-inner{max-width:100%;}
+    .lb-card{width:100%;}
     .mock-mini{grid-template-columns:92px 1fr;}
   }
   /* ===== cohesion with the Periodic line ===== */
@@ -261,7 +263,7 @@
           <div class="k" id="featureKind"></div>
           <div class="n" id="featureName"></div>
           <div class="muted" id="featureSub"></div>
-          <div class="feature-hint">Tap for full details &rarr;</div>
+          <div class="feature-hint">Tap to enlarge &rarr;</div>
         </div>
       </button>
     </div>
@@ -462,7 +464,7 @@ function applyLightbox(){
   if(!activeItem) return;
   const {kind,item}=activeItem;
   const isEvo=kind==='evo';
-  document.getElementById('lbImg').src=imgFor(kind,item);
+  document.getElementById('lbImg').src=deityUrl(kind,item);
   document.getElementById('lbImg').alt=nameFor(kind,item);
   document.getElementById('lbName').textContent=nameFor(kind,item);
   document.getElementById('lbSub').textContent=isEvo?item.sub.toUpperCase():`${item.real} · ${familyLabel(item.fam)}`;
