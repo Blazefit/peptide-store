@@ -346,10 +346,24 @@ def _fit(text, max_w, base, avg):
     return base if len(text) * avg * base <= max_w else max(12, int(max_w / (len(text) * avg)))
 
 
+def front_design():
+    """The shared FRONT print for every periodic shirt: the HUMAN+ chest logo.
+    Same on every garment, so it's one reusable print file."""
+    return f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <text x="600" y="690" font-family="{SANS}" font-size="150" font-weight="800" text-anchor="middle" letter-spacing="8" fill="{WHITE}">HUMAN<tspan fill="{BRAND_GREEN}">+</tspan></text>
+  <text x="600" y="770" font-family="{MONO}" font-size="34" text-anchor="middle" letter-spacing="10" fill="{WHITE}" fill-opacity="0.5">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>'''
+
+
 def stack_tile(name, subtitle, comps, tagline, extras=""):
     """A combined 'stack' tile: big name + a row of component mini-tiles.
     Components may be elements OR blends (KL/WO/GL). `extras` is a free-text list
-    of supportive ingredients with no tile, shown as a small "+ ..." line."""
+    of supportive ingredients with no tile, shown as a small "+ ..." line.
+
+    This is the BACK print: stack name + tiles + tagline + slogan. The HUMAN+
+    logo is printed on the FRONT (see front_design()), so it is intentionally
+    omitted here. The 'STACK SERIES' eyebrow stays as a small header."""
     n = len(comps)
     # wider band + tighter gaps at high counts so 5-6 tiles don't get scrunched
     band = 1120
@@ -390,13 +404,12 @@ def stack_tile(name, subtitle, comps, tagline, extras=""):
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">{''.join(stops)}</linearGradient></defs>
-  <text x="600" y="180" font-family="{SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{BRAND_GREEN}">+</tspan></text>
-  <text x="600" y="230" font-family="{MONO}" font-size="24" text-anchor="middle" letter-spacing="6" fill="{WHITE}" fill-opacity="0.45">STACK SERIES</text>
-  <text x="600" y="420" font-family="{SANS}" font-size="{name_fs}" font-weight="800" text-anchor="middle" fill="url(#g)"{name_len}>{esc(name)}</text>
-  <text x="600" y="500" font-family="{MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.75">{esc(subtitle.upper())}</text>
+  <text x="600" y="210" font-family="{MONO}" font-size="26" text-anchor="middle" letter-spacing="8" fill="{WHITE}" fill-opacity="0.45">HUMAN+ STACK SERIES</text>
+  <text x="600" y="370" font-family="{SANS}" font-size="{name_fs}" font-weight="800" text-anchor="middle" fill="url(#g)"{name_len}>{esc(name)}</text>
+  <text x="600" y="450" font-family="{MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="{WHITE}" fill-opacity="0.75">{esc(subtitle.upper())}</text>
   {''.join(minis)}
   {extras_svg}
-  <text x="600" y="1080" font-family="{MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
+  <text x="600" y="1090" font-family="{MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
   <text x="600" y="1320" font-family="{MONO}" font-size="26" letter-spacing="4" text-anchor="middle" fill="{WHITE}" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
 </svg>'''
 
@@ -590,6 +603,19 @@ def main():
         render_print(svg, os.path.join(print_light_dir, name + ".png"), light=True)
         printed += 1
         made.append(name)
+
+    # the shared FRONT print (HUMAN+ logo) — one file, used on every shirt front
+    fsvg = front_design()
+    fbase = "front_HumanPlus"
+    with open(os.path.join(svg_dir, fbase + ".svg"), "w") as f:
+        f.write(fsvg)
+    render_png(os.path.join(svg_dir, fbase + ".svg"), os.path.join(prev_dir, fbase + ".png"))
+    render_print(fsvg, os.path.join(print_dir, fbase + ".png"))
+    render_print(fsvg, os.path.join(print_light_dir, fbase + ".png"), light=True)
+    render_printful(fsvg, os.path.join(pf_dir, fbase + ".png"))
+    render_printful(fsvg, os.path.join(pf_light_dir, fbase + ".png"), light=True)
+    printed += 1
+    made.append(fbase)
 
     # static render-gallery fallback
     order = [n for n in made if n.startswith("poster")] + \

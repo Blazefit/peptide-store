@@ -175,6 +175,13 @@
             <button data-g="long">Long Sleeve</button>
           </div>
         </div>
+        <div class="row" id="sideRow">
+          <div class="seg" id="sideSeg">
+            <button data-side="front">Front</button>
+            <button data-side="back" class="on">Back</button>
+          </div>
+          <span class="hint" id="sideHint" style="margin:0;"></span>
+        </div>
         <div class="garment-wrap" id="garmentWrap"></div>
         <label class="fld">Garment color</label>
         <div class="row" id="garmentColors"></div>
@@ -1069,6 +1076,7 @@ const EL = {}; DB.elements.forEach(e=>EL[e.sym]=e);
 (DB.blends||[]).forEach(b=>{EL[b.sym]=Object.assign({fam:"BLEND",count:b.comps.length},b);});
 let selected = [];     // array of symbols
 let garment = "tee";
+let designSide = "back";   // "front" (HUMAN+ logo) or "back" (stack art)
 let garmentColor = "#0d0d12";
 let accentColor = DB.green;
 let stackCategory = "ALL";
@@ -1147,23 +1155,28 @@ function stackTileSVG(name,sub,comps,tag,extras){
     extrasSVG=`<text x="600" y="1000" font-family="${MONO}" font-size="${efs}" letter-spacing="2" text-anchor="middle" fill="${DB.green}" fill-opacity=".85">${esc(et)}</text>`;}
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
     <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>
-    <text x="600" y="180" font-family="${SANS}" font-size="80" font-weight="800" text-anchor="middle" letter-spacing="6" fill="#fff">HUMAN<tspan fill="${DB.green}">+</tspan></text>
-    <text x="600" y="230" font-family="${MONO}" font-size="24" text-anchor="middle" letter-spacing="6" fill="#fff" fill-opacity=".45">STACK SERIES</text>
-    <text x="600" y="420" font-family="${SANS}" font-size="${nameFS}" font-weight="800" text-anchor="middle" fill="url(#sg)">${esc(name||"MY STACK")}</text>
-    <text x="600" y="500" font-family="${MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="#fff" fill-opacity=".75">${esc((sub||"CUSTOM PROTOCOL").toUpperCase())}</text>
+    <text x="600" y="210" font-family="${MONO}" font-size="26" text-anchor="middle" letter-spacing="8" fill="#fff" fill-opacity=".45">HUMAN+ STACK SERIES</text>
+    <text x="600" y="370" font-family="${SANS}" font-size="${nameFS}" font-weight="800" text-anchor="middle" fill="url(#sg)">${esc(name||"MY STACK")}</text>
+    <text x="600" y="450" font-family="${MONO}" font-size="34" letter-spacing="6" text-anchor="middle" fill="#fff" fill-opacity=".75">${esc((sub||"CUSTOM PROTOCOL").toUpperCase())}</text>
     ${minis}
     ${extrasSVG}
-    <text x="600" y="1080" font-family="${MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="#fff">${esc(tag||"BUILT DIFFERENT")}</text>
+    <text x="600" y="1090" font-family="${MONO}" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="#fff">${esc(tag||"BUILT DIFFERENT")}</text>
     <text x="600" y="1320" font-family="${MONO}" font-size="26" letter-spacing="4" text-anchor="middle" fill="#fff" fill-opacity=".4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
   </svg>`;
 }
+/* shared FRONT print: the HUMAN+ chest logo (same on every shirt) */
+function frontDesignSVG(){
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
+    <text x="600" y="690" font-family="${SANS}" font-size="150" font-weight="800" text-anchor="middle" letter-spacing="8" fill="#fff">HUMAN<tspan fill="${DB.green}">+</tspan></text>
+    <text x="600" y="770" font-family="${MONO}" font-size="34" text-anchor="middle" letter-spacing="10" fill="#fff" fill-opacity=".5">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+  </svg>`;
+}
 
-/* current design = single tile if 1 selected (custom), else a stack.
-   A loaded preset always renders as a stack tile so its extras/subtitle show. */
-function currentDesignSVG(){
+/* The BACK print = stack name + tiles + tagline + slogan (single tile if 1
+   compound selected). A loaded preset renders as a stack so its extras show. */
+function currentBackSVG(){
   const name=(document.getElementById('stackName')?.value)||"";
   const tag=(document.getElementById('stackTag')?.value)||"";
-  // a single blend selected -> show its expanded blend card (KLOW etc.)
   if(selected.length===1){const e=EL[selected[0]];
     if(e.blend) return stackTileSVG(name||e.full, e.sub, e.comps, tag||e.tag, "");
     if(!presetMeta) return heroTileSVG(e);
@@ -1171,6 +1184,18 @@ function currentDesignSVG(){
   if(presetMeta)
     return stackTileSVG(name||presetMeta.name, presetMeta.sub, selected, tag||presetMeta.tag, presetMeta.extras||"");
   return stackTileSVG(name||"MY STACK","CUSTOM PROTOCOL",selected,tag||"BUILT DIFFERENT","");
+}
+/* A single-compound selection is a one-print design (the tile itself = front);
+   a stack/blend uses the split layout: HUMAN+ logo front, stack art back. */
+function isSplit(){
+  if(selected.length===1 && !presetMeta){const e=EL[selected[0]]; return !!e.blend;}
+  return selected.length>1 || !!presetMeta || (selected.length===1 && EL[selected[0]].blend);
+}
+/* design for the chosen side. side="front" -> logo (split designs only). */
+function currentDesignSVG(side){
+  side = side || designSide;
+  if(side==="front" && isSplit()) return frontDesignSVG();
+  return currentBackSVG();
 }
 
 /* ---------- garment mockups ---------- */
@@ -1385,9 +1410,16 @@ function buildGarmentPage(){
   ACCENT_COLORS.forEach(c=>{const s=document.createElement('div');s.className="swatch"+(c===accentColor?" on":"");s.style.background=c;
     s.onclick=()=>{accentColor=c;buildGarmentPage();};ac.appendChild(s);});
   document.querySelectorAll('#garmentSeg button').forEach(b=>b.classList.toggle('on',b.dataset.g===garment));
+  // Front/Back toggle: only meaningful for split (stack/blend) designs.
+  const split=isSplit();
+  document.getElementById('sideRow').style.display=split?"":"none";
+  if(!split) designSide="back";
+  document.querySelectorAll('#sideSeg button').forEach(b=>b.classList.toggle('on',b.dataset.side===designSide));
+  document.getElementById('sideHint').textContent=split
+    ?(designSide==="front"?"Front: HUMAN+ logo (same on every shirt)":"Back: your stack design"):"";
   // recolor the artwork to match the chosen garment + accent, then use that SAME
   // art for the flat preview, the garment mockup, AND the downloads (so files match)
-  currentArt=recolorArt(currentDesignSVG(),garmentColor,accentColor);
+  currentArt=recolorArt(currentDesignSVG(designSide),garmentColor,accentColor);
   document.getElementById('artWrap').innerHTML=currentArt;
   document.getElementById('garmentWrap').innerHTML=garmentSVG(garment,garmentColor,currentArt);
   document.getElementById('designSub').textContent=selected.map(s=>EL[s].full).join("  +  ");
@@ -1406,6 +1438,7 @@ document.getElementById('backBtn').onclick=()=>show('pageBuild');
 document.getElementById('backBtn2').onclick=()=>show('pageBuild');
 document.getElementById('navGallery').onclick=()=>{renderGallery();show('pageGallery');};
 document.querySelectorAll('#garmentSeg button').forEach(b=>b.onclick=()=>{garment=b.dataset.g;buildGarmentPage();});
+document.querySelectorAll('#sideSeg button').forEach(b=>b.onclick=()=>{designSide=b.dataset.side;buildGarmentPage();});
 document.querySelectorAll('#stackFilter button').forEach(b=>b.onclick=()=>{
   stackCategory=b.dataset.cat;
   document.querySelectorAll('#stackFilter button').forEach(x=>x.classList.toggle('on',x===b));
@@ -1416,7 +1449,8 @@ document.getElementById('stackSearch').addEventListener('input',e=>{stackQuery=e
 function fileBase(){
   const nm=(document.getElementById('stackName').value||selected.join("-")||"human-plus").trim().replace(/\s+/g,"_");
   const tone=luminance(garmentColor)>0.6?"light":"dark";
-  return `${nm}_${tone}`;
+  const sidePart=isSplit()?("_"+designSide):"";   // front/back only for split designs
+  return `${nm}${sidePart}_${tone}`;
 }
 // SVG download = the recolored art that matches the current garment + accent
 document.getElementById('downloadBtn').onclick=()=>{
