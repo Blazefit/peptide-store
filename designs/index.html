@@ -181,7 +181,8 @@
         <label class="fld">Print accent</label>
         <div class="row" id="accentColors"></div>
         <div class="row" style="margin-top:14px;">
-          <button class="btn btn-primary" id="downloadBtn">Download artwork (SVG)</button>
+          <button class="btn btn-primary" id="downloadBtn">Download SVG</button>
+          <button class="btn btn-primary" id="downloadPngBtn">Download PNG</button>
           <button class="btn btn-ghost" id="addCartBtn">Add to cart (demo)</button>
         </div>
         <p class="hint">Demo prototype — "add to cart" is a placeholder. Download gives you the print-ready vector.</p>
@@ -1162,11 +1163,24 @@ function currentDesignSVG(){
 
 /* ---------- garment mockups ---------- */
 function luminance(hex){const n=parseInt(hex.slice(1),16);return(0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255))/255;}
-function garmentSVG(g,color,artSVG){
-  // on light garments, swap white ink -> near-black so the design stays legible
-  if(luminance(color)>0.6){
-    artSVG=artSVG.replace(/#fff(?![0-9a-f])/gi,"#14141c").replace(/#ffffff/gi,"#14141c");
+/* Apply the user's garment + accent choices to the artwork itself, so the
+   on-screen preview AND the downloaded files (SVG/PNG) all match. */
+function recolorArt(artSVG,gColor,aColor){
+  // 1) accent swap: brand green -> chosen print accent (skip if accent is default green)
+  if(aColor && aColor.toLowerCase()!==DB.green.toLowerCase()){
+    artSVG=artSVG.replace(new RegExp(DB.green.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),"gi"),aColor);
   }
+  // 2) ink swap: on a LIGHT garment, white ink -> near-black so the design stays legible
+  if(luminance(gColor)>0.6){
+    artSVG=artSVG.replace(/#ffffff/gi,"#14141c").replace(/#fff(?![0-9a-f])/gi,"#14141c");
+  }
+  return artSVG;
+}
+/* ensure a standalone <svg> has explicit width/height so it rasterizes to PNG */
+function sizedSVG(artSVG,w){const h=Math.round(w*1400/1200);
+  return artSVG.replace(/^<svg /i,`<svg width="${w}" height="${h}" `);}
+function garmentSVG(g,color,artSVG){
+  // art is already recolored by the caller (recolorArt); just place it on the garment
   const inner=(x,y,w)=>`<svg x="${x}" y="${y}" width="${w}" height="${Math.round(w*1.1667)}" viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid meet">${artSVG.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')}</svg>`;
   const stroke="#000", sw=5;
   const lighter=shade(color,20), darker=shade(color,-26), rib=shade(color,-40);
@@ -1359,13 +1373,14 @@ function buildGarmentPage(){
   ACCENT_COLORS.forEach(c=>{const s=document.createElement('div');s.className="swatch"+(c===accentColor?" on":"");s.style.background=c;
     s.onclick=()=>{accentColor=c;buildGarmentPage();};ac.appendChild(s);});
   document.querySelectorAll('#garmentSeg button').forEach(b=>b.classList.toggle('on',b.dataset.g===garment));
-  // art (recolor accent by swapping palette green/amber -> chosen accent for single tiles is left as-is;
-  //  for visual variety the accent swatch tints the stack "+" and gradient via CSS filter-free direct swap)
-  const art=currentDesignSVG();
-  document.getElementById('artWrap').innerHTML=art;
-  document.getElementById('garmentWrap').innerHTML=garmentSVG(garment,garmentColor,art);
+  // recolor the artwork to match the chosen garment + accent, then use that SAME
+  // art for the flat preview, the garment mockup, AND the downloads (so files match)
+  currentArt=recolorArt(currentDesignSVG(),garmentColor,accentColor);
+  document.getElementById('artWrap').innerHTML=currentArt;
+  document.getElementById('garmentWrap').innerHTML=garmentSVG(garment,garmentColor,currentArt);
   document.getElementById('designSub').textContent=selected.map(s=>EL[s].full).join("  +  ");
 }
+let currentArt="";
 
 /* ---------- navigation ---------- */
 function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
@@ -1386,11 +1401,35 @@ document.querySelectorAll('#stackFilter button').forEach(b=>b.onclick=()=>{
 });
 document.getElementById('stackSearch').addEventListener('input',e=>{stackQuery=e.target.value;renderPresets();});
 ['stackName','stackTag'].forEach(id=>document.getElementById(id).addEventListener('input',buildGarmentPage));
+function fileBase(){
+  const nm=(document.getElementById('stackName').value||selected.join("-")||"human-plus").trim().replace(/\s+/g,"_");
+  const tone=luminance(garmentColor)>0.6?"light":"dark";
+  return `${nm}_${tone}`;
+}
+// SVG download = the recolored art that matches the current garment + accent
 document.getElementById('downloadBtn').onclick=()=>{
-  const blob=new Blob([currentDesignSVG()],{type:"image/svg+xml"});
+  const art=currentArt||recolorArt(currentDesignSVG(),garmentColor,accentColor);
+  const blob=new Blob([art],{type:"image/svg+xml"});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=(document.getElementById('stackName').value||selected.join("-")||"human-plus")+".svg";a.click();
+  a.download=fileBase()+".svg";a.click();URL.revokeObjectURL(a.href);
 };
+// PNG download = same recolored art rasterized at print resolution (transparent bg)
+function downloadPNG(){
+  const art=sizedSVG(currentArt||recolorArt(currentDesignSVG(),garmentColor,accentColor),3600);
+  const img=new Image();
+  const url=URL.createObjectURL(new Blob([art],{type:"image/svg+xml"}));
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=3600;c.height=4200;
+    c.getContext('2d').drawImage(img,0,0,3600,4200);
+    URL.revokeObjectURL(url);
+    c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);
+      a.download=fileBase()+".png";a.click();URL.revokeObjectURL(a.href);},"image/png");
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);alert("PNG export failed in this browser — use the SVG, it's print-ready.");};
+  img.src=url;
+}
+const pngBtn=document.getElementById('downloadPngBtn');
+if(pngBtn) pngBtn.onclick=downloadPNG;
 document.getElementById('addCartBtn').onclick=()=>alert("Demo only — this is where checkout would go.\n\nStack: "+selected.join(" + "));
 
 renderGrid();renderBlends();renderPresets();renderTray();
