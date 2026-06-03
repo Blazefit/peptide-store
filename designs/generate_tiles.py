@@ -28,7 +28,7 @@ DESIGN NOTES
   Now / Space Grotesk) and a mono (JetBrains Mono) and OUTLINE the text.
 """
 
-import os, re, subprocess, json
+import os, re, subprocess, json, sys
 from site_template import SITE_TEMPLATE
 
 # ----------------------------------------------------------------------------
@@ -346,9 +346,27 @@ def _fit(text, max_w, base, avg):
     return base if len(text) * avg * base <= max_w else max(12, int(max_w / (len(text) * avg)))
 
 
-def front_design():
-    """The shared FRONT print for every periodic shirt: the HUMAN+ chest logo.
-    Same on every garment, so it's one reusable print file."""
+# Front-print options for periodic shirts. key -> (label, builder).
+FRONTS = ["centered", "left_chest", "concept"]
+
+
+def front_design(style="centered"):
+    """A FRONT print for periodic shirts. Three placements:
+      centered   - big HUMAN+ across the chest + slogan (default)
+      left_chest - small HUMAN+ logo, upper-left (classic apparel placement)
+      concept    - the 'Hs -> Human+' factory-default->enhanced two-tile idea
+    Rendered on the same 1200x1400 transparent canvas as everything else."""
+    if style == "left_chest":
+        # small mark in the upper-left chest zone; lots of empty space elsewhere
+        return f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <text x="250" y="430" font-family="{SANS}" font-size="74" font-weight="800" letter-spacing="3" fill="{WHITE}">HUMAN<tspan fill="{BRAND_GREEN}">+</tspan></text>
+  <text x="252" y="470" font-family="{MONO}" font-size="19" letter-spacing="6" fill="{WHITE}" fill-opacity="0.5">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>'''
+    if style == "concept":
+        # reuse the "factory default -> enhanced" two-tile concept art
+        return modified_human()
+    # centered (default)
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
   <text x="600" y="690" font-family="{SANS}" font-size="150" font-weight="800" text-anchor="middle" letter-spacing="8" fill="{WHITE}">HUMAN<tspan fill="{BRAND_GREEN}">+</tspan></text>
@@ -494,6 +512,7 @@ def light_variant(svg):
 PF_W, PF_H = 3600, 4800
 PF_ART_W, PF_ART_H = 3600, 4200            # art keeps 6:7 at full width
 PF_OFF_Y = (PF_H - PF_ART_H) // 2          # 300px top/bottom margin
+DO_PRINTFUL = False                        # set True via --printful; heavy 3600x4800 batch
 
 
 def printful_wrap(svg):
@@ -508,7 +527,13 @@ def printful_wrap(svg):
 
 def render_printful(svg, png_path, light=False):
     """Render a Printful-template PNG: art centered on a 3600x4800 transparent
-    canvas (12x16in @ 300 DPI), ready to drop straight into Printful's print zone."""
+    canvas (12x16in @ 300 DPI), ready to drop straight into Printful's print zone.
+
+    Skipped unless DO_PRINTFUL is on (pass --printful). These 3600x4800 renders
+    are heavy, so routine regens stay fast; run with --printful when you need
+    fresh upload-ready Printful files."""
+    if not DO_PRINTFUL:
+        return
     art = strip_bg(svg)
     if light:
         art = light_variant(art)
@@ -539,8 +564,9 @@ def main():
     os.makedirs(prev_dir, exist_ok=True)
     os.makedirs(print_dir, exist_ok=True)
     os.makedirs(print_light_dir, exist_ok=True)
-    os.makedirs(pf_dir, exist_ok=True)
-    os.makedirs(pf_light_dir, exist_ok=True)
+    if DO_PRINTFUL:
+        os.makedirs(pf_dir, exist_ok=True)
+        os.makedirs(pf_light_dir, exist_ok=True)
 
     made = []
     printed = 0
@@ -604,18 +630,19 @@ def main():
         printed += 1
         made.append(name)
 
-    # the shared FRONT print (HUMAN+ logo) — one file, used on every shirt front
-    fsvg = front_design()
-    fbase = "front_HumanPlus"
-    with open(os.path.join(svg_dir, fbase + ".svg"), "w") as f:
-        f.write(fsvg)
-    render_png(os.path.join(svg_dir, fbase + ".svg"), os.path.join(prev_dir, fbase + ".png"))
-    render_print(fsvg, os.path.join(print_dir, fbase + ".png"))
-    render_print(fsvg, os.path.join(print_light_dir, fbase + ".png"), light=True)
-    render_printful(fsvg, os.path.join(pf_dir, fbase + ".png"))
-    render_printful(fsvg, os.path.join(pf_light_dir, fbase + ".png"), light=True)
-    printed += 1
-    made.append(fbase)
+    # shared FRONT prints (HUMAN+ logo placements) — reusable on every shirt front
+    for fstyle in FRONTS:
+        fsvg = front_design(fstyle)
+        fbase = f"front_{fstyle}"
+        with open(os.path.join(svg_dir, fbase + ".svg"), "w") as f:
+            f.write(fsvg)
+        render_png(os.path.join(svg_dir, fbase + ".svg"), os.path.join(prev_dir, fbase + ".png"))
+        render_print(fsvg, os.path.join(print_dir, fbase + ".png"))
+        render_print(fsvg, os.path.join(print_light_dir, fbase + ".png"), light=True)
+        render_printful(fsvg, os.path.join(pf_dir, fbase + ".png"))
+        render_printful(fsvg, os.path.join(pf_light_dir, fbase + ".png"), light=True)
+        printed += 1
+        made.append(fbase)
 
     # static render-gallery fallback
     order = [n for n in made if n.startswith("poster")] + \
@@ -632,7 +659,13 @@ def main():
     print(f"Generated {len(made)} designs + index.html (interactive) + gallery.html")
     print(f"Print-ready PNGs: {printed} dark (print/) + {printed} light (print/light/) "
           f"@ {PRINT_W}px wide, transparent background")
+    if DO_PRINTFUL:
+        print(f"Printful 12x16 PNGs: {printed} dark + {printed} light "
+              f"(print/printful/) @ {PF_W}x{PF_H}")
+    else:
+        print("Printful 12x16 batch skipped (run with --printful to render upload-ready files)")
 
 
 if __name__ == "__main__":
+    DO_PRINTFUL = ("--printful" in sys.argv)
     main()

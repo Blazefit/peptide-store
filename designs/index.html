@@ -182,6 +182,13 @@
           </div>
           <span class="hint" id="sideHint" style="margin:0;"></span>
         </div>
+        <div class="row" id="frontStyleRow" style="display:none;">
+          <div class="seg" id="frontSeg">
+            <button data-fs="centered" class="on">Centered</button>
+            <button data-fs="left_chest">Left chest</button>
+            <button data-fs="concept">Hs &rarr; H+</button>
+          </div>
+        </div>
         <div class="garment-wrap" id="garmentWrap"></div>
         <label class="fld">Garment color</label>
         <div class="row" id="garmentColors"></div>
@@ -1077,6 +1084,7 @@ const EL = {}; DB.elements.forEach(e=>EL[e.sym]=e);
 let selected = [];     // array of symbols
 let garment = "tee";
 let designSide = "back";   // "front" (HUMAN+ logo) or "back" (stack art)
+let frontStyle = "centered";   // centered | left_chest | concept
 let garmentColor = "#0d0d12";
 let accentColor = DB.green;
 let stackCategory = "ALL";
@@ -1164,8 +1172,33 @@ function stackTileSVG(name,sub,comps,tag,extras){
     <text x="600" y="1320" font-family="${MONO}" font-size="26" letter-spacing="4" text-anchor="middle" fill="#fff" fill-opacity=".4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
   </svg>`;
 }
-/* shared FRONT print: the HUMAN+ chest logo (same on every shirt) */
-function frontDesignSVG(){
+/* shared FRONT print: HUMAN+ logo, three placements (mirrors front_design) */
+function frontDesignSVG(style){
+  style = style || frontStyle;
+  if(style==="left_chest"){
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
+      <text x="250" y="430" font-family="${SANS}" font-size="74" font-weight="800" letter-spacing="3" fill="#fff">HUMAN<tspan fill="${DB.green}">+</tspan></text>
+      <text x="252" y="470" font-family="${MONO}" font-size="19" letter-spacing="6" fill="#fff" fill-opacity=".5">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+    </svg>`;
+  }
+  if(style==="concept"){
+    const grey="#6b6b78";
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
+      <text x="600" y="300" font-family="${SANS}" font-size="100" font-weight="800" text-anchor="middle" letter-spacing="6" fill="#fff">HUMAN<tspan fill="${DB.green}">+</tspan></text>
+      <text x="600" y="370" font-family="${MONO}" font-size="30" text-anchor="middle" letter-spacing="6" fill="#fff" fill-opacity=".5">FACTORY DEFAULT IS NOT FINAL</text>
+      <rect x="150" y="500" width="380" height="420" rx="18" fill="none" stroke="${grey}" stroke-width="9"/>
+      <text x="180" y="575" font-family="${MONO}" font-size="40" fill="${grey}">00</text>
+      <text x="340" y="745" font-family="${SANS}" font-size="120" font-weight="800" text-anchor="middle" fill="${grey}">Hs</text>
+      <text x="340" y="850" font-family="${SANS}" font-size="38" font-weight="700" text-anchor="middle" fill="${grey}">Homo sapiens</text>
+      <text x="340" y="895" font-family="${MONO}" font-size="22" letter-spacing="2" text-anchor="middle" fill="${grey}" fill-opacity=".7">FACTORY DEFAULT</text>
+      <text x="600" y="730" font-family="${SANS}" font-size="90" font-weight="800" text-anchor="middle" fill="${DB.green}">&#8594;</text>
+      <rect x="670" y="500" width="380" height="420" rx="18" fill="none" stroke="${DB.green}" stroke-width="9"/>
+      <text x="700" y="575" font-family="${MONO}" font-size="40" fill="${DB.green}">01</text>
+      <text x="860" y="745" font-family="${SANS}" font-size="110" font-weight="800" text-anchor="middle" fill="${DB.green}">H+</text>
+      <text x="860" y="850" font-family="${SANS}" font-size="38" font-weight="700" text-anchor="middle" fill="${DB.green}">Human plus</text>
+      <text x="860" y="895" font-family="${MONO}" font-size="22" letter-spacing="2" text-anchor="middle" fill="${DB.green}" fill-opacity=".8">ENHANCED</text>
+    </svg>`;
+  }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
     <text x="600" y="690" font-family="${SANS}" font-size="150" font-weight="800" text-anchor="middle" letter-spacing="8" fill="#fff">HUMAN<tspan fill="${DB.green}">+</tspan></text>
     <text x="600" y="770" font-family="${MONO}" font-size="34" text-anchor="middle" letter-spacing="10" fill="#fff" fill-opacity=".5">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
@@ -1416,7 +1449,10 @@ function buildGarmentPage(){
   if(!split) designSide="back";
   document.querySelectorAll('#sideSeg button').forEach(b=>b.classList.toggle('on',b.dataset.side===designSide));
   document.getElementById('sideHint').textContent=split
-    ?(designSide==="front"?"Front: HUMAN+ logo (same on every shirt)":"Back: your stack design"):"";
+    ?(designSide==="front"?"Front: HUMAN+ logo (pick a placement)":"Back: your stack design"):"";
+  // front-style picker only when viewing the front of a split design
+  document.getElementById('frontStyleRow').style.display=(split&&designSide==="front")?"":"none";
+  document.querySelectorAll('#frontSeg button').forEach(b=>b.classList.toggle('on',b.dataset.fs===frontStyle));
   // recolor the artwork to match the chosen garment + accent, then use that SAME
   // art for the flat preview, the garment mockup, AND the downloads (so files match)
   currentArt=recolorArt(currentDesignSVG(designSide),garmentColor,accentColor);
@@ -1439,6 +1475,7 @@ document.getElementById('backBtn2').onclick=()=>show('pageBuild');
 document.getElementById('navGallery').onclick=()=>{renderGallery();show('pageGallery');};
 document.querySelectorAll('#garmentSeg button').forEach(b=>b.onclick=()=>{garment=b.dataset.g;buildGarmentPage();});
 document.querySelectorAll('#sideSeg button').forEach(b=>b.onclick=()=>{designSide=b.dataset.side;buildGarmentPage();});
+document.querySelectorAll('#frontSeg button').forEach(b=>b.onclick=()=>{frontStyle=b.dataset.fs;buildGarmentPage();});
 document.querySelectorAll('#stackFilter button').forEach(b=>b.onclick=()=>{
   stackCategory=b.dataset.cat;
   document.querySelectorAll('#stackFilter button').forEach(x=>x.classList.toggle('on',x===b));
@@ -1449,7 +1486,8 @@ document.getElementById('stackSearch').addEventListener('input',e=>{stackQuery=e
 function fileBase(){
   const nm=(document.getElementById('stackName').value||selected.join("-")||"human-plus").trim().replace(/\s+/g,"_");
   const tone=luminance(garmentColor)>0.6?"light":"dark";
-  const sidePart=isSplit()?("_"+designSide):"";   // front/back only for split designs
+  let sidePart="";   // front/back only for split designs; front carries its style
+  if(isSplit()) sidePart = designSide==="front" ? ("_front_"+frontStyle) : "_back";
   return `${nm}${sidePart}_${tone}`;
 }
 // SVG download = the recolored art that matches the current garment + accent
