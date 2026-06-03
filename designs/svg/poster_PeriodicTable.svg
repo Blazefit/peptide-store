@@ -270,24 +270,31 @@
   </g>
   <g>
     <rect x="274" y="1584" width="170" height="190" rx="10" fill="none" stroke="#7C5CFC" stroke-width="4"/>
-    <text x="288" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">663</text>
+    <text x="288" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">24</text>
     <text x="432" y="1618" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="16" text-anchor="end" fill="#FFFFFF" fill-opacity="0.5">g/mol</text>
-    <text x="359.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Na</text>
-    <text x="359.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">NAD+</text>
+    <text x="359.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Mg</text>
+    <text x="359.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">Magnesium</text>
   </g>
   <g>
     <rect x="458" y="1584" width="170" height="190" rx="10" fill="none" stroke="#7C5CFC" stroke-width="4"/>
-    <text x="472" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">159</text>
+    <text x="472" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">663</text>
     <text x="616" y="1618" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="16" text-anchor="end" fill="#FFFFFF" fill-opacity="0.5">g/mol</text>
-    <text x="543.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Mq</text>
-    <text x="543.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">5-Amino-1MQ</text>
+    <text x="543.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Na</text>
+    <text x="543.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">NAD+</text>
   </g>
   <g>
     <rect x="642" y="1584" width="170" height="190" rx="10" fill="none" stroke="#7C5CFC" stroke-width="4"/>
-    <text x="656" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">320</text>
+    <text x="656" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">159</text>
     <text x="800" y="1618" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="16" text-anchor="end" fill="#FFFFFF" fill-opacity="0.5">g/mol</text>
-    <text x="727.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Mb</text>
-    <text x="727.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">Methylene Blue</text>
+    <text x="727.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Mq</text>
+    <text x="727.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">5-Amino-1MQ</text>
+  </g>
+  <g>
+    <rect x="826" y="1584" width="170" height="190" rx="10" fill="none" stroke="#7C5CFC" stroke-width="4"/>
+    <text x="840" y="1624" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" fill="#7C5CFC">320</text>
+    <text x="984" y="1618" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="16" text-anchor="end" fill="#FFFFFF" fill-opacity="0.5">g/mol</text>
+    <text x="911.0" y="1702" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="78" font-weight="800" text-anchor="middle" fill="#FFFFFF">Mb</text>
+    <text x="911.0" y="1746" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#7C5CFC">Methylene Blue</text>
   </g>
   <text x="600" y="1928" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" letter-spacing="6" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
 </svg>

@@ -84,6 +84,7 @@ MYTHIC = {
     "T3": ("THE FURNACE",     "alchemist", "crimson",  "Throttles the fire at the body's center."),
     "Ml": ("THE DUSK",        "sage",      "violet",   "Draws the curtain so the work can begin."),
     # molecules
+    "Mg": ("THE KEYSTONE",    "alchemist", "sapphire", "The mineral that fires three hundred reactions."),
     "Na": ("THE CURRENT",     "ascendant", "violet",   "The coin every cell must spend to live."),
     "Mq": ("THE UNMAKER",     "alchemist", "violet",   "Deletes the gene that hoards the fat."),
     "Mb": ("THE AZURE",       "alchemist", "sapphire", "Lends electrons to the failing light."),

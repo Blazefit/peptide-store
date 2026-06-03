@@ -91,6 +91,7 @@ ELEMENTS = [
     ("T3", "Liothyronine",   "Thyroid T3",           "HOR", "", 651, "THROTTLE THE FURNACE", "C15H12I3NO4"),
     ("Ml", "Melatonin",      "Pineal Hormone",       "HOR", "", 232, "LIGHTS OUT",           "C13H16N2O2"),
     # --- MOLECULE FAMILY : metabolic cofactors / small-molecule nootropics, by g/mol ---
+    ("Mg", "Magnesium",      "Essential Mineral",    "MOL", "", 24,  "THE SPARK PLUG",      "Mg"),
     ("Na", "NAD+",           "Nicotinamide Dinucl.", "MOL", "", 663, "CELLULAR CURRENCY",    "C21H27N7O14P2"),
     ("Mq", "5-Amino-1MQ",    "NNMT Inhibitor",       "MOL", "", 159, "DELETE THE FAT GENE",  "C10H11N2"),
     ("Mb", "Methylene Blue", "Methylthioninium",     "MOL", "", 320, "ELECTRON DONOR",       "C16H18ClN3S"),
@@ -124,7 +125,7 @@ STACKS = [
     ("LIMITLESS",       "Cognitive / Nootropic",["Sx", "Mb"],            "NO CEILING",             "nootropic support"),
     ("LOCK IN",         "Cognitive / Nootropic",["Sx"],                  "TUNNEL VISION",          "caffeine + L-theanine + tyrosine"),
     ("IRON MIND",       "Cognitive / Nootropic",["Sk"],                  "FORGE THE MIND",         "Lion's Mane + Rhodiola + Bacopa"),
-    ("CLEAR HEAD",      "Cognitive / Nootropic",["Sk"],                  "SIGNAL NO NOISE",        "magnesium + L-theanine"),
+    ("CLEAR HEAD",      "Cognitive / Nootropic",["Sk", "Mg"],            "SIGNAL NO NOISE",        "L-theanine"),
     ("GAME DAY",        "Cognitive / Nootropic",["Sx"],                  "GO TIME",                "performance nootropic support"),
     # --- Mito / longevity / aesthetic ---
     ("REACTOR",         "Mito / Longevity",    ["Ss", "Mc"],             "POWER THE CORE",         ""),
@@ -475,6 +476,34 @@ def light_variant(svg):
                .replace("#FFF", WHITE_INK).replace("#fff", WHITE_INK))
 
 
+# Printful standard front DTG print area: 12in x 16in @ 300 DPI = 3600 x 4800 px.
+# Our art is 12in x 14in (1200x1400, 6:7); we center it on the 16in-tall canvas.
+PF_W, PF_H = 3600, 4800
+PF_ART_W, PF_ART_H = 3600, 4200            # art keeps 6:7 at full width
+PF_OFF_Y = (PF_H - PF_ART_H) // 2          # 300px top/bottom margin
+
+
+def printful_wrap(svg):
+    """Center the 1200x1400 art on Printful's 3600x4800 transparent print area."""
+    inner = re.sub(r'^\s*<\?xml[^>]*\?>', '', svg)
+    inner = re.sub(r'^\s*<svg[^>]*>', '', inner).rsplit('</svg>', 1)[0]
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{PF_W}" height="{PF_H}" '
+            f'viewBox="0 0 {PF_W} {PF_H}">'
+            f'<svg x="0" y="{PF_OFF_Y}" width="{PF_ART_W}" height="{PF_ART_H}" '
+            f'viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid meet">{inner}</svg></svg>')
+
+
+def render_printful(svg, png_path, light=False):
+    """Render a Printful-template PNG: art centered on a 3600x4800 transparent
+    canvas (12x16in @ 300 DPI), ready to drop straight into Printful's print zone."""
+    art = strip_bg(svg)
+    if light:
+        art = light_variant(art)
+    art = printful_wrap(art)
+    subprocess.run(["rsvg-convert", "-w", str(PF_W), "-h", str(PF_H), "-o", png_path, "-"],
+                   input=art.encode("utf-8"), check=True)
+
+
 def render_print(svg, png_path, light=False):
     """Render `svg` (a string) to a transparent, high-res print PNG.
     rsvg-convert with no `-b` flag preserves the SVG's transparent background."""
@@ -491,10 +520,14 @@ def main():
     prev_dir = os.path.join(here, "preview")
     print_dir = os.path.join(here, "print")          # dark-garment print PNGs
     print_light_dir = os.path.join(print_dir, "light")  # light-garment variant
+    pf_dir = os.path.join(here, "print", "printful")        # Printful 3600x4800 (dark ink)
+    pf_light_dir = os.path.join(pf_dir, "light")            # Printful 3600x4800 (light-garment ink)
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
     os.makedirs(print_dir, exist_ok=True)
     os.makedirs(print_light_dir, exist_ok=True)
+    os.makedirs(pf_dir, exist_ok=True)
+    os.makedirs(pf_light_dir, exist_ok=True)
 
     made = []
     printed = 0
@@ -509,6 +542,8 @@ def main():
         render_png(sp, os.path.join(prev_dir, base + ".png"))
         render_print(svg, os.path.join(print_dir, base + ".png"))
         render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
+        render_printful(svg, os.path.join(pf_dir, base + ".png"))
+        render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
         printed += 1
         made.append(base)
 
@@ -522,6 +557,8 @@ def main():
         render_png(sp, os.path.join(prev_dir, base + ".png"))
         render_print(svg, os.path.join(print_dir, base + ".png"))
         render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
+        render_printful(svg, os.path.join(pf_dir, base + ".png"))
+        render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
         printed += 1
         made.append(base)
 
@@ -537,6 +574,8 @@ def main():
         render_png(sp, os.path.join(prev_dir, base + ".png"))
         render_print(svg, os.path.join(print_dir, base + ".png"))
         render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
+        render_printful(svg, os.path.join(pf_dir, base + ".png"))
+        render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
         printed += 1
         made.append(base)
 
