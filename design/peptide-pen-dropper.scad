@@ -45,8 +45,30 @@ tray_lip      = 12;     // [6:1:20]   front catch-lip height
 drop_clear    = 26;     // [12:1:50]  air gap from drum bottom down into the tray
 
 /* [Preview] */
-part = "exploded";      // [drum, cradle, flap, secondary, both, exploded]
+part = "exploded";      // [drum, cradle, flap, secondary, both, exploded, section, latchtest, detenttest]
 show_pen = true;        // demo pen in the bottom chamber (preview only)
+
+/* [Mechanism states] (for previewing the motion) */
+latch_state = "closed"; // [closed, pressed]
+flap_state  = "closed"; // [closed, open]
+flap_open_ang = 62;     // [20:1:90] how far the trapdoor swings down
+
+/* [Print-in-place latch] */
+latch_b      = 14;      // [8:1:24]   button / blade width
+latch_t      = 2.2;     // [1.4:0.1:3.5] spring blade thickness (the springiness)
+latch_len    = 22;      // [14:1:34]  blade length
+latch_throw  = 4.5;     // [2:0.5:8]  button travel needed to release
+hook_grab    = 2.6;     // [1.5:0.1:4] how deeply the hook holds the lip
+latch_gap    = 0.5;     // [0.3:0.1:0.9] print-in-place clearance
+
+/* [Auto-index detent] */
+detent_on    = true;
+detent_t     = 1.8;     // [1:0.1:3]  detent leaf-spring thickness
+detent_nub   = 2.2;     // [1:0.1:4]  how far the nub drops into each notch
+
+/* [Catch ramp] */
+ramp_on      = true;
+cushion_on   = true;    // springy fingers at the landing zone
 
 $fn = 80;
 
@@ -71,6 +93,10 @@ shroud_ir = drum_r + shroud_gap;
 shroud_or = shroud_ir + shroud_th;
 tray_floor_z = 6;                                       // tray low point (front)
 axle_z    = tray_floor_z + drop_clear + drum_r;         // drum centre height
+det_dr    = drum_r - 6.5;                               // detent dimple ring radius
+det_nz    = axle_z - det_dr;                            // bottom dimple height (z)
+det_xf    = drum_len/2;                                 // +X drum end face plane
+det_xl    = axle_x - leg_th/2;                          // right-leg inner face plane
 
 // =============================================================================
 //  DRUM  (built on its axis = Z; back face z=0, front face z=drum_len)
@@ -86,6 +112,11 @@ module drum() {
         // axle sockets both ends
         translate([0,0,-1])                  cylinder(h = pin_engage+1, r = socket_r);
         translate([0,0,drum_len-pin_engage]) cylinder(h = pin_engage+1, r = socket_r);
+        // auto-index detent: a ring of ball-detent dimples on the +Z end face,
+        // one per chamber, so the drum clicks as each chamber reaches the bottom
+        if (detent_on)
+            for (i = [0:num_chambers-1]) rotate([0,0,ch_ang(i)])
+                translate([drum_r - 6.5, 0, drum_len]) sphere(r = detent_nub + 0.4);
     }
 }
 
@@ -128,6 +159,8 @@ else if (part == "flap")      flap();
 else if (part == "secondary") secondary();
 else if (part == "exploded")  exploded();
 else if (part == "section")   section();
+else if (part == "latchtest") latchtest();
+else if (part == "detenttest")detenttest();
 else                          assembled();
 
 echo(str("Drum Ø", 2*drum_r, " x ", drum_len, "  pitch_r=", pitch_r));
