@@ -65,3 +65,23 @@ dial-relief counterbores add downward apex area). q3/q4 have comfortable margin.
 If more margin is wanted, shrink the relief radius or open the relief from the
 top instead of using a larger teardrop. All five 2-pen designs (d1–d5) remain
 unchanged and passing. Verifier now reports 9/9 PASS.
+
+## Iteration 4 (2026-06-05) — front-loading from a long face (q5_rack4)
+User asked whether the 4-pen designs can load from a long flat face instead of
+the end. Constraint analysis: pen length (165) must occupy the 177.8 axis, and
+4 pens force a vertical stack on the 152.4 axis, leaving only the 63.5 axis
+facing "out the front." A straight vertical stack can't be top/side drop-loaded
+support-free because each opening is blocked by the pen above. Resolution: a
+RECLINED staggered ramp (toast-rack). Each pen sits behind-and-above the last on
+a 58deg ramp, so all four grooves open on the top-front long face and the ramp
+still faces up -> prints support-free. A 2.5 mm lip (grooves cut deeper than a
+semicircle) snap-retains each pen.
+
+| design     | family                    | L      | W     | H     | wt | overhang |
+|------------|---------------------------|-------:|------:|------:|:--:|---------:|
+| q5_rack4   | reclined front-load rack  | 172.00 | 56.83 | 87.64 | y  | 0.040    |
+
+Takeaway: the enclosed grid/tower/echelon (q1/q2/q3) are inherently
+end-loading; making them load from a long face support-free requires this
+reclined-ramp restructuring (q5). q4_hybrid already top-loads its upper row.
+Verifier now reports 10/10 PASS.

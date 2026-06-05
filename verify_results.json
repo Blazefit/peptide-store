@@ -1,5 +1,5 @@
 {
-  "pass_count": 9,
+  "pass_count": 10,
   "results": [
     {
       "id": "d1_cradle",
@@ -152,6 +152,23 @@
       "H": 49.11,
       "watertight": true,
       "overhang": 0.0889,
+      "note": ""
+    },
+    {
+      "id": "q5_rack4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.83,
+      "H": 87.64,
+      "watertight": true,
+      "overhang": 0.0395,
       "note": ""
     }
   ]
