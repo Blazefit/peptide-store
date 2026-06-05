@@ -211,3 +211,22 @@ out the front. Measured footprint:
   L 172.0mm / 6.77in,  W 79.2mm / 3.12in,  H 60.4mm / 2.38in,  watertight, ovh 0.034.
 Width 3.12in intentionally exceeds the old 2.5in spec (user has the depth);
 all other checks pass (verifier flags only W>63.5 by design).
+
+## Iteration 12 (2026-06-05) — lip-cradle FIX: integral curbs, one solid piece
+User flagged the front lip on the bottom pen as a fragile "floating" nub from the
+side view, and asked for several improvement loops to make it one functional
+piece. Connectivity check added (trimesh component count; "watertight" alone does
+NOT prove a single body). Loops:
+  A. Replaced perched cylinder nubs with a CONTINUOUS integral curb (shear the
+     ramp 'lip' above the pen centers) + a solid base slab -> no nub, no
+     knife-edge toe; mesh = 1 connected piece.
+  B. lip=5: pens nestle; 1 piece, watertight.
+  C. swept lip 5/6/7 -> lip=6 puts the front rim ~at the pen centerline (secure
+     cradle) with a 17mm throat; overhang 0.033.
+  D. finalized lip=6; presentation + side renders confirm each pen is cradled to
+     center and the bottom pen has a solid front wall.
+
+Final lc4_secure: 172.0 x 78.6 x 66.4 mm = 6.77 x 3.09 x 2.61 in, watertight,
+ONE piece, overhang 0.033. (Width over the old 2.5in spec by design.)
+All lip-cradle parts are single-piece: lc3_shallow (3-pen, fits 2.5in width),
+lc4_steep (4-pen steep), lc4_secure (4-pen secure).

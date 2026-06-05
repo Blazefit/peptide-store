@@ -250,10 +250,10 @@
         "overhang<=0.15": true
       },
       "L": 172.0,
-      "W": 60.99,
-      "H": 47.17,
+      "W": 60.41,
+      "H": 52.17,
       "watertight": true,
-      "overhang": 0.0318,
+      "overhang": 0.0252,
       "note": ""
     },
     {
@@ -267,10 +267,10 @@
         "overhang<=0.15": true
       },
       "L": 172.0,
-      "W": 79.19,
-      "H": 60.39,
+      "W": 78.61,
+      "H": 65.39,
       "watertight": true,
-      "overhang": 0.0337,
+      "overhang": 0.0253,
       "note": ""
     },
     {
@@ -284,10 +284,10 @@
         "overhang<=0.15": true
       },
       "L": 172.0,
-      "W": 60.06,
-      "H": 85.75,
+      "W": 61.75,
+      "H": 86.36,
       "watertight": true,
-      "overhang": 0.0497,
+      "overhang": 0.0495,
       "note": ""
     },
     {
@@ -526,6 +526,23 @@
       "H": 112.62,
       "watertight": true,
       "overhang": 0.0527,
+      "note": ""
+    },
+    {
+      "id": "tmp_lip6",
+      "status": "FAIL",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": false,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 78.61,
+      "H": 66.39,
+      "watertight": true,
+      "overhang": 0.0332,
       "note": ""
     }
   ]
