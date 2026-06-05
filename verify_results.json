@@ -257,6 +257,23 @@
       "note": ""
     },
     {
+      "id": "lc4_secure",
+      "status": "FAIL",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": false,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 79.19,
+      "H": 60.39,
+      "watertight": true,
+      "overhang": 0.0337,
+      "note": ""
+    },
+    {
       "id": "lc4_steep",
       "status": "PASS",
       "checks": {

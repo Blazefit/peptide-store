@@ -203,3 +203,11 @@ steep ramp needed for 4 pens leaves the pens proud with only light retention.
 
 Both PASS (watertight, support-free). This is the simple "rests in a cradle"
 option; the two-part gate (f-series) remains the secure-retention option.
+
+## Iteration 11 (2026-06-05) — lc4_secure: 4-pen lip-cradle at the secure 36deg
+User accepted a deeper footprint to keep the secure shallow hold for 4 pens.
+lc4_secure = lipcradle(n=4, phi=36). Single part, little front lip, pull pens
+out the front. Measured footprint:
+  L 172.0mm / 6.77in,  W 79.2mm / 3.12in,  H 60.4mm / 2.38in,  watertight, ovh 0.034.
+Width 3.12in intentionally exceeds the old 2.5in spec (user has the depth);
+all other checks pass (verifier flags only W>63.5 by design).
