@@ -1,0 +1,10 @@
+// pens (gray) nestled in a single-part lip-cradle (blue). Params via -D.
+include <../designs/lipcradle_lib.scad>
+N=3; PHI=36; PP=22.5; LH=4.5;
+color([0.30,0.50,0.90]) lipcradle(n=N, phi=PHI, P=PP, liph=LH);
+for(i=[0:N-1]){
+    yc=(-(N-1)/2+i)*PP*cos(PHI);
+    zc=(WALL+RCH)+i*PP*sin(PHI);
+    color([0.62,0.62,0.64]) translate([0,yc,zc]) rotate([0,90,0])
+        cylinder(h=PEN_L, r=PEN_B/2, center=true);
+}

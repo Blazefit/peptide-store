@@ -188,3 +188,18 @@ snap, nothing tolerance-critical, prints support-free. (gate printed standing.)
 All six parts (3 bodies + 3 gates) PASS (within volume, watertight, overhang
 <=0.057). Steeper ramp than the toast-rack is needed so the 4-5 staggered
 cradles + end catches stay under the 63.5mm width. Verifier 28/28.
+
+## Iteration 10 (2026-06-05) — single-part "little front lip" cradle (no cover)
+User asked to drop the full gate and just use a small front lip so the pen sits
+in a cradle. Built lipcradle_lib.scad: half-pipe cradles + a small rounded lip
+(proud bump, lift the pen over it -> no snap, tolerance-proof). Honest tradeoff
+confirmed by pen renders: a little lip holds well only on a SHALLOW ramp; the
+steep ramp needed for 4 pens leaves the pens proud with only light retention.
+
+| design       | pens | ramp | W     | H     | hold quality            |
+|--------------|-----:|-----:|------:|------:|-------------------------|
+| lc3_shallow  | 3    | 36   | 60.99 | 47.17 | decent (rests securely) |
+| lc4_steep    | 4    | 56   | 60.06 | 85.75 | light (desk-only)       |
+
+Both PASS (watertight, support-free). This is the simple "rests in a cradle"
+option; the two-part gate (f-series) remains the secure-retention option.
