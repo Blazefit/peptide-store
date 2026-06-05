@@ -4,6 +4,10 @@ A horizontal **rotating cylinder** that holds injector pens like the chambers of
 a revolver. Spin the drum to bring the pen you want up to the top. Two 3D-printed
 parts, no hardware.
 
+> **Want the select-and-drop version?** See
+> [`README-dropper.md`](README-dropper.md) — spin to a pen, press a button, and
+> it drops into a catch tray below.
+
 ![preview](revolver-preview.png)
 
 ## How it works
