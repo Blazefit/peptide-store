@@ -128,3 +128,19 @@ Trade-off noted: a full-length snap over a rigid pen is a firm press; production
 options = chamfered/intermittent lips, OR a separate retainer (elastic-band posts,
 front bar, or flip lid), OR revert to the end-loaded enclosed q-series which
 capture pens fully. Awaiting user's preferred retention approach.
+
+## Iteration 7 (2026-06-05) — FINAL snap-fit retention (user-selected)
+User chose snap-fit clip grooves. Added a `flex` parameter to rack_lib: relief
+gaps notch each lip into short spring-fingers so a rigid pen clips in with low
+force (vs one stiff 165 mm rib). Rebuilt the best three as snap-fit:
+
+| design      | role            | pens | W     | H      | wt | overhang |
+|-------------|-----------------|-----:|------:|-------:|:--:|---------:|
+| s1_compact  | compact         | 4    | 46.85 | 92.06  | y  | 0.053    |
+| s2_clinic   | dial-visible    | 4    | 60.94 | 86.36  | y  | 0.041    |
+| s3_max5     | max capacity    | 5    | 56.00 | 112.62 | y  | 0.053    |
+
+All snap-fit (groove wraps >180deg, opening ~18.6mm < 20mm pen) + flex fingers,
+watertight, overhang well under 0.15. s2 angle nudged 54->56deg because the
+deeper snap lip un-trims the front corner and restored full width (63.68>63.5).
+These three are the recommended deliverables. STLs exported.

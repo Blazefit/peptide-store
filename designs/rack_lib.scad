@@ -16,8 +16,10 @@ LBLK = PEN_L + 7;   // 172  overall body length (< 177.8), leaves end walls
 // scoop   : add a thumb-scallop at the +X mouth for easy pen removal
 // plate   : recess a nameplate/label pocket into the flat back face
 // vials   : number of vertical vial wells bored into the back-top shelf (0 = none)
+// flex     : number of relief gaps cut across each lip -> short spring-fingers
+//            that flex outward, so a rigid pen snaps in with low force
 module rack(n=4, phi=58, P=22.5, lip=2.5, rr=RCH+1.5, rlen=30,
-            endwall=3, scoop=false, plate=false, vials=0) {
+            endwall=3, scoop=false, plate=false, vials=0, flex=0) {
     cph = cos(phi);
     sph = sin(phi);
     yc  = [for (i=[0:n-1]) (-(n-1)/2 + i) * P * cph];
@@ -49,6 +51,11 @@ module rack(n=4, phi=58, P=22.5, lip=2.5, rr=RCH+1.5, rlen=30,
                 rotate([0,90,0]) cylinder(h=rlen, r=rr, center=true);
             if (scoop)
                 translate([LBLK/2, yc[i] - 0.30*RCH, zc[i]]) sphere(r=7.5);
+            // flex-relief gaps: notch the lip (above centerline) at intervals
+            if (flex > 0)
+                for (k = [1:flex])
+                    translate([-LBLK/2 + k*LBLK/(flex+1), yc[i], zc[i] + RCH])
+                        cube([3, 2*RCH + 6, 2*RCH], center=true);
         }
 
         // ---- optional vertical vial wells in the back-top shelf ----

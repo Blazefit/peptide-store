@@ -5,8 +5,9 @@ N    = 4;
 PHI  = 58;
 Pp   = 22.5;
 LIPp = 2.5;
+FLEXp = 0;
 
-color([0.30, 0.50, 0.90]) rack(n=N, phi=PHI, P=Pp, lip=LIPp, endwall=3, scoop=true);
+color([0.30, 0.50, 0.90]) rack(n=N, phi=PHI, P=Pp, lip=LIPp, endwall=3, scoop=true, flex=FLEXp);
 
 cph = cos(PHI);
 sph = sin(PHI);

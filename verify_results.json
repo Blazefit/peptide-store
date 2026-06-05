@@ -1,5 +1,5 @@
 {
-  "pass_count": 16,
+  "pass_count": 19,
   "results": [
     {
       "id": "d1_cradle",
@@ -271,6 +271,57 @@
       "H": 87.64,
       "watertight": true,
       "overhang": 0.0487,
+      "note": ""
+    },
+    {
+      "id": "s1_compact",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.85,
+      "H": 92.06,
+      "watertight": true,
+      "overhang": 0.0528,
+      "note": ""
+    },
+    {
+      "id": "s2_clinic",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 60.94,
+      "H": 86.36,
+      "watertight": true,
+      "overhang": 0.0408,
+      "note": ""
+    },
+    {
+      "id": "s3_max5",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.0,
+      "H": 112.62,
+      "watertight": true,
+      "overhang": 0.0527,
       "note": ""
     }
   ]
