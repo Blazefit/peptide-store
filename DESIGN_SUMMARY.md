@@ -108,3 +108,23 @@ All PASS (watertight, overhang well under 0.15). Verifier reports 15/15.
 - **r3_clinic**  — 4-pen, shallow recline so dials read at a glance, thumb
   scoops for easy removal, recessed back nameplate for dose-rotation labeling.
 - **r5_max5**    — 5-pen maximum capacity within the envelope.
+
+## Iteration 6 (2026-06-05) — RETENTION CHECK + fix (do pens fall out?)
+Rendered real pens (Ø20 x 165) seated in the racks. Finding: with the original
+shallow groove (lip 2.5), the opening is 20.19 mm vs a 20.0 mm pen and the front
+rim sits 7-8 mm BELOW the pen center at 54-66deg -> pens are NOT retained and
+would roll out the front. Confirmed geometrically:
+  - drop-in + gravity capture (opening>=pen AND rim>=center) only holds up to a
+    ~16deg ramp, which fits just ~2 pens in 63.5 mm. So 4-5 pens cannot be
+    gravity-captured in this envelope.
+Fix: snap-fit C-grooves — cut the groove 4.6 mm below the ramp so it wraps >180deg
+(opening ~18.6 mm < 20 mm pen); the pen clips in and is positively held.
+
+| design   | retention      | W     | H     | wt | overhang |
+|----------|----------------|------:|------:|:--:|---------:|
+| r6_snap  | snap-fit clip  | 58.14 | 87.64 | y  | 0.049    |
+
+Trade-off noted: a full-length snap over a rigid pen is a firm press; production
+options = chamfered/intermittent lips, OR a separate retainer (elastic-band posts,
+front bar, or flip lid), OR revert to the end-loaded enclosed q-series which
+capture pens fully. Awaiting user's preferred retention approach.
