@@ -85,3 +85,26 @@ Takeaway: the enclosed grid/tower/echelon (q1/q2/q3) are inherently
 end-loading; making them load from a long face support-free requires this
 reclined-ramp restructuring (q5). q4_hybrid already top-loads its upper row.
 Verifier now reports 10/10 PASS.
+
+## Iterations 5a-5e (2026-06-05) — refine the toast-rack (q5_rack4)
+Built a parametric `designs/rack_lib.scad` (one `rack()` module: n, ramp angle,
+spacing, lip, end walls, dial relief, thumb scoop, back nameplate, vial wells)
+so each pass is one attributable change. (Bug found+fixed: `LBLK` lived only in
+the old per-design files, not common.scad, so rack_lib evaluated empty until
+LBLK was defined there; also excluded rack_lib from verifier discovery.)
+
+| iter | id          | change                                  | W     | H      | ovh   |
+|------|-------------|-----------------------------------------|------:|-------:|------:|
+| 5a   | r1_ends     | closed groove ends + dial relief        | 56.83 | 87.64  | 0.038 |
+| 5b   | r2_scoop    | + thumb scoops at the +X mouths         | 56.83 | 87.64  | 0.038 |
+| 5c   | r3_clinic   | 54deg (dials visible) + scoop + plate   | 62.21 | 85.01  | 0.032 |
+| 5d   | r4_compact  | steep 66deg, smallest footprint         | 45.91 | 92.06  | 0.053 |
+| 5e   | r5_max5     | 5 pens @ 66deg (fits 63.5 width)        | 55.06 | 112.62 | 0.053 |
+
+All PASS (watertight, overhang well under 0.15). Verifier reports 15/15.
+
+### Best 3 (selected)
+- **r4_compact** — compact 4-pen, narrowest (W 45.9), safest margins.
+- **r3_clinic**  — 4-pen, shallow recline so dials read at a glance, thumb
+  scoops for easy removal, recessed back nameplate for dose-rotation labeling.
+- **r5_max5**    — 5-pen maximum capacity within the envelope.
