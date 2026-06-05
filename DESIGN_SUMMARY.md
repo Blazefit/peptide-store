@@ -230,3 +230,13 @@ Final lc4_secure: 172.0 x 78.6 x 66.4 mm = 6.77 x 3.09 x 2.61 in, watertight,
 ONE piece, overhang 0.033. (Width over the old 2.5in spec by design.)
 All lip-cradle parts are single-piece: lc3_shallow (3-pen, fits 2.5in width),
 lc4_steep (4-pen steep), lc4_secure (4-pen secure).
+
+## Iteration 13 (2026-06-05) — finalize lip-cradle: end caps + finger scoops
+Added per user: end caps on BOTH ends of each channel (channel length = PEN_L,
+3.5mm walls) so pens can't slide out if the rack is tipped sideways; a finger
+scoop (scallop) at the front-center of each cradle to lift pens out; dial-relief
+pocket kept inside the +X end wall. All three lip-cradles remain single connected
+pieces, watertight, support-free:
+  lc4_secure 6.77x3.09x2.61in ovh .028 | lc3_shallow 6.77x2.38x2.09in ovh .028 |
+  lc4_steep 6.77x2.43x3.40in ovh .047.
+lc4_secure is the finalized 4-pen part. Next: translate user's sketch.
