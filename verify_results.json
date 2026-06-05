@@ -1,5 +1,5 @@
 {
-  "pass_count": 22,
+  "pass_count": 28,
   "results": [
     {
       "id": "d1_cradle",
@@ -84,6 +84,108 @@
       "H": 24.0,
       "watertight": true,
       "overhang": 0.0,
+      "note": ""
+    },
+    {
+      "id": "f1_body",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 61.79,
+      "H": 92.0,
+      "watertight": true,
+      "overhang": 0.0439,
+      "note": ""
+    },
+    {
+      "id": "f1_gate",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 3.0,
+      "H": 111.3,
+      "watertight": true,
+      "overhang": 0.0175,
+      "note": ""
+    },
+    {
+      "id": "f2_body",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 62.35,
+      "H": 116.42,
+      "watertight": true,
+      "overhang": 0.0573,
+      "note": ""
+    },
+    {
+      "id": "f2_gate",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 3.0,
+      "H": 133.8,
+      "watertight": true,
+      "overhang": 0.0153,
+      "note": ""
+    },
+    {
+      "id": "f3_body",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 55.39,
+      "H": 94.98,
+      "watertight": true,
+      "overhang": 0.0551,
+      "note": ""
+    },
+    {
+      "id": "f3_gate",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 3.0,
+      "H": 111.3,
+      "watertight": true,
+      "overhang": 0.0175,
       "note": ""
     },
     {
