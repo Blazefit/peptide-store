@@ -1,12 +1,12 @@
 {
-  "iteration": 8,
+  "iteration": 9,
   "status": "success",
-  "approach": "enclosed teardrop bore + front grab-window, end-loaded (tolerance-proof retention)",
+  "approach": "two-part front-removable: open reclined cradle body + lift-off gate retainer",
+  "retention": "gate windows are smaller than the pen; loose/positive fit, no snap, tolerance-proof",
+  "use": "lift the gate off, pull any pen straight out the front; drop gate into end catches to retain",
   "recommended": {
-    "g1_diag4":   {"pens": 4, "L": 172.00, "W": 60.00, "H": 85.31,  "watertight": true, "overhang": 0.119, "note": "diagonal echelon, balanced footprint (HERO)"},
-    "g2_column4": {"pens": 4, "L": 172.00, "W": 58.00, "H": 133.40, "watertight": true, "overhang": 0.140, "note": "vertical column on base, narrow frontal footprint"},
-    "g3_diag5":   {"pens": 5, "L": 172.00, "W": 62.00, "H": 110.31, "watertight": true, "overhang": 0.139, "note": "diagonal echelon, max capacity"}
-  },
-  "retention": "geometric: closed bore (0.4mm clearance) + grab-window narrower than pen; no snap, no flex, tolerance-proof",
-  "loading": "slide pen in from the +X end; dial relief opens that end for the dose dial"
+    "f1": {"role": "hero 4-pen",    "ramp_deg": 62, "body": {"L":172.00,"W":61.79,"H":92.00},  "gate": {"L":172.00,"W":3.00,"H":111.30}},
+    "f2": {"role": "max 5-pen",     "ramp_deg": 69, "body": {"L":172.00,"W":62.35,"H":116.42}, "gate": {"L":172.00,"W":3.00,"H":133.80}},
+    "f3": {"role": "compact 4-pen", "ramp_deg": 68, "body": {"L":172.00,"W":55.39,"H":94.98},  "gate": {"L":172.00,"W":3.00,"H":111.30}}
+  }
 }

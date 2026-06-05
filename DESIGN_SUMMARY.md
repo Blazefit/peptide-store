@@ -168,3 +168,23 @@ dilutes overhang fraction).
 All PASS. Pen-in-bore renders confirm each pen is fully wrapped by the closed
 bore (end-on view) and visible through the front windows. These are the
 recommended deliverables for a first-time-right print.
+
+## Iteration 9 (2026-06-05) — FINAL: front-removable, two-part (body + lift-off gate)
+User requirement: take any pen out the FRONT, reliably retained, no test print.
+Physics recap: front radial removal + passive retention can't coexist in one
+rigid part (opening >= pen -> falls out at usable angles; opening < pen -> snap).
+So: two parts. Open reclined cradles (pens pull straight out the front) + a slim
+lift-off GATE that drops into a catch at each end and spans the front; its
+windows are smaller than the pen, so with the gate on the pens can't escape.
+Lift the gate off to remove any pen. All fits are loose/positive (0.6mm) -> no
+snap, nothing tolerance-critical, prints support-free. (gate printed standing.)
+
+| design     | pens | ramp | body W | body H | gate H | both PASS |
+|------------|-----:|-----:|-------:|-------:|-------:|:---------:|
+| f1 (hero)  | 4    | 62   | 61.79  | 92.00  | 111.30 | yes       |
+| f2 (max)   | 5    | 69   | 62.35  | 116.42 | 133.80 | yes       |
+| f3 (compact)| 4   | 68   | 55.39  | 94.98  | 111.30 | yes       |
+
+All six parts (3 bodies + 3 gates) PASS (within volume, watertight, overhang
+<=0.057). Steeper ramp than the toast-rack is needed so the 4-5 staggered
+cradles + end catches stay under the 63.5mm width. Verifier 28/28.
