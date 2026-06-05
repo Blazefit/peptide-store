@@ -3,6 +3,10 @@
 A 3D-printable, gravity-feed rack that holds injector pens lying flat. Designed
 from Jason's hand sketch (the `1. SIDE` / `FRONT` drawing).
 
+> **Looking for the rotating version?** See
+> [`README-revolver.md`](README-revolver.md) for the horizontal "revolver"
+> carousel — a spinning 6-chamber cylinder on a snap-on base.
+
 ![preview](preview.png)
 
 ## How your sketch was interpreted
