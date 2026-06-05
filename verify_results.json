@@ -1,0 +1,90 @@
+{
+  "pass_count": 5,
+  "results": [
+    {
+      "id": "d1_cradle",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.4,
+      "H": 22.4,
+      "watertight": true,
+      "overhang": 0.0,
+      "note": ""
+    },
+    {
+      "id": "d2_capsule",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.4,
+      "H": 28.31,
+      "watertight": true,
+      "overhang": 0.1231,
+      "note": ""
+    },
+    {
+      "id": "d3_modular",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 28.0,
+      "H": 22.4,
+      "watertight": true,
+      "overhang": 0.0,
+      "note": ""
+    },
+    {
+      "id": "d4_magnetic",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 49.4,
+      "H": 38.0,
+      "watertight": true,
+      "overhang": 0.0008,
+      "note": ""
+    },
+    {
+      "id": "d5_vialcombo",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 42.6,
+      "H": 24.0,
+      "watertight": true,
+      "overhang": 0.0,
+      "note": ""
+    }
+  ]
+}
