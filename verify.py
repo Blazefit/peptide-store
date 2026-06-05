@@ -44,7 +44,25 @@ OVERHANG_MAX = 0.15
 OVERHANG_COS = math.cos(math.radians(45.0))  # 0.7071...
 BED_EPS = 0.6  # mm: faces this close to Z-min are bed-supported
 
-DESIGN_IDS = ["d1_cradle", "d2_capsule", "d3_modular", "d4_magnetic", "d5_vialcombo"]
+import glob
+
+# Preferred display order; any other designs/*.scad are appended automatically.
+PREFERRED = ["d1_cradle", "d2_capsule", "d3_modular", "d4_magnetic", "d5_vialcombo"]
+
+
+def discover_designs():
+    found = []
+    for path in sorted(glob.glob(os.path.join(DESIGNS, "*.scad"))):
+        name = os.path.splitext(os.path.basename(path))[0]
+        if name == "common":
+            continue
+        found.append(name)
+    ordered = [d for d in PREFERRED if d in found]
+    ordered += [d for d in found if d not in PREFERRED]
+    return ordered
+
+
+DESIGN_IDS = discover_designs()
 
 
 def render(scad_path, stl_path):

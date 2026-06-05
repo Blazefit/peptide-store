@@ -42,3 +42,26 @@ Wrote `designs/common.scad` (shared locked params + `trough_cut`,
 ## Stop condition
 ≥ 3 designs PASS all checks → **status: success** at iteration 2 (all 5 pass).
 Passing designs left untouched; no thrash-guard cases.
+
+## Iteration 3 (2026-06-05) — four 4-pen designs (capacity bump)
+User asked for higher capacity ("easily fit 4 pens with the height we are
+allowed"). Key constraint insight: the 63.5 mm WIDTH cap only fits ~2 pens
+across, so 4 pens must STACK vertically — and stacking open-top troughs would
+put a ceiling (overhang) over the lower pens. Solution: enclosed self-supporting
+teardrop bores for the stacked rows. verify.py was changed to auto-discover all
+designs/*.scad (so new + sketched designs are picked up automatically).
+
+Four new designs, all 4-pen, all PASS:
+
+| design       | family                   | L      | W     | H      | wt | overhang |
+|--------------|--------------------------|-------:|------:|-------:|:--:|---------:|
+| q1_grid4     | 2x2 enclosed teardrop    | 172.00 | 46.40 | 57.84  | y  | 0.147    |
+| q2_tower4    | 4x1 teardrop wall-rack   | 172.00 | 56.00 | 111.26 | y  | 0.145    |
+| q3_diag4     | diagonal teardrop echelon| 172.00 | 60.00 | 87.43  | y  | 0.117    |
+| q4_hybrid4   | 2 open + 2 enclosed combo| 172.00 | 46.40 | 49.11  | y  | 0.089    |
+
+Note: q1 and q2 PASS but sit close to the 0.15 overhang ceiling (the teardrop
+dial-relief counterbores add downward apex area). q3/q4 have comfortable margin.
+If more margin is wanted, shrink the relief radius or open the relief from the
+top instead of using a larger teardrop. All five 2-pen designs (d1–d5) remain
+unchanged and passing. Verifier now reports 9/9 PASS.
