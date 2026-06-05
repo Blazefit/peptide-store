@@ -144,3 +144,27 @@ All snap-fit (groove wraps >180deg, opening ~18.6mm < 20mm pen) + flex fingers,
 watertight, overhang well under 0.15. s2 angle nudged 54->56deg because the
 deeper snap lip un-trims the front corner and restored full width (63.68>63.5).
 These three are the recommended deliverables. STLs exported.
+
+## Iteration 8 (2026-06-05) — FINAL: enclosed bore + front grab-window (no-test-needed)
+User constraint: must be right first time, no test print; snap-fit rejected as
+tolerance-sensitive. Chose enclosed-bore + grab-slot. Retention is now GEOMETRIC
+and tolerance-proof: each pen sits in a closed teardrop tube (0.4mm clearance,
+loaded by sliding in the +X end) and cannot escape sideways. A self-supporting
+teardrop grab-window (apex up) is cut through the front face into each bore so
+the pen is visible/pushable but the window is narrower/shorter than the pen ->
+it cannot fall out the front. New `designs/borewin_lib.scad`.
+
+Overhang tuning: the 45deg teardrop apex sits exactly on the 0.15 threshold;
+made apex sharpness a parameter (`apexk`) so narrow parts use a steeper,
+clearly-self-supporting apex. Narrow column also gets a base slab (stability +
+dilutes overhang fraction).
+
+| design       | pens | layout            | W     | H      | wt | overhang |
+|--------------|-----:|-------------------|------:|-------:|:--:|---------:|
+| g1_diag4     | 4    | diagonal echelon  | 60.00 | 85.31  | y  | 0.119    |
+| g2_column4   | 4    | vertical + base   | 58.00 | 133.40 | y  | 0.140    |
+| g3_diag5     | 5    | diagonal echelon  | 62.00 | 110.31 | y  | 0.139    |
+
+All PASS. Pen-in-bore renders confirm each pen is fully wrapped by the closed
+bore (end-on view) and visible through the front windows. These are the
+recommended deliverables for a first-time-right print.

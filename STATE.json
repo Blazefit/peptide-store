@@ -1,13 +1,12 @@
 {
-  "iteration": 2,
+  "iteration": 8,
   "status": "success",
-  "pass_count": 5,
-  "designs": {
-    "d1_cradle":   {"status": "PASS", "L": 172.00, "W": 46.40, "H": 22.40, "watertight": true, "overhang": 0.000, "note": "twin staggered open-top cradle"},
-    "d2_capsule":  {"status": "PASS", "L": 172.00, "W": 46.40, "H": 28.31, "watertight": true, "overhang": 0.123, "note": "enclosed teardrop tubes, self-supporting"},
-    "d3_modular":  {"status": "PASS", "L": 172.00, "W": 28.00, "H": 22.40, "watertight": true, "overhang": 0.000, "note": "single-pen tile, vertical dovetail joints"},
-    "d4_magnetic": {"status": "PASS", "L": 172.00, "W": 49.40, "H": 38.00, "watertight": true, "overhang": 0.001, "note": "L-base + magnet-pocket back wall"},
-    "d5_vialcombo":{"status": "PASS", "L": 172.00, "W": 42.60, "H": 24.00, "watertight": true, "overhang": 0.000, "note": "pen trough + 3 vertical vial wells"}
+  "approach": "enclosed teardrop bore + front grab-window, end-loaded (tolerance-proof retention)",
+  "recommended": {
+    "g1_diag4":   {"pens": 4, "L": 172.00, "W": 60.00, "H": 85.31,  "watertight": true, "overhang": 0.119, "note": "diagonal echelon, balanced footprint (HERO)"},
+    "g2_column4": {"pens": 4, "L": 172.00, "W": 58.00, "H": 133.40, "watertight": true, "overhang": 0.140, "note": "vertical column on base, narrow frontal footprint"},
+    "g3_diag5":   {"pens": 5, "L": 172.00, "W": 62.00, "H": 110.31, "watertight": true, "overhang": 0.139, "note": "diagonal echelon, max capacity"}
   },
-  "passing": ["d1_cradle", "d2_capsule", "d3_modular", "d4_magnetic", "d5_vialcombo"]
+  "retention": "geometric: closed bore (0.4mm clearance) + grab-window narrower than pen; no snap, no flex, tolerance-proof",
+  "loading": "slide pen in from the +X end; dial relief opens that end for the dose dial"
 }

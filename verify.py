@@ -54,7 +54,7 @@ def discover_designs():
     found = []
     for path in sorted(glob.glob(os.path.join(DESIGNS, "*.scad"))):
         name = os.path.splitext(os.path.basename(path))[0]
-        if name in ("common", "rack_lib"):
+        if name in ("common", "rack_lib", "borewin_lib"):
             continue
         found.append(name)
     ordered = [d for d in PREFERRED if d in found]
