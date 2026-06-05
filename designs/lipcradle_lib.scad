@@ -14,15 +14,17 @@ LBLK = PEN_L + 7;   // 172
 ENDW = (LBLK - PEN_L) / 2;   // 3.5 mm end wall each side when endcaps=true
 
 module lipcradle(n=4, phi=36, P=22.5, lip=6, rr=RCH+2, rlen=25,
-                 base_h=3, endcaps=true, scoop=true) {
+                 base_h=3, endcaps=true, scoop=true, side_open=false) {
     cph=cos(phi); sph=sin(phi);
     yc=[for(i=[0:n-1]) (-(n-1)/2+i)*P*cph];
     zc=[for(i=[0:n-1]) (WALL+RCH)+i*P*sph];
     ymn=min(yc)-RCH-WALL; ymx=max(yc)+RCH+WALL;
     Wb=ymx-ymn; ycen=(ymx+ymn)/2; Hb=max(zc)+RCH+8;
     big=800;
-    chan_len = endcaps ? PEN_L : LBLK+2;       // closed ends vs through
-    relief_cx = PEN_L/2 - rlen/2;              // dial pocket inside the +X wall
+    // side_open: channel goes through the -X end (insert from the side), capped +X
+    chan_len = side_open ? (PEN_L/2 + LBLK/2 + 1) : (endcaps ? PEN_L : LBLK+2);
+    chan_cx  = side_open ? (PEN_L/2 - LBLK/2 - 1)/2 : 0;
+    relief_cx = PEN_L/2 - rlen/2;               // dial pocket inside the +X wall
 
     difference() {
         union() {
@@ -35,8 +37,8 @@ module lipcradle(n=4, phi=36, P=22.5, lip=6, rr=RCH+2, rlen=25,
             translate([0,ycen,base_h/2]) cube([LBLK,Wb,base_h],center=true); // base
         }
         for(i=[0:n-1]) {
-            // pen channel (closed both ends when endcaps)
-            translate([0,yc[i],zc[i]]) rotate([0,90,0])
+            // pen channel (closed both ends, or open -X end for side loading)
+            translate([chan_cx,yc[i],zc[i]]) rotate([0,90,0])
                 cylinder(h=chan_len, r=RCH, center=true);
             // dial relief: wider open-top pocket near the +X end (inside the wall)
             translate([relief_cx,yc[i],zc[i]]) rotate([0,90,0])

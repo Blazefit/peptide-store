@@ -240,3 +240,13 @@ pieces, watertight, support-free:
   lc4_secure 6.77x3.09x2.61in ovh .028 | lc3_shallow 6.77x2.38x2.09in ovh .028 |
   lc4_steep 6.77x2.43x3.40in ovh .047.
 lc4_secure is the finalized 4-pen part. Next: translate user's sketch.
+
+## Iteration 14 (2026-06-05) — translate Jason's sketch (sk1_sketch)
+Sketch (photo rotated 90deg): SIDE = wedge; FRONT = 4 stacked horizontal channels
+each with a "lip to catch pens"; notes "insert side / slides down / won't fall
+out". Interpreted as: wedge body, 4 stacked horizontal cradles, integral front
+lip per channel, INSERT FROM THE SIDE (one open end), other end capped with a
+dial-relief slot. Added `side_open` to lipcradle_lib (channel through the -X end).
+sk1_sketch: 6.77 x 3.09 x 2.61 in, watertight, ONE piece, overhang 0.032.
+Open question for Jason: pens rest in individual lanes (this build) vs. roll into
+a single shared front tray (gravity-feed) — confirm which he meant.
