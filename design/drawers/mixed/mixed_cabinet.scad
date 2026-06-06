@@ -111,17 +111,25 @@ module vial_tray(bw,bd,bh){
   p=vial_d+vial_clr+4;                 // pitch ~27.6
   nx=floor((bw-2*dwall-4)/p); ny=floor((bd-2*dwall-4)/p);
   ox=dwall+(bw-2*dwall-(nx-1)*p)/2; oy=dwall+(bd-2*dwall-(ny-1)*p)/2;
-  // OPEN RING RACK: thin ring per vial + a small base cup (indent) in the floor.
-  // Hollow between rings -> much less plastic & faster print than a solid block.
-  ringO=vial_d+vial_clr+2*ring_wall;
-  color("#6f8fe6") for(ix=[0:nx-1])for(iy=[0:ny-1])
-    translate([ox+ix*p,oy+iy*p,dfloor]) difference(){
-      cylinder(h=vial_grip, d=ringO);                                  // grip ring
-      translate([0,0,cup]) cylinder(h=vial_grip, d=vial_d+vial_clr);   // bore (vial), cup base
-      translate([0,0,vial_grip-3]) cylinder(h=3.1,d1=vial_d+vial_clr,d2=vial_d+vial_clr+4); // drop-in chamfer
-      translate([0,0,-1]) cylinder(h=cup+2, d=5);                       // drain through the cup
+  // TWO-PLATE FRAME RACK (matches the reference): a perforated TOP plate grips the
+  // upper vial + shallow base cups seat the bottom; open frame between = least plastic.
+  bore=vial_d+vial_clr;
+  topz=30; top_th=6; base_th=6;
+  color("#6f8fe6"){
+    // top perforated plate
+    difference(){
+      translate([dwall,dwall,topz]) cube([bw-2*dwall, bd-2*dwall, top_th]);
+      for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,topz-1]){
+        cylinder(h=top_th+2, d=bore);
+        translate([0,0,top_th-1.4]) cylinder(h=2.6, d1=bore, d2=bore+4); }   // drop-in chamfer
     }
-  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials (open ring rack)"));
+    // bottom locating cups (lower "plate") + drain
+    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,dfloor])
+      difference(){ cylinder(h=base_th, d=bore+5);
+        translate([0,0,2]) cylinder(h=base_th, d=bore);
+        translate([0,0,-1]) cylinder(h=4, d=5); }
+  }
+  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials (two-plate frame rack)"));
   echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials"));
 }
 module pen_tray(bw,bd,bh){
@@ -166,6 +174,13 @@ else if(mode=="section"){
   // horizontal slice at the vial-bay rail height -> shows rib-in-groove in plan
   gz=zb(0)+(bays[0][0]-ghei)/2;
   intersection(){ cabinet([[60,6,6],[6,6,6]]); translate([-10,-260,gz+1]) cube([W+20,640,3]); }
+}
+else if(mode=="vialsection"){   // vertical slice through a row of vial holders
+  intersection(){ translate([-colL(0)-colw/2,0,-zb(0)]) drawer(0,0,0);
+                  translate([-300,140,-10]) cube([600,3,130]); }
+}
+else if(mode=="vialxray"){       // ghost walls, solid holders
+  translate([-colL(0)-colw/2,0,-zb(0)]){ %drawer(0,0,0); }
 }
 else if(mode=="pendetail")  translate([-colL(0)-colw/2,0,-zb(1)]) drawer(0,1,0);
 else if(mode=="vialdetail") translate([-colL(0)-colw/2,0,-zb(0)]) drawer(0,0,0);
