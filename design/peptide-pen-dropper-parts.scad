@@ -120,6 +120,10 @@ module body() {
             if (feet_on)
                 translate([-(body_out_x-8), -B-W+8, -0.01])
                     cube([2*(body_out_x-8), B+F+2*W-16, 1.6]);
+            // lid snap-clip dimples on the upright outer faces (lid-ready by default)
+            for (sx=[-1,1]) for (a=[120,240])
+                translate([sx*body_out_x, snap_r*sin(a), axle_z+snap_r*cos(a)])
+                    sphere(r=1.35);
             // i12: optional wall-mount keyholes on the back
             if (wallmount)
                 for (sx=[-1,1]) translate([sx*min(upright_x_in-12,48), -B-W-1, 12]) {
@@ -157,7 +161,6 @@ module body() {
 // =============================================================================
 //  OPTIONAL DUST LID  (i11)  — arched cover that locates over the uprights
 // =============================================================================
-lid_ir = drum_r + 9;  lid_or = drum_r + 12;
 module lid() {
     color("#b3a8ee") {
         translate([0,0,axle_z]) rotate([0,-90,0])
@@ -169,6 +172,10 @@ module lid() {
                 linear_extrude(height=2.5)
                     difference(){ circle(lid_or); wedge2d(102,258,lid_or+5);
                                   circle(lid_ir-2); }
+        // snap clips: inward bumps that click into dimples on the upright faces
+        for (sx=[-1,1]) for (a=[120,240])
+            translate([sx*(body_out_x-0.6), snap_r*sin(a), axle_z+snap_r*cos(a)])
+                sphere(r=1.1);
     }
 }
 
