@@ -250,3 +250,15 @@ dial-relief slot. Added `side_open` to lipcradle_lib (channel through the -X end
 sk1_sketch: 6.77 x 3.09 x 2.61 in, watertight, ONE piece, overhang 0.032.
 Open question for Jason: pens rest in individual lanes (this build) vs. roll into
 a single shared front tray (gravity-feed) — confirm which he meant.
+
+## Iteration 15 (2026-06-05) — sketch option #2: gravity-feed chute (sk2_chute)
+Jason chose #2 (fridge-can-dispenser style). sk2_chute: a 30deg ramp (low at
+front, high at back), two end walls guiding the pen ends, a front catch wall+lip;
+drop a pen at the open back/top, it rolls to the front and stacks against the lip;
+take the front one over the lip and the next rolls forward. 4 pens single-file.
+6.72 x 3.23 x 2.88 in, watertight, ONE piece, overhang 0.000 (sloped floor is a
+solid wedge; all walls vertical). Honest caveat: pens have a fatter dose-dial end
+so they won't roll perfectly straight — gentle slope + end-wall guidance mitigate.
+Also staged d06_lib.scad (vertical standing rack, 4 pens, 3.5x6.6in envelope) but
+parked pending Jason's go-ahead.
+>>>>>>> aa7b7da (Add sk2_chute (gravity-feed magazine, sketch option #2); stage d06_lib)
