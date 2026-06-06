@@ -75,8 +75,8 @@ module frame(){
 handle_style="bar";   // [scoop, bar, dpull]
 module add_handle(bw,ff){
   cy=ff*0.46;
-  if(handle_style=="bar")                       // rounded bar pull
-    hull() for(yy=[-12,-5]) translate([bw/2-38,yy,cy]) rotate([0,90,0]) cylinder(h=76,r=4.5,$fn=28);
+  if(handle_style=="bar")                       // rounded bar pull (overlaps the face)
+    hull() for(yy=[-12,1]) translate([bw/2-38,yy,cy]) rotate([0,90,0]) cylinder(h=76,r=4.5,$fn=28);
   else if(handle_style=="dpull"){               // D-shaped pull on two posts
     for(sx=[-1,1]) translate([bw/2+sx*32,-3,cy]) rotate([-90,0,0]) cylinder(h=11,r=3.5,$fn=24);
     translate([bw/2-32,-12.5,cy]) rotate([0,90,0]) cylinder(h=64,r=3.5,$fn=24);
@@ -159,22 +159,18 @@ module vial_tray(bw,bd,bh){
   }
 }
 module pen_tray(bw,bd,bh){
-  // pens lie ACROSS the width (broadside to you) -> lanes run left-right, stacked front-to-back
+  // pens lie ACROSS the width (broadside). One continuous cradle block with a
+  // channel per lane -> 4 mm walls between channels (no zero-thickness edges).
   r=(pen_d+pen_clr)/2; p=pen_d+pen_clr+4;   // front-back pitch ~24.6
   n=floor((bd-2*dwall-2)/p);
   oy=dwall+(bd-2*dwall-(n-1)*p)/2;
-  laneL=pen_len+6;                          // cradle length along X (fits a 150 mm pen)
-  ox=dwall+(bw-2*dwall-laneL)/2;
-  color("#e0922f") for(k=[0:n-1]){
-    ly=oy+k*p;
-    difference(){
-      translate([ox-2, ly-p/2+2, dfloor]) cube([laneL+4, p-4, r+5]);     // cradle block
-      translate([ox, ly, dfloor+r+2]) rotate([0,90,0]) cylinder(h=laneL, r=r); // pen channel along X
-      translate([ox+laneL/2-9, ly-p, dfloor+r-2]) cube([18,2*p,r+8]);    // center finger-dip (lift pen)
+  laneL=pen_len+6; ox=dwall+(bw-2*dwall-laneL)/2;
+  color("#e0922f") difference(){
+    translate([ox-2, oy-p/2, dfloor-1]) cube([laneL+4, n*p, r+6]);     // continuous block
+    for(k=[0:n-1]){ ly=oy+k*p;
+      translate([ox+6, ly, dfloor+r+2]) rotate([0,90,0]) cylinder(h=laneL-12, r=r);  // channel (solid ends = stops)
+      translate([ox+laneL/2-9, ly-(p-6)/2, dfloor+r-1]) cube([18, p-6, r+8]);        // center lift-dip
     }
-    // end stops so a pen can't slide out the sides
-    translate([ox-2, ly-r, dfloor]) cube([2.5,2*r,r+3]);
-    translate([ox+laneL-0.5, ly-r, dfloor]) cube([2.5,2*r,r+3]);
   }
   echo(str("pen drawer: ",n," pens lie BROADSIDE (",pen_len,"mm across width ",bw,"mm)"));
 }
