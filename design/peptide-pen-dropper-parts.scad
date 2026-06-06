@@ -93,11 +93,14 @@ module body() {
                 cylinder(h = 2*body_out_x+2, r = stub_d/2 + bearing_gap, center=true);
             translate([-body_out_x-1, -(stub_d/2+bearing_gap), axle_z])
                 cube([2*body_out_x+2, stub_d+2*bearing_gap, upright_top_z]);
-            // shutter track grooves on the inner faces of the uprights
+            // shutter track grooves (open at the back to insert, blind at the
+            // front so a normal pull can't yank the shutter out) — i6
             for (sx = [-1,1]) {
                 gx = sx*upright_x_in;
-                translate([sx>0 ? gx-0.1 : gx-3+0.1, -win_y-6, z_sh-shutter_gap])
-                    cube([3, F+8-(-win_y-6), shutter_th+2*shutter_gap]);
+                g0 = -B-W-1;                                    // open back face
+                g1 = shutter_lock ? win_y+3+shutter_travel+4 : F+8;
+                translate([sx>0 ? gx-0.1 : gx-3+0.1, g0, z_sh-shutter_gap])
+                    cube([3, g1-g0, shutter_th+2*shutter_gap]);
             }
             // relief pocket so the detent leaf-spring can flex into the right upright
             if (detent_on)
@@ -107,6 +110,21 @@ module body() {
                 for (sx=[-1,1])
                     translate([sx*(hw/2+16), F-7, tray_lip+2]) rotate([-90,0,0])
                         cylinder(h=W+10, r=9);
+            // i8: recessed label panel on the front of the base
+            if (label_panel)
+                translate([-min(upright_x_in-6,40), F+W-1.2, 5])
+                    cube([2*min(upright_x_in-6,40), 2, 14]);
+            // i9: recess the underside so it sits on a flat rim (won't rock)
+            if (feet_on)
+                translate([-(body_out_x-8), -B-W+8, -0.01])
+                    cube([2*(body_out_x-8), B+F+2*W-16, 1.6]);
+            // i10: chamfer the handled edges (front lip top + upright top outers)
+            if (round_edges) {
+                translate([0, F+W, Lt+2]) rotate([45,0,0])
+                    cube([2*upright_x_in-2, 6, 6], center=true);
+                for (sx=[-1,1]) translate([sx*body_out_x, 0, upright_top_z])
+                    rotate([0,45,0]) cube([5, B+F+2*W+4, 5], center=true);
+            }
         }
         if (detent_on)  detent_spring();
         if (cushion_on) cushion_fingers();
@@ -120,6 +138,11 @@ module body() {
             for (sx=[-1,1]) for (sy=[-1,1])
                 translate([sx*upright_x, sy*(stub_d/2+bearing_gap), axle_z+3])
                     sphere(r=1.3);
+        // i6: closed-position detent bumps in the grooves (gate clicks shut)
+        if (shutter_lock)
+            for (sx=[-1,1])
+                translate([sx*(upright_x_in-1.0), win_y+5, z_sh+shutter_th+shutter_gap])
+                    sphere(r=0.9);
     }
 }
 

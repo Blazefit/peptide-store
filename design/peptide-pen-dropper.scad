@@ -103,6 +103,7 @@ tw_th        = 8;
 //  DRUM  (built on its axis = Z; integral axle stubs at both ends)
 // =============================================================================
 module drum() {
+  difference() {
     union() {
         difference() {
             cylinder(h = drum_len, r = drum_r);
@@ -128,6 +129,10 @@ module drum() {
         // i2: thumbwheel spin grip, just outside the +X upright
         if (thumbwheel) translate([0,0,drum_len+sl_pos-3]) thumb_wheel();
     }
+    // i7: axial bore — lightens the drum, and takes an optional Ø6 metal rod axle
+    if (hub_light)
+        translate([0,0,-stub_len-2]) cylinder(h = drum_len+2*tw_reach+8, r = 3);
+  }
 }
 
 module thumb_wheel() {
