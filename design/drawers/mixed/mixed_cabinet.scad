@@ -19,11 +19,14 @@ v3_d=17.4; v3_h=40;                           // 3 mL vial  -> hole Ø19.0 (matc
 vial_split=0.68;                             // LEFT fraction for 3 mL (~70/30 -> 2 clean 10 mL cols)
 pen_d=19; pen_len=150; pen_clr=1.6;          // -> cradle Ø20.6, lane >=156
 
+/* LIGHT mode — thinner walls + opened-up frame for cheaper printing */
+light=true;
+
 /* drawer slide */
 run_clr=0.5;                  // body-to-wall side gap
 gdep=3; ghei=5;               // groove (in frame wall): depth(X) x height(Z)
 rwid=2.4; rhei=4;             // rail (on drawer): width(X) x height(Z)
-dfloor=4; dwall=3;            // drawer floor / wall thickness
+dfloor=light?2.6:4; dwall=light?2.4:3;   // drawer floor / wall thickness
 dh_clr=2;                     // drawer top-to-shelf clearance
 
 /* preview */
@@ -60,8 +63,16 @@ module frame(){
     // fridge condensation drain holes through the bottom of each bay
     for(c=[0,1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:5])
       translate([colL(c)+25+jx*42, 40+jy*52, -1]) cylinder(h=shelf+2, d=5);
-    // back vent
-    translate([W/2-120, D-backw-0.1, 16]) cube([240, backw+1, H-34]);
+    // LIGHT: open up every horizontal slab (shelves/top/bottom) -> perimeter frame
+    // + a centre cross-rib. Drawers ride on the SIDE grooves, so slabs aren't load-bearing.
+    if(light) for(c=[0,1]) for(i=[0:len(bays)]) {
+      zlo=zb(i)-shelf; m=9;
+      for(half=[0,1])
+        translate([colL(c)+m, half==0 ? m : (D-backw)/2+5, zlo-1])
+          cube([colw-2*m, (D-backw)/2 - m - 7, shelf+2]);
+    }
+    // back vent (bigger in light mode)
+    translate([W/2-(light?170:120), D-backw-0.1, 14]) cube([light?340:240, backw+1, H-30]);
   }
   // front anti-pull-out stops (small lip at the front top of each groove)
   color("#9aa3b2") for(c=[0,1]) for(i=[0:len(bays)-1]){
@@ -128,9 +139,9 @@ module drawer(c,i,ext){
   }
 }
 
-top_th=5;                          // top plate thickness
-bot_th=8;                          // bottom plate (thicker, holds the indent)
-indent_d=5;                        // base indent depth
+top_th=light?3.5:5;                // top plate thickness
+bot_th=light?5.5:8;                // bottom plate (thicker, holds the indent)
+indent_d=light?4:5;                // base indent depth
 topz_v=dfloor+24;                  // single top plate height (grips both vial sizes)
 
 // drill one zone's holes (top through-hole + chamfer + base indent + drain)
@@ -165,8 +176,9 @@ module pen_tray(bw,bd,bh){
   n=floor((bd-2*dwall-2)/p);
   oy=dwall+(bd-2*dwall-(n-1)*p)/2;
   laneL=pen_len+6; ox=dwall+(bw-2*dwall-laneL)/2;
+  blkh=light? r+4 : r+6;
   color("#e0922f") difference(){
-    translate([ox-2, oy-p/2, dfloor-1]) cube([laneL+4, n*p, r+6]);     // continuous block
+    translate([ox-2, oy-p/2, dfloor-1]) cube([laneL+4, n*p, blkh]);    // continuous block
     for(k=[0:n-1]){ ly=oy+k*p;
       translate([ox+6, ly, dfloor+r+2]) rotate([0,90,0]) cylinder(h=laneL-12, r=r);  // channel (solid ends = stops)
       translate([ox+laneL/2-9, ly-(p-6)/2, dfloor+r-1]) cube([18, p-6, r+8]);        // center lift-dip
