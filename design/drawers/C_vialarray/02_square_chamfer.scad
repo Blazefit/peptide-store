@@ -19,7 +19,8 @@ drawer_gap = 1.0;
 vial_d    = 23.5;
 chamfer   = 3.0;        // lead-in chamfer
 pitch     = 26.5;       // center-to-center
-pocket_d  = vial_depth = 42;
+vial_depth = 42;
+pocket_d  = vial_depth;
 
 inner_w = outer_w - 2*wall;
 inner_d = outer_d - 2*wall;
