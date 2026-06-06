@@ -7,7 +7,7 @@
 mode = "open";
 
 /* envelope */
-W=375; D=372; H=134;          // ~14.8 x 14.6 x 5.3 in
+W=375; D=372; H=136;          // ~14.8 x 14.6 x 5.35 in  (taller vial bay)
 ow=4;                          // outer wall
 cw=6;                          // centre divider
 shelf=4;                       // shelf / floor / top thickness
@@ -28,8 +28,10 @@ dh_clr=2;                     // drawer top-to-shelf clearance
 open_ext=170;                 // how far an opened drawer slides forward
 $fn=40;
 
+vial_grip=17;                 // collar height gripping the vial base (anti-tip)
+
 // bays bottom->top  [interior height, type]
-bays=[[56,"vial"],[30,"pen"],[30,"supply"]];
+bays=[[60,"vial"],[30,"pen"],[30,"supply"]];   // vial bay raised to fit taller collar
 function zb(i)= i<=0 ? shelf : zb(i-1)+bays[i-1][0]+shelf;
 ntot = H;                     // (echo check)
 colw=(W-2*ow-cw)/2;
@@ -108,36 +110,33 @@ module vial_tray(bw,bd,bh){
   nx=floor((bw-2*dwall-4)/p); ny=floor((bd-2*dwall-4)/p);
   ox=dwall+(bw-2*dwall-(nx-1)*p)/2; oy=dwall+(bd-2*dwall-(ny-1)*p)/2;
   color("#6f8fe6") difference(){
-    translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,14]);
-    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,dfloor+4]){
-      cylinder(h=20,d=vial_d+vial_clr);
-      translate([0,0,12]) cylinder(h=3,d1=vial_d+vial_clr,d2=vial_d+vial_clr+4); } // lead-in chamfer
+    translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,vial_grip]);
+    // vials rest on the drawer floor (deeper effective grip); chamfered drop-in
+    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,dfloor]){
+      cylinder(h=vial_grip+6,d=vial_d+vial_clr);
+      translate([0,0,vial_grip-3]) cylinder(h=3.1,d1=vial_d+vial_clr,d2=vial_d+vial_clr+4); }
   }
   echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials"));
 }
 module pen_tray(bw,bd,bh){
-  r=(pen_d+pen_clr)/2; p=pen_d+pen_clr+4;   // pitch ~24.6
-  n=floor((bw-2*dwall-2)/p);
-  ox=dwall+(bw-2*dwall-(n-1)*p)/2;
-  laneL=bd-2*dwall-8;
-  color("#e0922f"){
-    // raised lane walls form cradles; a finger-relief dip in the middle of each
-    for(k=[0:n-1]){
-      lx=ox+k*p;
-      difference(){
-        // cradle block per lane
-        translate([lx-p/2+2, dwall+2, dfloor]) cube([p-4, laneL+4, r+5]);
-        // the pen channel (semicylinder along Y)
-        translate([lx, dwall, dfloor+r+2]) rotate([-90,0,0]) cylinder(h=bd, r=r);
-        // finger-relief dip across the middle so you can lift the pen
-        translate([lx-p, dwall+laneL/2-9, dfloor+r-2]) cube([2*p,18,r+8]);
-      }
-      // end stops so a pen can't roll out front/back
-      translate([lx-r, dwall+2, dfloor]) cube([2*r,2.5,r+3]);
-      translate([lx-r, dwall+laneL+1.5, dfloor]) cube([2*r,2.5,r+3]);
+  // pens lie ACROSS the width (broadside to you) -> lanes run left-right, stacked front-to-back
+  r=(pen_d+pen_clr)/2; p=pen_d+pen_clr+4;   // front-back pitch ~24.6
+  n=floor((bd-2*dwall-2)/p);
+  oy=dwall+(bd-2*dwall-(n-1)*p)/2;
+  laneL=pen_len+6;                          // cradle length along X (fits a 150 mm pen)
+  ox=dwall+(bw-2*dwall-laneL)/2;
+  color("#e0922f") for(k=[0:n-1]){
+    ly=oy+k*p;
+    difference(){
+      translate([ox-2, ly-p/2+2, dfloor]) cube([laneL+4, p-4, r+5]);     // cradle block
+      translate([ox, ly, dfloor+r+2]) rotate([0,90,0]) cylinder(h=laneL, r=r); // pen channel along X
+      translate([ox+laneL/2-9, ly-p, dfloor+r-2]) cube([18,2*p,r+8]);    // center finger-dip (lift pen)
     }
+    // end stops so a pen can't slide out the sides
+    translate([ox-2, ly-r, dfloor]) cube([2.5,2*r,r+3]);
+    translate([ox+laneL-0.5, ly-r, dfloor]) cube([2.5,2*r,r+3]);
   }
-  echo(str("pen drawer: ",n," lanes (",pen_len,"mm pens lie along depth ",bd,"mm)"));
+  echo(str("pen drawer: ",n," pens lie BROADSIDE (",pen_len,"mm across width ",bw,"mm)"));
 }
 module supply_tray(bw,bd,bh){
   color("#2bb98a"){

@@ -28,7 +28,7 @@ items=["1 Real vial Ø22→Ø23.6 pockets","2 Real pen Ø19→Ø20.6 cradles (15
  "15 Modular split (fits any bed)"]
 for i,it in enumerate(items): t(cx+16,566+i*17,it,SUB,11.5)
 # specs strip
-t(20,860,"Capacity (2×3 = 6 drawers):  144 vials (2×72)  ·  12 pen/syringe lanes  ·  12 supply cells",INK,15,"start","600")
+t(20,860,"Capacity (2×3 = 6 drawers):  144 vials (2×72)  ·  28 pens broadside (2×14)  ·  12 supply cells",INK,15,"start","600")
 t(20,886,"Slide: drawer side ribs ride in frame grooves; back-bump + front lip stop the drawer before it falls out.",SUB,13)
 t(20,908,"Print: two side-by-side column modules; each column's drawers split front/back (~185 mm) to fit a normal bed. Add columns to widen.",SUB,13)
 t(20,930,"Fridge-ready: drain holes through every floor so condensation can't pool; open back for airflow.",SUB,13)
