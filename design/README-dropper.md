@@ -47,6 +47,33 @@ you want zero springy features.
 - **Concave catch ramp + cushion fingers + tall front lip** so the pen lands
   gently and can't bounce out.
 
+## Refinements & variants (15-iteration polish pass)
+![iterations](iterations-contact.png)
+
+On top of the simple 3-part core, these refinements are built in (all
+parametric toggles, on by default unless noted). See `design/iterations/` for a
+render of each step.
+
+| Toggle | What it adds |
+|---|---|
+| `finger_scoop` | front scoops to pinch the dropped pen out |
+| `thumbwheel` | a ridged spin grip on one drum end (spin without touching pens) |
+| `chamber_nums` | engraved chamber numbers on the drum face |
+| `sel_pointer` | raised dispense pointers on the uprights |
+| `bearing_keep` | snap bumps that keep the drum seated (still lifts out) |
+| `shutter_lock` | shutter captive in a blind-front track + closed click |
+| `hub_light` | Ø6 axial bore — lightens the drum, takes an optional metal rod axle |
+| `label_panel` | recessed front label area (dose / name) |
+| `feet_on` | underside rim recess so it sits flat without rocking |
+| `round_edges` | chamfered handled edges |
+| `lid_on` *(off)* | optional clip-over **dust lid** (an extra printed part) |
+| `wallmount` *(off)* | keyhole slots on the back for hanging |
+
+**Capacity variants** — just change `num_chambers` (and `pen_*`): a compact
+4-chamber or a high-capacity 8-chamber print from the same files.
+
+![favorites](favorites.png)
+
 ## Default dimensions
 | | |
 |---|---|
@@ -61,8 +88,10 @@ resizes.
 ## Files
 - `peptide-pen-dropper.scad` — main model + parameters (open this).
 - `peptide-pen-dropper-parts.scad` — body / shutter / preview modules (auto-included).
-- `compose_simple.py` — builds the preview sheet.
-- `dropper-preview.png`, `simple_*.png` — the images above.
+- `compose_simple.py`, `compose_gallery.py` — build the preview sheets.
+- `dropper-preview.png`, `simple_*.png`, `favorites.png`, `iterations-contact.png` — images.
+- `iterations/` — a render of each of the 15 refinement passes.
+- `favorites/` — high-res renders of the final + favourite variants.
 
 ## Print & assemble
 1. In [OpenSCAD](https://openscad.org), set your real pen size, then export each
