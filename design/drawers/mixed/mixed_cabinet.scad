@@ -210,6 +210,11 @@ else if(mode=="vialxray"){       // ghost walls, solid holders
 }
 else if(mode=="pendetail")  translate([-colL(0)-colw/2,0,-zb(1)]) drawer(0,1,0);
 else if(mode=="vialdetail") translate([-colL(0)-colw/2,0,-zb(0)]) drawer(0,0,0);
+// ---- single-part exports (laid at origin for STL) ----
+else if(mode=="exp_frame")  frame();
+else if(mode=="exp_vial")   translate([-colL(0)-run_clr,0,-zb(0)]) drawer(0,0,0);
+else if(mode=="exp_pen")    translate([-colL(0)-run_clr,0,-zb(1)]) drawer(0,1,0);
+else if(mode=="exp_supply") translate([-colL(0)-run_clr,0,-zb(2)]) drawer(0,2,0);
 else cabinet(opened);
 
 echo(str("outer ",W,"x",D,"x",H,"  top of stack=", zb(len(bays))));
