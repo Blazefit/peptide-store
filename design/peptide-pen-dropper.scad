@@ -49,8 +49,8 @@ cushion_on    = true;   // springy fingers at the landing zone
 
 /* [Auto-index click] */
 detent_on     = true;
-detent_nub    = 2.2;    // [1:0.1:4]
-detent_t      = 1.8;    // [1:0.1:3]
+detent_nub    = 2.6;    // [1:0.1:4]  firmer so a single pen won't creep the drum
+detent_t      = 2.2;    // [1:0.1:3]  stiffer leaf spring
 
 /* [Preview] */
 part = "assembled";     // [drum, body, shutter, assembled, exploded, section]
@@ -95,6 +95,8 @@ tray_back_y  = drum_r + 6;
 upright_top_z= axle_z + stub_d/2 + bearing_gap + 4;
 det_dr       = drum_r - 7;
 det_nz       = axle_z - det_dr;
+lid_ir       = drum_r + 9;   lid_or = drum_r + 12;   // dust-lid arc radii
+snap_r       = drum_r + 10.5;                         // lid snap-clip pitch radius
 tw_reach     = upright_gap + upright_th + 4;            // +Z stub length with wheel
 tw_r         = round(drum_r*0.66);                      // thumbwheel radius
 tw_th        = 8;
