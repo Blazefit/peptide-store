@@ -1,0 +1,169 @@
+// =============================================================================
+// Mixed peptide drawer cabinet — front access, engineered slide  (iter pass)
+// Two columns, each with vial / pen / supply drawers that slide OUT THE FRONT
+// on a rib-in-groove runner. Real dims: vials Ø22×52, pens Ø19×150.
+// Modes: closed | open | exploded | section | vialdetail | pendetail
+// =============================================================================
+mode = "open";
+
+/* envelope */
+W=375; D=372; H=134;          // ~14.8 x 14.6 x 5.3 in
+ow=4;                          // outer wall
+cw=6;                          // centre divider
+shelf=4;                       // shelf / floor / top thickness
+backw=4;                       // back wall
+
+/* contents (from the other projects) */
+vial_d=22; vial_h=52; vial_clr=1.6;          // -> hole Ø23.6
+pen_d=19; pen_len=150; pen_clr=1.6;          // -> cradle Ø20.6, lane >=156
+
+/* drawer slide */
+run_clr=0.5;                  // body-to-wall side gap
+gdep=3; ghei=5;               // groove (in frame wall): depth(X) x height(Z)
+rwid=2.4; rhei=4;             // rail (on drawer): width(X) x height(Z)
+dfloor=4; dwall=3;            // drawer floor / wall thickness
+dh_clr=2;                     // drawer top-to-shelf clearance
+
+/* preview */
+open_ext=170;                 // how far an opened drawer slides forward
+$fn=40;
+
+// bays bottom->top  [interior height, type]
+bays=[[56,"vial"],[30,"pen"],[30,"supply"]];
+function zb(i)= i<=0 ? shelf : zb(i-1)+bays[i-1][0]+shelf;
+ntot = H;                     // (echo check)
+colw=(W-2*ow-cw)/2;
+function colL(c)= ow + c*(colw+cw);   // left inner face of column c (0,1)
+function colR(c)= colL(c)+colw;
+
+// ---------------------------------------------------------------- FRAME
+module frame(){
+  color("#9aa3b2") difference(){
+    cube([W,D,H]);
+    // hollow each column/bay from the front
+    for(c=[0,1]) for(i=[0:len(bays)-1])
+      translate([colL(c),-1,zb(i)]) cube([colw, D-backw+1, bays[i][0]]);
+    // slide grooves on both side faces of each column bay
+    for(c=[0,1]) for(i=[0:len(bays)-1]){
+      gz=zb(i)+ (bays[i][0]-ghei)/2;
+      // left face groove (cut into the wall to -X)
+      translate([colL(c)-gdep, 6, gz]) cube([gdep+0.1, D-backw-6, ghei]);
+      // right face groove (cut into wall to +X)
+      translate([colR(c)-0.1, 6, gz]) cube([gdep+0.1, D-backw-6, ghei]);
+    }
+    // fridge condensation drain holes through the bottom of each bay
+    for(c=[0,1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:5])
+      translate([colL(c)+25+jx*42, 40+jy*52, -1]) cylinder(h=shelf+2, d=5);
+    // back vent
+    translate([W/2-120, D-backw-0.1, 16]) cube([240, backw+1, H-34]);
+  }
+  // front anti-pull-out stops (small lip at the front top of each groove)
+  color("#9aa3b2") for(c=[0,1]) for(i=[0:len(bays)-1]){
+    gz=zb(i)+(bays[i][0]-ghei)/2;
+    for(fx=[colL(c)-gdep, colR(c)+gdep-2])
+      translate([fx,4,gz+ghei-1.6]) cube([2,3,1.6]);
+  }
+}
+
+// ---------------------------------------------------------------- DRAWER
+module drawer(c,i,ext){
+  type=bays[i][1];
+  h=bays[i][0]; dz=zb(i);
+  bw=colw-2*run_clr;                 // drawer body width
+  bd=D-backw-8;                      // drawer depth
+  bh=h-dh_clr;                       // drawer height
+  col = type=="vial"?"#7c9cf0": type=="pen"?"#f0a23b":"#34d399";
+  translate([colL(c)+run_clr, -ext, dz]) color(col){
+    difference(){
+      union(){
+        // open-top box
+        difference(){ cube([bw,bd,bh]);
+          translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,bh]); }
+        // front face + finger pull
+        cube([bw, 4, bh+ (type=="vial"?14: 8)]);
+        translate([bw/2-45,-9, bh*0.4]) cube([90,9,16]);
+        // side rails that ride in the grooves
+        rz=(bh-rhei)/2 + 1;
+        for(s=[-1,1]) translate([s>0?bw:-rwid, 6, rz]) cube([rwid, bd-12, rhei]);
+        // rail back-bump = the anti-pull-out catch
+        for(s=[-1,1]) translate([s>0?bw:-rwid, bd-12, rz]) cube([rwid,4,rhei+1.4]);
+      }
+      // finger relief notch in the front face (lift contents)
+      translate([bw/2,-2, bh+4]) rotate([-90,0,0]) cylinder(h=8,r=9);
+      // recessed label patch on the drawer front
+      translate([bw/2-32,-0.1,5]) cube([64,1.2,11]);
+      // drain holes through the floor (fridge condensation can't pool)
+      for(jx=[0:3]) for(jy=[0:5])
+        translate([dwall+18+jx*(bw-2*dwall-36)/3, dwall+18+jy*(bd-2*dwall-36)/5, -1])
+          cylinder(h=dfloor+2,d=4);
+    }
+    if(type=="vial")   vial_tray(bw,bd,bh);
+    if(type=="pen")    pen_tray(bw,bd,bh);
+    if(type=="supply") supply_tray(bw,bd,bh);
+  }
+}
+
+module vial_tray(bw,bd,bh){
+  p=vial_d+vial_clr+4;                 // pitch ~27.6
+  nx=floor((bw-2*dwall-4)/p); ny=floor((bd-2*dwall-4)/p);
+  ox=dwall+(bw-2*dwall-(nx-1)*p)/2; oy=dwall+(bd-2*dwall-(ny-1)*p)/2;
+  color("#6f8fe6") difference(){
+    translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,14]);
+    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,dfloor+4]){
+      cylinder(h=20,d=vial_d+vial_clr);
+      translate([0,0,12]) cylinder(h=3,d1=vial_d+vial_clr,d2=vial_d+vial_clr+4); } // lead-in chamfer
+  }
+  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials"));
+}
+module pen_tray(bw,bd,bh){
+  r=(pen_d+pen_clr)/2; p=pen_d+pen_clr+4;   // pitch ~24.6
+  n=floor((bw-2*dwall-2)/p);
+  ox=dwall+(bw-2*dwall-(n-1)*p)/2;
+  laneL=bd-2*dwall-8;
+  color("#e0922f"){
+    // raised lane walls form cradles; a finger-relief dip in the middle of each
+    for(k=[0:n-1]){
+      lx=ox+k*p;
+      difference(){
+        // cradle block per lane
+        translate([lx-p/2+2, dwall+2, dfloor]) cube([p-4, laneL+4, r+5]);
+        // the pen channel (semicylinder along Y)
+        translate([lx, dwall, dfloor+r+2]) rotate([-90,0,0]) cylinder(h=bd, r=r);
+        // finger-relief dip across the middle so you can lift the pen
+        translate([lx-p, dwall+laneL/2-9, dfloor+r-2]) cube([2*p,18,r+8]);
+      }
+      // end stops so a pen can't roll out front/back
+      translate([lx-r, dwall+2, dfloor]) cube([2*r,2.5,r+3]);
+      translate([lx-r, dwall+laneL+1.5, dfloor]) cube([2*r,2.5,r+3]);
+    }
+  }
+  echo(str("pen drawer: ",n," lanes (",pen_len,"mm pens lie along depth ",bd,"mm)"));
+}
+module supply_tray(bw,bd,bh){
+  color("#2bb98a"){
+    for(k=[1:2]) translate([dwall+k*(bw-2*dwall)/3-1,dwall,dfloor]) cube([2,bd-2*dwall,bh-dfloor]);
+    translate([dwall,dwall+(bd-2*dwall)/2-1,dfloor]) cube([bw-2*dwall,2,bh-dfloor]);
+  }
+}
+
+// ---------------------------------------------------------------- assembly
+module cabinet(exts){
+  frame();
+  for(c=[0,1]) for(i=[0:len(bays)-1]) drawer(c,i,exts[c][i]);
+}
+closed=[[6,6,6],[6,6,6]];
+opened=[[open_ext,40,40],[40,110,open_ext]];   // a few pulled to show interiors
+
+if(mode=="closed")    cabinet(closed);
+else if(mode=="open") cabinet(opened);
+else if(mode=="exploded") cabinet([[open_ext,open_ext,open_ext],[open_ext,open_ext,open_ext]]);
+else if(mode=="section"){
+  // horizontal slice at the vial-bay rail height -> shows rib-in-groove in plan
+  gz=zb(0)+(bays[0][0]-ghei)/2;
+  intersection(){ cabinet([[60,6,6],[6,6,6]]); translate([-10,-260,gz+1]) cube([W+20,640,3]); }
+}
+else if(mode=="pendetail")  translate([-colL(0)-colw/2,0,-zb(1)]) drawer(0,1,0);
+else if(mode=="vialdetail") translate([-colL(0)-colw/2,0,-zb(0)]) drawer(0,0,0);
+else cabinet(opened);
+
+echo(str("outer ",W,"x",D,"x",H,"  top of stack=", zb(len(bays))));
