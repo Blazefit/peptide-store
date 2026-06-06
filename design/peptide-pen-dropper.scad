@@ -177,6 +177,7 @@ else if (part == "shutter")   shutter(shutter_state);
 else if (part == "exploded")  exploded();
 else if (part == "section")   section();
 else if (part == "detentview")detentview();
+else if (part == "lid")       lid();
 else                          assembled();
 
 echo(str("Drum Ø", 2*drum_r, " x ", drum_len, "  axle_z=", axle_z));

@@ -51,7 +51,9 @@ module shutter(state="closed") {
     color("#fbbf24") translate([0, dy, 0]) {
         translate([-sw/2, -win_y-3, z_sh]) cube([sw, 2*win_y+6, shutter_th]);   // gate
         translate([-hw/2,  win_y+3, z_sh]) cube([hw, F+8-(win_y+3), shutter_th]); // handle
-        translate([-hw/2,  F+5, z_sh])     cube([hw, 4, 11]);                    // grip tab
+        // i15: finger-friendly grip — tab + overhang ledge to hook a finger under
+        translate([-hw/2,  F+5, z_sh])         cube([hw, 4, 13]);
+        translate([-hw/2,  F+5-2.5, z_sh+10])  cube([hw, 2.5, 3]);
     }
 }
 
@@ -118,6 +120,12 @@ module body() {
             if (feet_on)
                 translate([-(body_out_x-8), -B-W+8, -0.01])
                     cube([2*(body_out_x-8), B+F+2*W-16, 1.6]);
+            // i12: optional wall-mount keyholes on the back
+            if (wallmount)
+                for (sx=[-1,1]) translate([sx*min(upright_x_in-12,48), -B-W-1, 12]) {
+                    rotate([-90,0,0]) cylinder(h=W+2, r=5);       // screw-head hole
+                    translate([-2.5,0,0]) cube([5, W+2, 13]);     // shank slot (up)
+                }
             // i10: chamfer the handled edges (front lip top + upright top outers)
             if (round_edges) {
                 translate([0, F+W, Lt+2]) rotate([45,0,0])
@@ -147,6 +155,24 @@ module body() {
 }
 
 // =============================================================================
+//  OPTIONAL DUST LID  (i11)  — arched cover that locates over the uprights
+// =============================================================================
+lid_ir = drum_r + 9;  lid_or = drum_r + 12;
+module lid() {
+    color("#b3a8ee") {
+        translate([0,0,axle_z]) rotate([0,-90,0])
+            linear_extrude(height = 2*body_out_x, center=true)
+                difference() { difference(){circle(lid_or);circle(lid_ir);}
+                               wedge2d(102,258,lid_or+5); }
+        for (sx=[-1,1])
+            translate([sx>0 ? body_out_x : -body_out_x-2.5, 0, axle_z]) rotate([0,90,0])
+                linear_extrude(height=2.5)
+                    difference(){ circle(lid_or); wedge2d(102,258,lid_or+5);
+                                  circle(lid_ir-2); }
+    }
+}
+
+// =============================================================================
 //  PREVIEW ASSEMBLIES
 // =============================================================================
 module assembled() {
@@ -154,6 +180,7 @@ module assembled() {
     shutter(shutter_state);
     color("#7c5cfc") drum_in_place(0);
     if (show_pen) demo_pen();
+    if (lid_on) lid();
 }
 
 module caught_pen() {
