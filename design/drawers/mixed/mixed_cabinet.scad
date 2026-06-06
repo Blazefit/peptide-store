@@ -75,11 +75,13 @@ module frame(){
     // optional back vent (OFF by default -> solid back for privacy)
     if(vent) translate([W/2-120, D-backw-0.1, 14]) cube([240, backw+1, H-30]);
   }
-  // front anti-pull-out stops (small lip at the front top of each groove)
+  // travel-limit stop: a bump in each groove floor. The rail rides over it on
+  // the way out, and its back edge catches behind it -> drawer stops ~2/3 out
+  // with ~1/3 still captured (stays level). A firm tug rides over it to remove.
   color("#9aa3b2") for(c=[0,1]) for(i=[0:len(bays)-1]){
     gz=zb(i)+(bays[i][0]-ghei)/2;
-    for(fx=[colL(c)-gdep, colR(c)+gdep-2])
-      translate([fx,4,gz+ghei-1.6]) cube([2,3,1.6]);
+    for(fx=[colL(c)-gdep, colR(c)])
+      translate([fx, 126, gz]) cube([gdep, 4, 1.0]);
   }
 }
 
@@ -118,11 +120,9 @@ module drawer(c,i,ext){
         // front face + handle
         cube([bw, 4, bh + (type=="vial"?14:8)]);
         add_handle(bw, bh + (type=="vial"?14:8));
-        // side rails that ride in the grooves
+        // side rails that ride in the grooves (carry the drawer, keep it level)
         rz=(bh-rhei)/2 + 1;
         for(s=[-1,1]) translate([s>0?bw:-rwid, 6, rz]) cube([rwid, bd-12, rhei]);
-        // rail back-bump = the anti-pull-out catch
-        for(s=[-1,1]) translate([s>0?bw:-rwid, bd-12, rz]) cube([rwid,4,rhei+1.4]);
       }
       // recessed handle (scoop style) + reach-in relief for contents
       cut_handle(bw, bh + (type=="vial"?14:8));
