@@ -111,24 +111,27 @@ module vial_tray(bw,bd,bh){
   p=vial_d+vial_clr+4;                 // pitch ~27.6
   nx=floor((bw-2*dwall-4)/p); ny=floor((bd-2*dwall-4)/p);
   ox=dwall+(bw-2*dwall-(nx-1)*p)/2; oy=dwall+(bd-2*dwall-(ny-1)*p)/2;
-  // TWO-PLATE FRAME RACK (matches the reference): a perforated TOP plate grips the
-  // upper vial + shallow base cups seat the bottom; open frame between = least plastic.
+  // TWO PLATES bonded to all four drawer walls (rigid): a perforated TOP plate
+  // grips the upper vial; a thicker BOTTOM plate with an indent seats the base.
+  // Open frame between = least plastic.
   bore=vial_d+vial_clr;
-  topz=30; top_th=6; base_th=6;
-  color("#6f8fe6"){
-    // top perforated plate
-    difference(){
-      translate([dwall,dwall,topz]) cube([bw-2*dwall, bd-2*dwall, top_th]);
-      for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,topz-1]){
-        cylinder(h=top_th+2, d=bore);
-        translate([0,0,top_th-1.4]) cylinder(h=2.6, d1=bore, d2=bore+4); }   // drop-in chamfer
+  top_th=5;                         // top plate thickness
+  bot_th=8;                         // bottom plate (thicker, holds the indent)
+  indent_d=5;                       // base indent depth
+  topz=dfloor + round(vial_h*0.6);  // grip ~60% up the vial
+  color("#6f8fe6") difference(){
+    union(){
+      translate([dwall,dwall,dfloor]) cube([bw-2*dwall, bd-2*dwall, bot_th]);   // bottom plate
+      translate([dwall,dwall,topz])   cube([bw-2*dwall, bd-2*dwall, top_th]);   // top plate
     }
-    // bottom locating cups (lower "plate") + drain
-    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,dfloor])
-      difference(){ cylinder(h=base_th, d=bore+5);
-        translate([0,0,2]) cylinder(h=base_th, d=bore);
-        translate([0,0,-1]) cylinder(h=4, d=5); }
+    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,0]){
+      translate([0,0,topz-1]) cylinder(h=top_th+2, d=bore);                      // top through-hole
+      translate([0,0,topz+top_th-1.4]) cylinder(h=2.6, d1=bore, d2=bore+4);      // drop-in chamfer
+      translate([0,0,dfloor+bot_th-indent_d]) cylinder(h=indent_d+0.1, d=bore);  // base indent
+      translate([0,0,-1]) cylinder(h=dfloor+bot_th, d=5);                        // drain
+    }
   }
+  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials  (top plate @",topz," mm, vial Ø",vial_d,"x",vial_h,")"));
   echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials (two-plate frame rack)"));
   echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials"));
 }
