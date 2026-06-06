@@ -28,7 +28,9 @@ dh_clr=2;                     // drawer top-to-shelf clearance
 open_ext=170;                 // how far an opened drawer slides forward
 $fn=40;
 
-vial_grip=17;                 // collar height gripping the vial base (anti-tip)
+vial_grip=17;                 // ring height gripping the vial base (anti-tip)
+ring_wall=2;                  // vial ring wall (open rack -> saves plastic vs solid block)
+cup=2;                        // bottom indent that seats the vial base
 
 // bays bottom->top  [interior height, type]
 bays=[[60,"vial"],[30,"pen"],[30,"supply"]];   // vial bay raised to fit taller collar
@@ -109,13 +111,17 @@ module vial_tray(bw,bd,bh){
   p=vial_d+vial_clr+4;                 // pitch ~27.6
   nx=floor((bw-2*dwall-4)/p); ny=floor((bd-2*dwall-4)/p);
   ox=dwall+(bw-2*dwall-(nx-1)*p)/2; oy=dwall+(bd-2*dwall-(ny-1)*p)/2;
-  color("#6f8fe6") difference(){
-    translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,vial_grip]);
-    // vials rest on the drawer floor (deeper effective grip); chamfered drop-in
-    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,dfloor]){
-      cylinder(h=vial_grip+6,d=vial_d+vial_clr);
-      translate([0,0,vial_grip-3]) cylinder(h=3.1,d1=vial_d+vial_clr,d2=vial_d+vial_clr+4); }
-  }
+  // OPEN RING RACK: thin ring per vial + a small base cup (indent) in the floor.
+  // Hollow between rings -> much less plastic & faster print than a solid block.
+  ringO=vial_d+vial_clr+2*ring_wall;
+  color("#6f8fe6") for(ix=[0:nx-1])for(iy=[0:ny-1])
+    translate([ox+ix*p,oy+iy*p,dfloor]) difference(){
+      cylinder(h=vial_grip, d=ringO);                                  // grip ring
+      translate([0,0,cup]) cylinder(h=vial_grip, d=vial_d+vial_clr);   // bore (vial), cup base
+      translate([0,0,vial_grip-3]) cylinder(h=3.1,d1=vial_d+vial_clr,d2=vial_d+vial_clr+4); // drop-in chamfer
+      translate([0,0,-1]) cylinder(h=cup+2, d=5);                       // drain through the cup
+    }
+  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials (open ring rack)"));
   echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials"));
 }
 module pen_tray(bw,bd,bh){

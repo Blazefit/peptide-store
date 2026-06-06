@@ -18,7 +18,7 @@ panel(460,520,430,300,YEL); s.append(f'<image href="{PD}" x="466" y="540" width=
 # changelog
 cx=905; panel(cx,520,W-cx-20,300,INK)
 t(cx+16,542,"15 improvements applied",INK,15,"start","700")
-items=["1 Real vial Ø22→Ø23.6 pockets","2 Real pen Ø19→Ø20.6 cradles (150 mm)",
+items=["1 Open ring rack (saves plastic)","2 Real pen Ø19→Ø20.6 cradles (150 mm)",
  "3 Chamfered vial drop-in lead-ins","4 Pen end-stops (won't roll out)",
  "5 Center finger-dip to lift pens","6 Rib-in-groove slide (~0.6 mm play)",
  "7 Anti-pull-out drawer stop","8 Top-to-shelf clearance (no bind)",
@@ -31,7 +31,7 @@ for i,it in enumerate(items): t(cx+16,566+i*17,it,SUB,11.5)
 t(20,860,"Capacity (2×3 = 6 drawers):  144 vials (2×72)  ·  28 pens broadside (2×14)  ·  12 supply cells",INK,15,"start","600")
 t(20,886,"Slide: drawer side ribs ride in frame grooves; back-bump + front lip stop the drawer before it falls out.",SUB,13)
 t(20,908,"Print: two side-by-side column modules; each column's drawers split front/back (~185 mm) to fit a normal bed. Add columns to widen.",SUB,13)
-t(20,930,"Fridge-ready: drain holes through every floor so condensation can't pool; open back for airflow.",SUB,13)
+t(20,930,"Plastic-saving: vial holders are open ring racks (thin ring + base cup) instead of a solid block. Fridge drains + rear vent.",SUB,13)
 s.append('</svg>')
 cairosvg.svg2png(bytestring="\n".join(s).encode(),write_to="mixed-summary.png",output_width=W*2,output_height=H*2)
 print("ok")
