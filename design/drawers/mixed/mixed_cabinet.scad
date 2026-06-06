@@ -15,8 +15,8 @@ backw=4;                       // back wall
 
 /* contents (from the other projects) */
 vial_d=22; vial_h=52; vial_clr=1.6;          // 10 mL vial -> hole Ø23.6
-v3_d=17;  v3_h=40;                            // 3 mL vial  -> hole Ø18.6
-vial_split=0.68;                             // front fraction of the drawer for 3 mL
+v3_d=17.4; v3_h=40;                           // 3 mL vial  -> hole Ø19.0 (matches reference rack)
+vial_split=0.68;                             // LEFT fraction for 3 mL (~70/30 -> 2 clean 10 mL cols)
 pen_d=19; pen_len=150; pen_clr=1.6;          // -> cradle Ø20.6, lane >=156
 
 /* drawer slide */
@@ -72,7 +72,7 @@ module frame(){
 }
 
 // ---------------------------------------------------------------- HANDLE
-handle_style="scoop";   // [scoop, bar, dpull]
+handle_style="bar";   // [scoop, bar, dpull]
 module add_handle(bw,ff){
   cy=ff*0.46;
   if(handle_style=="bar")                       // rounded bar pull
@@ -135,7 +135,7 @@ topz_v=dfloor+24;                  // single top plate height (grips both vial s
 
 // drill one zone's holes (top through-hole + chamfer + base indent + drain)
 module vzone(bore, x0,y0,x1,y1){
-  p=bore+4; nx=floor((x1-x0-2)/p); ny=floor((y1-y0-2)/p);
+  p=bore+3; nx=floor((x1-x0-2)/p); ny=floor((y1-y0-2)/p);
   ox=x0+(x1-x0-(nx-1)*p)/2; oy=y0+(y1-y0-(ny-1)*p)/2;
   for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,0]){
     translate([0,0,topz_v-1]) cylinder(h=top_th+2,d=bore);
