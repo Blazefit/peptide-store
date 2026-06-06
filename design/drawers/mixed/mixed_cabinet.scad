@@ -113,7 +113,7 @@ module drawer(c,i,ext){
   bd=D-backw-8;                      // drawer depth
   bh=h-dh_clr;                       // drawer height
   col = type=="vial"?"#7c9cf0": type=="pen"?"#f0a23b":"#34d399";
-  ff = bays[i][0] + shelf - 1;        // overlay front: covers the opening, tiles to the next drawer
+  ff = bays[i][0] - 1;                // INSET front: fits inside the opening (no collision with the shelf above)
   translate([colL(c)+run_clr, -ext, dz]) color(col){
     difference(){
       union(){
