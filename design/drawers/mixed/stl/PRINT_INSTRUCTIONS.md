@@ -63,3 +63,12 @@ bed whole**. Two options:
 | Handle style | `handle_style` = `bar` / `scoop` / `dpull` |
 | Pen size/count | `pen_d`, `pen_len` |
 | Add a third column (wider) | duplicate a column module |
+
+---
+## LIGHT version (cheaper) — `*_light.stl`
+Same fit and function, ~40 % less material (the frame is 63 % lighter: open
+skeleton instead of solid slabs). Print **`frame_light` ×1, `drawer_vial_light`
+×2, `drawer_pen_light` ×2, `drawer_supply_light` ×2**. Quote both sets on
+Craftcloud and pick whichever comes back cheaper — the light set should win.
+Walls/plates are thinner (drawer walls 2.4 mm, vial plates 3.5/5.5 mm), so prefer
+PETG or Nylon over brittle PLA for the light version.
