@@ -72,3 +72,10 @@ skeleton instead of solid slabs). Print **`frame_light` ×1, `drawer_vial_light`
 Craftcloud and pick whichever comes back cheaper — the light set should win.
 Walls/plates are thinner (drawer walls 2.4 mm, vial plates 3.5/5.5 mm), so prefer
 PETG or Nylon over brittle PLA for the light version.
+
+---
+## SINGLE-COLUMN (half-size) version — current default
+Frame is now **one column** (≈188 × 372 × 136 mm), so print **one of each drawer**:
+`frame_light` ×1, `drawer_vial_light` ×1, `drawer_pen_light` ×1, `drawer_supply_light` ×1.
+Frame drops to ~878 cm³ (was ~1655). Capacity: 80× 3 mL + 26× 10 mL vials, 14 pens,
+6 supply cells. (Set `cols=2` in the .scad to go back to the double-wide cabinet.)

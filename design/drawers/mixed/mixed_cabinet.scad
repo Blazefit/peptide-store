@@ -7,9 +7,12 @@
 mode = "open";
 
 /* envelope */
-W=375; D=372; H=136;          // ~14.8 x 14.6 x 5.35 in  (taller vial bay)
+cols=1;                        // number of drawer columns (1 = half-size, one of each)
+colw=180.5;                    // column interior width (keeps the drawers the same size)
+D=372; H=136;                  // depth x height (~14.6 x 5.35 in)
 ow=4;                          // outer wall
-cw=6;                          // centre divider
+cw=6;                          // centre divider (only used when cols>1)
+W=2*ow + cols*colw + (cols-1)*cw;   // width follows the column count
 shelf=4;                       // shelf / floor / top thickness
 backw=4;                       // back wall
 
@@ -42,7 +45,6 @@ cup=2;                        // bottom indent that seats the vial base
 bays=[[60,"vial"],[30,"pen"],[30,"supply"]];   // vial bay raised to fit taller collar
 function zb(i)= i<=0 ? shelf : zb(i-1)+bays[i-1][0]+shelf;
 ntot = H;                     // (echo check)
-colw=(W-2*ow-cw)/2;
 function colL(c)= ow + c*(colw+cw);   // left inner face of column c (0,1)
 function colR(c)= colL(c)+colw;
 
@@ -51,10 +53,10 @@ module frame(){
   color("#9aa3b2") difference(){
     cube([W,D,H]);
     // hollow each column/bay from the front
-    for(c=[0,1]) for(i=[0:len(bays)-1])
+    for(c=[0:cols-1]) for(i=[0:len(bays)-1])
       translate([colL(c),-1,zb(i)]) cube([colw, D-backw+1, bays[i][0]]);
     // slide grooves on both side faces of each column bay
-    for(c=[0,1]) for(i=[0:len(bays)-1]){
+    for(c=[0:cols-1]) for(i=[0:len(bays)-1]){
       gz=zb(i)+ (bays[i][0]-ghei)/2;
       // left face groove (cut into the wall to -X)
       translate([colL(c)-gdep, 6, gz]) cube([gdep+0.1, D-backw-6, ghei]);
@@ -62,11 +64,11 @@ module frame(){
       translate([colR(c)-0.1, 6, gz]) cube([gdep+0.1, D-backw-6, ghei]);
     }
     // fridge condensation drain holes through the bottom of each bay
-    for(c=[0,1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:5])
+    for(c=[0:cols-1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:5])
       translate([colL(c)+25+jx*42, 40+jy*52, -1]) cylinder(h=shelf+2, d=5);
     // LIGHT: open up the INTERNAL shelves + bottom only (hidden) -> saves material.
     // TOP stays solid for privacy; i goes 0..len-1 so the top slab is untouched.
-    if(light) for(c=[0,1]) for(i=[0:len(bays)-1]) {
+    if(light) for(c=[0:cols-1]) for(i=[0:len(bays)-1]) {
       zlo=zb(i)-shelf; m=9;
       for(half=[0,1])
         translate([colL(c)+m, half==0 ? m : (D-backw)/2+5, zlo-1])
@@ -78,7 +80,7 @@ module frame(){
   // travel-limit stop: a bump in each groove floor. The rail rides over it on
   // the way out, and its back edge catches behind it -> drawer stops ~2/3 out
   // with ~1/3 still captured (stays level). A firm tug rides over it to remove.
-  color("#9aa3b2") for(c=[0,1]) for(i=[0:len(bays)-1]){
+  color("#9aa3b2") for(c=[0:cols-1]) for(i=[0:len(bays)-1]){
     gz=zb(i)+(bays[i][0]-ghei)/2;
     for(fx=[colL(c)-gdep, colR(c)])
       translate([fx, 126, gz]) cube([gdep, 4, 1.0]);
@@ -197,7 +199,7 @@ module supply_tray(bw,bd,bh){
 // ---------------------------------------------------------------- assembly
 module cabinet(exts){
   frame();
-  for(c=[0,1]) for(i=[0:len(bays)-1]) drawer(c,i,exts[c][i]);
+  for(c=[0:cols-1]) for(i=[0:len(bays)-1]) drawer(c,i,exts[c][i]);
 }
 closed=[[6,6,6],[6,6,6]];
 opened=[[open_ext,40,40],[40,110,open_ext]];   // a few pulled to show interiors
