@@ -1,22 +1,15 @@
 // =============================================================================
-// Peptide Pen "Drop-Selector Revolver"   (evolution of peptide-pen-revolver)
+// Peptide Pen "Drop-Selector Revolver"  —  SIMPLE edition
 // =============================================================================
-// Spin the fluted drum to bring the chamber you want to the BOTTOM "drop
-// station", press the button, and that one pen is released — it drops through
-// a trapdoor into the angled catch tray of a secondary base below and rolls
-// forward to a lip where you grab it.
+// Three printed parts, no fasteners, no springs to fatigue:
+//   1. DRUM    — fluted revolver cylinder; just DROPS into the body's bearings
+//   2. BODY    — tray + uprights + open-top bearings + shroud + shutter track
+//   3. SHUTTER — one flat slide ("drawer pull"); slide it open to drop a pen
 //
-// PARTS (print separately, select with `part`):
-//   drum       — fluted revolver cylinder, chamber pockets open along the side
-//   cradle     — legs + axle pins + shroud (holds pens in) + button-latch
-//   flap       — the trapdoor that drops the pen (snaps onto the cradle hinge)
-//   secondary  — lower base: slides onto the cradle legs, angled catch tray + lip
-//   both       — everything assembled (preview)
-//   exploded   — parts pulled apart (preview)
-//
-// NOTE: the button/latch/hinge are modelled in the CLOSED position; this file
-// captures the geometry and motion of the mechanism (see README) rather than a
-// tuned spring. Units: millimetres.
+// Use it: spin the drum to your pen (it clicks into place), pull the shutter,
+// that one pen drops into the catch tray and rests at the front lip. Push the
+// shutter shut. To refill: lift the whole drum out and drop pens in the top.
+// Units: mm.
 // -----------------------------------------------------------------------------
 
 /* [What it holds] */
@@ -26,142 +19,125 @@ pen_length    = 150;    // [80:1:200]
 /* [Revolver] */
 num_chambers  = 6;      // [4:1:8]
 clearance     = 2.5;    // [1:0.5:6]
-flute_depth   = 1.6;    // [0:0.2:4]   exterior scallops between chambers (0 = plain)
+flute_depth   = 1.6;    // [0:0.2:4]
 
 /* [Structure] */
 wall          = 3.0;    // [2:0.2:5]
-end_wall      = 4.0;    // [2:0.5:8]   solid drum ends (axial pen stop)
+end_wall      = 4.0;    // [2:0.5:8]
 shroud_th     = 3.0;    // [2:0.5:6]
-shroud_gap    = 1.2;    // [0.6:0.1:2] drum-to-shroud running clearance
+shroud_gap    = 1.4;    // [0.8:0.1:2.5]
 
-/* [Axle] */
-pin_d         = 9;      // [6:0.5:14]
-pin_engage    = 6;      // [4:0.5:10]
-axle_gap      = 0.5;    // [0.2:0.1:1]
+/* [Drop-in axle] */
+stub_d        = 11;     // [7:0.5:16]  integral axle stub diameter
+stub_len      = 9;      // [5:0.5:14]
+bearing_gap   = 0.6;    // [0.3:0.1:1.2] stub-to-bearing running clearance
 
-/* [Secondary base / catch tray] */
-tray_incline  = 8;      // [4:1:18]   forward slope so the pen rolls to the lip
-tray_lip      = 12;     // [6:1:20]   front catch-lip height
-drop_clear    = 26;     // [12:1:50]  air gap from drum bottom down into the tray
+/* [Uprights] */
+upright_th    = 8;      // [5:0.5:12]
+upright_gap   = 1.2;    // [0.5:0.1:3] gap between drum end and upright
+
+/* [Shutter gate] */
+win_ang       = 18;     // [12:1:26]  half-angle of the bottom drop window
+shutter_th    = 2.6;    // [1.8:0.1:4]
+shutter_gap   = 0.6;    // [0.3:0.1:1] slide clearance
+shutter_travel= 30;     // [18:1:45]  how far it slides to open
+
+/* [Catch tray] */
+tray_lip      = 20;     // [10:1:30]
+drop_clear    = 30;     // [12:1:45]  headroom: pen drop + handle clears the catch
+cushion_on    = true;   // springy fingers at the landing zone
+
+/* [Auto-index click] */
+detent_on     = true;
+detent_nub    = 2.2;    // [1:0.1:4]
+detent_t      = 1.8;    // [1:0.1:3]
 
 /* [Preview] */
-part = "exploded";      // [drum, cradle, flap, secondary, both, exploded, section, latchtest, detenttest]
-show_pen = true;        // demo pen in the bottom chamber (preview only)
-
-/* [Mechanism states] (for previewing the motion) */
-latch_state = "closed"; // [closed, pressed]
-flap_state  = "closed"; // [closed, open]
-flap_open_ang = 62;     // [20:1:90] how far the trapdoor swings down
-
-/* [Print-in-place latch] */
-latch_b      = 14;      // [8:1:24]   button / blade width
-latch_t      = 2.2;     // [1.4:0.1:3.5] spring blade thickness (the springiness)
-latch_len    = 22;      // [14:1:34]  blade length
-latch_throw  = 4.5;     // [2:0.5:8]  button travel needed to release
-hook_grab    = 2.6;     // [1.5:0.1:4] how deeply the hook holds the lip
-latch_gap    = 0.5;     // [0.3:0.1:0.9] print-in-place clearance
-
-/* [Auto-index detent] */
-detent_on    = true;
-detent_t     = 1.8;     // [1:0.1:3]  detent leaf-spring thickness
-detent_nub   = 2.2;     // [1:0.1:4]  how far the nub drops into each notch
-
-/* [Catch ramp] */
-ramp_on      = true;
-cushion_on   = true;    // springy fingers at the landing zone
+part = "assembled";     // [drum, body, shutter, assembled, exploded, section]
+show_pen = true;
+shutter_state = "closed";  // [closed, open]
 
 $fn = 80;
 
 // --------------------------- derived geometry --------------------------------
 ch_r     = (pen_diameter + clearance) / 2;
-pitch_r  = max(2*ch_r + wall, ch_r + pin_d/2 + wall + 5)
-           / (2*sin(180/num_chambers));               // ring radius
-drum_r   = pitch_r + ch_r + 2;                          // pen recessed ~2 mm
+pitch_r  = (2*ch_r + wall) / (2*sin(180/num_chambers));
+drum_r   = pitch_r + ch_r + 2;
 drum_len = pen_length + 2*end_wall;
-throat_w = pen_diameter + 1.5;                          // side opening of a pocket
-socket_r = pin_d/2 + axle_gap;
+throat_w = pen_diameter + 1.5;
 
-// chambers placed so #0 is at TOP (load) and one is at BOTTOM (drop)
-function ch_ang(i) = 90 + i*360/num_chambers;
+function ch_ang(i)    = 90 + i*360/num_chambers;
 function flute_ang(i) = 90 + (i+0.5)*360/num_chambers;
 
-// in-use placement (axis = X, table at z=0)
-leg_th    = 9;
-leg_gap   = 2;
-axle_x    = drum_len/2 + leg_gap + leg_th/2;            // legs centred at ±axle_x
-shroud_ir = drum_r + shroud_gap;
-shroud_or = shroud_ir + shroud_th;
-tray_floor_z = 6;                                       // tray low point (front)
-axle_z    = tray_floor_z + drop_clear + drum_r;         // drum centre height
-det_dr    = drum_r - 6.5;                               // detent dimple ring radius
-det_nz    = axle_z - det_dr;                            // bottom dimple height (z)
-det_xf    = drum_len/2;                                 // +X drum end face plane
-det_xl    = axle_x - leg_th/2;                          // right-leg inner face plane
+tray_floor_z = 6;
+axle_z       = tray_floor_z + drop_clear + drum_r;
+upright_x_in = drum_len/2 + upright_gap;
+upright_x    = upright_x_in + upright_th/2;
+body_out_x   = upright_x_in + upright_th;
+shroud_ir    = drum_r + shroud_gap;
+shroud_or    = shroud_ir + shroud_th;
+tray_front_y = drum_r + 14;
+tray_back_y  = drum_r + 6;
+upright_top_z= axle_z + stub_d/2 + bearing_gap + 4;
+det_dr       = drum_r - 7;
+det_nz       = axle_z - det_dr;
 
 // =============================================================================
-//  DRUM  (built on its axis = Z; back face z=0, front face z=drum_len)
+//  DRUM  (built on its axis = Z; integral axle stubs at both ends)
 // =============================================================================
 module drum() {
-    difference() {
-        cylinder(h = drum_len, r = drum_r);
-        // chamber pockets: rounded cradle + throat opening to the outer surface
-        for (i = [0:num_chambers-1]) rotate([0,0,ch_ang(i)]) pocket();
-        // exterior flutes between chambers
-        if (flute_depth > 0)
-            for (i = [0:num_chambers-1]) rotate([0,0,flute_ang(i)]) flute();
-        // axle sockets both ends
-        translate([0,0,-1])                  cylinder(h = pin_engage+1, r = socket_r);
-        translate([0,0,drum_len-pin_engage]) cylinder(h = pin_engage+1, r = socket_r);
-        // auto-index detent: a ring of ball-detent dimples on the +Z end face,
-        // one per chamber, so the drum clicks as each chamber reaches the bottom
-        if (detent_on)
-            for (i = [0:num_chambers-1]) rotate([0,0,ch_ang(i)])
-                translate([drum_r - 6.5, 0, drum_len]) sphere(r = detent_nub + 0.4);
+    union() {
+        difference() {
+            cylinder(h = drum_len, r = drum_r);
+            for (i = [0:num_chambers-1]) rotate([0,0,ch_ang(i)]) pocket();
+            if (flute_depth > 0)
+                for (i = [0:num_chambers-1]) rotate([0,0,flute_ang(i)]) flute();
+            // auto-index dimples on the +Z end face (one per chamber)
+            if (detent_on)
+                for (i = [0:num_chambers-1]) rotate([0,0,ch_ang(i)])
+                    translate([det_dr, 0, drum_len]) sphere(r = detent_nub + 0.4);
+        }
+        // integral axle stubs
+        translate([0,0,-stub_len+0.01]) cylinder(h = stub_len, r = stub_d/2);
+        translate([0,0,drum_len-0.01])   cylinder(h = stub_len, r = stub_d/2);
     }
 }
 
 module pocket() {
     translate([pitch_r, 0, end_wall]) {
-        cylinder(h = drum_len - 2*end_wall, r = ch_r);     // cradle
-        translate([0, -throat_w/2, 0])                      // throat to surface
+        cylinder(h = drum_len - 2*end_wall, r = ch_r);
+        translate([0, -throat_w/2, 0])
             cube([drum_r, throat_w, drum_len - 2*end_wall]);
     }
 }
 
 module flute() {
-    fl = drum_len - 24;
     translate([drum_r + (3.2 - flute_depth), 0, 12])
-        cylinder(h = fl, r = 3.2);
+        cylinder(h = drum_len - 24, r = 3.2);
 }
 
-// =============================================================================
-//  ASSEMBLY HELPERS — place the drum horizontally
-// =============================================================================
+// place the drum horizontally (axis = X), stubs reaching into the bearings
 module drum_in_place(rot=0) {
     translate([0,0,axle_z]) rotate([0,90,0]) rotate([0,0,rot])
         translate([0,0,-drum_len/2]) drum();
 }
 
-// crude pen for preview, sitting in the visible TOP chamber
 module demo_pen() {
     color("#e8e8f5")
     translate([-pen_length/2, 0, axle_z + pitch_r])
         rotate([0,90,0]) cylinder(h = pen_length, r = pen_diameter/2);
 }
 
-// (cradle, flap, secondary defined below)
 include <peptide-pen-dropper-parts.scad>
 
 // --------------------------------- output ------------------------------------
 if      (part == "drum")      drum();
-else if (part == "cradle")    cradle();
-else if (part == "flap")      flap();
-else if (part == "secondary") secondary();
+else if (part == "body")      body();
+else if (part == "shutter")   shutter(shutter_state);
 else if (part == "exploded")  exploded();
 else if (part == "section")   section();
-else if (part == "latchtest") latchtest();
-else if (part == "detenttest")detenttest();
+else if (part == "detentview")detentview();
 else                          assembled();
 
-echo(str("Drum Ø", 2*drum_r, " x ", drum_len, "  pitch_r=", pitch_r));
-echo(str("axle_z=", axle_z, " shroud_or=", shroud_or));
+echo(str("Drum Ø", 2*drum_r, " x ", drum_len, "  axle_z=", axle_z));
+echo(str("body ", 2*body_out_x, " x ", tray_front_y+tray_back_y+2*wall, " x ", upright_top_z));
