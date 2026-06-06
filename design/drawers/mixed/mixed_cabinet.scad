@@ -14,7 +14,9 @@ shelf=4;                       // shelf / floor / top thickness
 backw=4;                       // back wall
 
 /* contents (from the other projects) */
-vial_d=22; vial_h=52; vial_clr=1.6;          // -> hole Ø23.6
+vial_d=22; vial_h=52; vial_clr=1.6;          // 10 mL vial -> hole Ø23.6
+v3_d=17;  v3_h=40;                            // 3 mL vial  -> hole Ø18.6
+vial_split=0.68;                             // front fraction of the drawer for 3 mL
 pen_d=19; pen_len=150; pen_clr=1.6;          // -> cradle Ø20.6, lane >=156
 
 /* drawer slide */
@@ -107,33 +109,35 @@ module drawer(c,i,ext){
   }
 }
 
+top_th=5;                          // top plate thickness
+bot_th=8;                          // bottom plate (thicker, holds the indent)
+indent_d=5;                        // base indent depth
+topz_v=dfloor+24;                  // single top plate height (grips both vial sizes)
+
+// drill one zone's holes (top through-hole + chamfer + base indent + drain)
+module vzone(bore, x0,y0,x1,y1){
+  p=bore+4; nx=floor((x1-x0-2)/p); ny=floor((y1-y0-2)/p);
+  ox=x0+(x1-x0-(nx-1)*p)/2; oy=y0+(y1-y0-(ny-1)*p)/2;
+  for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,0]){
+    translate([0,0,topz_v-1]) cylinder(h=top_th+2,d=bore);
+    translate([0,0,topz_v+top_th-1.4]) cylinder(h=2.6,d1=bore,d2=bore+4);
+    translate([0,0,dfloor+bot_th-indent_d]) cylinder(h=indent_d+0.1,d=bore);
+    translate([0,0,-1]) cylinder(h=dfloor+bot_th,d=4);
+  }
+  echo(str("  ",(bore<20?"3 mL":"10 mL")," zone -> ",nx,"x",ny,"=",nx*ny));
+}
+
 module vial_tray(bw,bd,bh){
-  p=vial_d+vial_clr+4;                 // pitch ~27.6
-  nx=floor((bw-2*dwall-4)/p); ny=floor((bd-2*dwall-4)/p);
-  ox=dwall+(bw-2*dwall-(nx-1)*p)/2; oy=dwall+(bd-2*dwall-(ny-1)*p)/2;
-  // TWO PLATES bonded to all four drawer walls (rigid): a perforated TOP plate
-  // grips the upper vial; a thicker BOTTOM plate with an indent seats the base.
-  // Open frame between = least plastic.
-  bore=vial_d+vial_clr;
-  top_th=5;                         // top plate thickness
-  bot_th=8;                         // bottom plate (thicker, holds the indent)
-  indent_d=5;                       // base indent depth
-  topz=dfloor + round(vial_h*0.6);  // grip ~60% up the vial
+  // TWO PLATES bonded to all 4 walls, with TWO zones: front = 3 mL, back = 10 mL
+  ysplit = dwall + (bd-2*dwall)*vial_split;
   color("#6f8fe6") difference(){
     union(){
       translate([dwall,dwall,dfloor]) cube([bw-2*dwall, bd-2*dwall, bot_th]);   // bottom plate
-      translate([dwall,dwall,topz])   cube([bw-2*dwall, bd-2*dwall, top_th]);   // top plate
+      translate([dwall,dwall,topz_v]) cube([bw-2*dwall, bd-2*dwall, top_th]);   // top plate
     }
-    for(ix=[0:nx-1])for(iy=[0:ny-1]) translate([ox+ix*p,oy+iy*p,0]){
-      translate([0,0,topz-1]) cylinder(h=top_th+2, d=bore);                      // top through-hole
-      translate([0,0,topz+top_th-1.4]) cylinder(h=2.6, d1=bore, d2=bore+4);      // drop-in chamfer
-      translate([0,0,dfloor+bot_th-indent_d]) cylinder(h=indent_d+0.1, d=bore);  // base indent
-      translate([0,0,-1]) cylinder(h=dfloor+bot_th, d=5);                        // drain
-    }
+    vzone(v3_d+vial_clr,   dwall, dwall,  bw-dwall, ysplit);     // 3 mL field (front)
+    vzone(vial_d+vial_clr, dwall, ysplit, bw-dwall, bd-dwall);   // 10 mL field (back)
   }
-  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials  (top plate @",topz," mm, vial Ø",vial_d,"x",vial_h,")"));
-  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials (two-plate frame rack)"));
-  echo(str("vial drawer: ",nx,"x",ny,"=",nx*ny," vials"));
 }
 module pen_tray(bw,bd,bh){
   // pens lie ACROSS the width (broadside to you) -> lanes run left-right, stacked front-to-back
