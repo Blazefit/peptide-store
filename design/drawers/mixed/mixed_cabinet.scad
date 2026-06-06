@@ -83,7 +83,7 @@ module frame(){
   color("#9aa3b2") for(c=[0:cols-1]) for(i=[0:len(bays)-1]){
     gz=zb(i)+(bays[i][0]-ghei)/2;
     for(fx=[colL(c)-gdep, colR(c)])
-      translate([fx, 126, gz]) cube([gdep, 4, 1.0]);
+      translate([fx, 126, gz]) cube([gdep, 4, 0.8]);   // rides with 0.2 clearance, soft catch
   }
 }
 
@@ -113,6 +113,7 @@ module drawer(c,i,ext){
   bd=D-backw-8;                      // drawer depth
   bh=h-dh_clr;                       // drawer height
   col = type=="vial"?"#7c9cf0": type=="pen"?"#f0a23b":"#34d399";
+  ff = bays[i][0] + shelf - 1;        // overlay front: covers the opening, tiles to the next drawer
   translate([colL(c)+run_clr, -ext, dz]) color(col){
     difference(){
       union(){
@@ -120,14 +121,14 @@ module drawer(c,i,ext){
         difference(){ cube([bw,bd,bh]);
           translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,bh]); }
         // front face + handle
-        cube([bw, 4, bh + (type=="vial"?14:8)]);
-        add_handle(bw, bh + (type=="vial"?14:8));
+        cube([bw, 4, ff]);
+        add_handle(bw, ff);
         // side rails that ride in the grooves (carry the drawer, keep it level)
         rz=(bh-rhei)/2 + 1;
         for(s=[-1,1]) translate([s>0?bw:-rwid, 6, rz]) cube([rwid, bd-12, rhei]);
       }
       // recessed handle (scoop style) + reach-in relief for contents
-      cut_handle(bw, bh + (type=="vial"?14:8));
+      cut_handle(bw, ff);
       translate([bw/2,-2, bh+3]) rotate([-90,0,0]) cylinder(h=8,r=7);
       // recessed label patch on the drawer front (every drawer)
       translate([bw/2-32,-0.1,5]) cube([64,1.4,12]);
@@ -204,7 +205,10 @@ module cabinet(exts){
 closed=[[6,6,6],[6,6,6]];
 opened=[[open_ext,40,40],[40,110,open_ext]];   // a few pulled to show interiors
 
-if(mode=="closed")    cabinet(closed);
+if(mode=="fitx"){     // X-Z cross-section through a closed vial drawer + frame (rail-in-groove)
+  intersection(){ union(){ frame(); drawer(0,0,6); } translate([-5,200,-5]) cube([W+10,3,H+10]); }
+}
+else if(mode=="closed")    cabinet(closed);
 else if(mode=="open") cabinet(opened);
 else if(mode=="exploded") cabinet([[open_ext,open_ext,open_ext],[open_ext,open_ext,open_ext]]);
 else if(mode=="section"){
