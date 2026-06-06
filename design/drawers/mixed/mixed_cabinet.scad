@@ -71,6 +71,24 @@ module frame(){
   }
 }
 
+// ---------------------------------------------------------------- HANDLE
+handle_style="scoop";   // [scoop, bar, dpull]
+module add_handle(bw,ff){
+  cy=ff*0.46;
+  if(handle_style=="bar")                       // rounded bar pull
+    hull() for(yy=[-12,-5]) translate([bw/2-38,yy,cy]) rotate([0,90,0]) cylinder(h=76,r=4.5,$fn=28);
+  else if(handle_style=="dpull"){               // D-shaped pull on two posts
+    for(sx=[-1,1]) translate([bw/2+sx*32,-3,cy]) rotate([-90,0,0]) cylinder(h=11,r=3.5,$fn=24);
+    translate([bw/2-32,-12.5,cy]) rotate([0,90,0]) cylinder(h=64,r=3.5,$fn=24);
+  }
+}
+module cut_handle(bw,ff){
+  if(handle_style=="scoop"){                    // recessed finger pull (hook over the top)
+    translate([bw/2-42,-3,ff-1]) rotate([0,90,0]) cylinder(h=84,r=12,$fn=48);
+    translate([bw/2-42,1.5,ff-13]) cube([84,7,15]);   // open the top edge into the scoop
+  }
+}
+
 // ---------------------------------------------------------------- DRAWER
 module drawer(c,i,ext){
   type=bays[i][1];
@@ -85,19 +103,20 @@ module drawer(c,i,ext){
         // open-top box
         difference(){ cube([bw,bd,bh]);
           translate([dwall,dwall,dfloor]) cube([bw-2*dwall,bd-2*dwall,bh]); }
-        // front face + finger pull
-        cube([bw, 4, bh+ (type=="vial"?14: 8)]);
-        translate([bw/2-45,-9, bh*0.4]) cube([90,9,16]);
+        // front face + handle
+        cube([bw, 4, bh + (type=="vial"?14:8)]);
+        add_handle(bw, bh + (type=="vial"?14:8));
         // side rails that ride in the grooves
         rz=(bh-rhei)/2 + 1;
         for(s=[-1,1]) translate([s>0?bw:-rwid, 6, rz]) cube([rwid, bd-12, rhei]);
         // rail back-bump = the anti-pull-out catch
         for(s=[-1,1]) translate([s>0?bw:-rwid, bd-12, rz]) cube([rwid,4,rhei+1.4]);
       }
-      // finger relief notch in the front face (lift contents)
-      translate([bw/2,-2, bh+4]) rotate([-90,0,0]) cylinder(h=8,r=9);
-      // recessed label patch on the drawer front
-      translate([bw/2-32,-0.1,5]) cube([64,1.2,11]);
+      // recessed handle (scoop style) + reach-in relief for contents
+      cut_handle(bw, bh + (type=="vial"?14:8));
+      translate([bw/2,-2, bh+3]) rotate([-90,0,0]) cylinder(h=8,r=7);
+      // recessed label patch on the drawer front (every drawer)
+      translate([bw/2-32,-0.1,5]) cube([64,1.4,12]);
       // drain holes through the floor (fridge condensation can't pool)
       for(jx=[0:3]) for(jy=[0:5])
         translate([dwall+18+jx*(bw-2*dwall-36)/3, dwall+18+jy*(bd-2*dwall-36)/5, -1])
@@ -128,15 +147,15 @@ module vzone(bore, x0,y0,x1,y1){
 }
 
 module vial_tray(bw,bd,bh){
-  // TWO PLATES bonded to all 4 walls, with TWO zones: front = 3 mL, back = 10 mL
-  ysplit = dwall + (bd-2*dwall)*vial_split;
+  // TWO PLATES bonded to all 4 walls, split LENGTHWAYS: left = 3 mL, right = 10 mL
+  xsplit = dwall + (bw-2*dwall)*vial_split;
   color("#6f8fe6") difference(){
     union(){
       translate([dwall,dwall,dfloor]) cube([bw-2*dwall, bd-2*dwall, bot_th]);   // bottom plate
       translate([dwall,dwall,topz_v]) cube([bw-2*dwall, bd-2*dwall, top_th]);   // top plate
     }
-    vzone(v3_d+vial_clr,   dwall, dwall,  bw-dwall, ysplit);     // 3 mL field (front)
-    vzone(vial_d+vial_clr, dwall, ysplit, bw-dwall, bd-dwall);   // 10 mL field (back)
+    vzone(v3_d+vial_clr,   dwall,  dwall, xsplit,   bd-dwall);   // 3 mL field (left)
+    vzone(vial_d+vial_clr, xsplit, dwall, bw-dwall, bd-dwall);   // 10 mL field (right)
   }
 }
 module pen_tray(bw,bd,bh){
