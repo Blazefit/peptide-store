@@ -262,3 +262,20 @@ so they won't roll perfectly straight — gentle slope + end-wall guidance mitig
 Also staged d06_lib.scad (vertical standing rack, 4 pens, 3.5x6.6in envelope) but
 parked pending Jason's go-ahead.
 >>>>>>> aa7b7da (Add sk2_chute (gravity-feed magazine, sketch option #2); stage d06_lib)
+
+## Iteration 16 (2026-06-05) — standing TRAY (gravity removed) + 15 tuning passes
+Jason: keep sk2's look but drop the gravity feature, make it a standing tray, and
+fix back fall-out. New tray_lib.scad (standtray). 15 fine-tuning passes, verified
+each (dims, watertight, single-piece, overhang):
+ 1 base+lanes -> caught a 2-piece bug (front groove carved the lip into a floater)
+ 2 yfront=14 (pen sits behind the lip)        3 clear 0.5 (easier drop-in)
+ 4 ang 30 (display+stability)                 5 pitch tuning
+ 6 dial pocket held off end wall              7 DROP dial relief -> 1 clean piece
+   (dial relief was isolating an end-wall nub; not needed on an open-top tray)
+ 8 lip_h 6 (front lip above pen center)        9 back_h 11 (back wall to pen top)
+ 10 P=22 (~1mm divider ridge / lanes)         11 base 3.5 (sturdy flat bottom)
+ 12 finger scoops per lane                     13 corner chamfers
+ 14 stability: CG z=18.7mm, tip-forward 71deg / tip-back 60deg (very stable)
+ 15 final verify + export.
+FINAL standtray: 6.75 x 3.41 x 2.60 in, ONE piece, watertight, overhang 0.000,
+back wall stops back fall-out, front lip + end walls retain, open top to load.
