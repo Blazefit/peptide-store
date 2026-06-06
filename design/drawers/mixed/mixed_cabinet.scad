@@ -19,8 +19,9 @@ v3_d=17.4; v3_h=40;                           // 3 mL vial  -> hole Ø19.0 (matc
 vial_split=0.68;                             // LEFT fraction for 3 mL (~70/30 -> 2 clean 10 mL cols)
 pen_d=19; pen_len=150; pen_clr=1.6;          // -> cradle Ø20.6, lane >=156
 
-/* LIGHT mode — thinner walls + opened-up frame for cheaper printing */
+/* LIGHT mode — thinner walls + opened-up internal frame for cheaper printing */
 light=true;
+vent=false;   // solid back for privacy (set true for a rear airflow vent)
 
 /* drawer slide */
 run_clr=0.5;                  // body-to-wall side gap
@@ -63,16 +64,16 @@ module frame(){
     // fridge condensation drain holes through the bottom of each bay
     for(c=[0,1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:5])
       translate([colL(c)+25+jx*42, 40+jy*52, -1]) cylinder(h=shelf+2, d=5);
-    // LIGHT: open up every horizontal slab (shelves/top/bottom) -> perimeter frame
-    // + a centre cross-rib. Drawers ride on the SIDE grooves, so slabs aren't load-bearing.
-    if(light) for(c=[0,1]) for(i=[0:len(bays)]) {
+    // LIGHT: open up the INTERNAL shelves + bottom only (hidden) -> saves material.
+    // TOP stays solid for privacy; i goes 0..len-1 so the top slab is untouched.
+    if(light) for(c=[0,1]) for(i=[0:len(bays)-1]) {
       zlo=zb(i)-shelf; m=9;
       for(half=[0,1])
         translate([colL(c)+m, half==0 ? m : (D-backw)/2+5, zlo-1])
           cube([colw-2*m, (D-backw)/2 - m - 7, shelf+2]);
     }
-    // back vent (bigger in light mode)
-    translate([W/2-(light?170:120), D-backw-0.1, 14]) cube([light?340:240, backw+1, H-30]);
+    // optional back vent (OFF by default -> solid back for privacy)
+    if(vent) translate([W/2-120, D-backw-0.1, 14]) cube([240, backw+1, H-30]);
   }
   // front anti-pull-out stops (small lip at the front top of each groove)
   color("#9aa3b2") for(c=[0,1]) for(i=[0:len(bays)-1]){
