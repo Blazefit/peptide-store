@@ -102,9 +102,24 @@ module body() {
             // relief pocket so the detent leaf-spring can flex into the right upright
             if (detent_on)
                 translate([det_xl-0.1, -6, det_nz-6]) cube([5, 12, 32]);
+            // i1: front finger scoops flanking the handle — pinch the dropped pen out
+            if (finger_scoop)
+                for (sx=[-1,1])
+                    translate([sx*(hw/2+16), F-7, tray_lip+2]) rotate([-90,0,0])
+                        cylinder(h=W+10, r=9);
         }
         if (detent_on)  detent_spring();
         if (cushion_on) cushion_fingers();
+        // i4: raised arrows on the uprights pointing to the dispense (front) side
+        if (sel_pointer)
+            for (sx=[-1,1])
+                translate([sx*upright_x, F-12, upright_top_z])
+                    linear_extrude(1.6) polygon([[-5,0],[5,0],[0,9]]);
+        // i5: bearing keeper bumps — snap the drum in; lift out with a firm pull
+        if (bearing_keep)
+            for (sx=[-1,1]) for (sy=[-1,1])
+                translate([sx*upright_x, sy*(stub_d/2+bearing_gap), axle_z+3])
+                    sphere(r=1.3);
     }
 }
 

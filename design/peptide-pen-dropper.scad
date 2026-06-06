@@ -43,7 +43,7 @@ shutter_gap   = 0.6;    // [0.3:0.1:1] slide clearance
 shutter_travel= 30;     // [18:1:45]  how far it slides to open
 
 /* [Catch tray] */
-tray_lip      = 20;     // [10:1:30]
+tray_lip      = 24;     // [10:1:30]  taller than the pen so it can't roll out
 drop_clear    = 30;     // [12:1:45]  headroom: pen drop + handle clears the catch
 cushion_on    = true;   // springy fingers at the landing zone
 
@@ -56,6 +56,20 @@ detent_t      = 1.8;    // [1:0.1:3]
 part = "assembled";     // [drum, body, shutter, assembled, exploded, section]
 show_pen = true;
 shutter_state = "closed";  // [closed, open]
+
+/* [Refinements] (added over the iteration passes) */
+finger_scoop = true;    // i1  front scoop to pinch the pen out
+thumbwheel   = true;    // i2  spin grip on one drum end
+chamber_nums = true;    // i3  numbers on the drum face
+sel_pointer  = true;    // i4  "drop station" pointer on the body
+bearing_keep = true;    // i5  lips that keep the drum seated
+shutter_lock = true;    // i6  closed click + open hard-stop
+hub_light    = true;    // i7  lighten the drum hub
+label_panel  = true;    // i9  recessed label area on the front
+feet_on      = true;    // i10 recessed non-slip feet
+round_edges  = true;    // i11 chamfer the handled edges
+lid_on       = false;   // i12 optional clip-on dust lid (extra part)
+wallmount    = false;   // i13 optional keyhole slots on the back
 
 $fn = 80;
 
@@ -81,6 +95,9 @@ tray_back_y  = drum_r + 6;
 upright_top_z= axle_z + stub_d/2 + bearing_gap + 4;
 det_dr       = drum_r - 7;
 det_nz       = axle_z - det_dr;
+tw_reach     = upright_gap + upright_th + 4;            // +Z stub length with wheel
+tw_r         = round(drum_r*0.66);                      // thumbwheel radius
+tw_th        = 8;
 
 // =============================================================================
 //  DRUM  (built on its axis = Z; integral axle stubs at both ends)
@@ -96,10 +113,28 @@ module drum() {
             if (detent_on)
                 for (i = [0:num_chambers-1]) rotate([0,0,ch_ang(i)])
                     translate([det_dr, 0, drum_len]) sphere(r = detent_nub + 0.4);
+            // i3: engraved chamber numbers on the -Z end face
+            if (chamber_nums)
+                for (i = [0:num_chambers-1])
+                    rotate([0,0,ch_ang(i)]) translate([drum_r-13, 0, -0.01])
+                        rotate([0,0,-ch_ang(i)+90]) mirror([1,0,0])
+                            linear_extrude(height = 1.4)
+                                text(str(i+1), size=8, halign="center", valign="center");
         }
-        // integral axle stubs
+        // integral axle stubs (the +Z one runs through to a thumbwheel)
+        sl_pos = thumbwheel ? tw_reach : stub_len;
         translate([0,0,-stub_len+0.01]) cylinder(h = stub_len, r = stub_d/2);
-        translate([0,0,drum_len-0.01])   cylinder(h = stub_len, r = stub_d/2);
+        translate([0,0,drum_len-0.01])  cylinder(h = sl_pos, r = stub_d/2);
+        // i2: thumbwheel spin grip, just outside the +X upright
+        if (thumbwheel) translate([0,0,drum_len+sl_pos-3]) thumb_wheel();
+    }
+}
+
+module thumb_wheel() {
+    difference() {
+        cylinder(h = tw_th, r = tw_r);
+        for (i = [0:11]) rotate([0,0,i*30])
+            translate([tw_r, 0, -1]) cylinder(h = tw_th+2, r = 2.4);   // grip scallops
     }
 }
 
