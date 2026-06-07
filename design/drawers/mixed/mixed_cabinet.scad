@@ -9,7 +9,7 @@ mode = "open";
 /* envelope */
 cols=1;                        // number of drawer columns (1 = half-size, one of each)
 colw=180.5;                    // column interior width (keeps the drawers the same size)
-D=372; H=136;                  // depth x height (~14.6 x 5.35 in)
+D=186; H=136;                  // depth x height — HALF depth (was 372); set 372 for full
 ow=4;                          // outer wall
 cw=6;                          // centre divider (only used when cols>1)
 W=2*ow + cols*colw + (cols-1)*cw;   // width follows the column count
@@ -47,6 +47,8 @@ function zb(i)= i<=0 ? shelf : zb(i-1)+bays[i-1][0]+shelf;
 ntot = H;                     // (echo check)
 function colL(c)= ow + c*(colw+cw);   // left inner face of column c (0,1)
 function colR(c)= colL(c)+colw;
+stop_y = 6 + round((D-backw-8)*0.34);  // travel-stop position scales with depth (~2/3 pull)
+dny    = max(1, floor((D-backw-50)/52)); // drain rows that fit the (possibly halved) depth
 
 // ---------------------------------------------------------------- FRAME
 module frame(){
@@ -64,7 +66,7 @@ module frame(){
       translate([colR(c)-0.1, 6, gz]) cube([gdep+0.1, D-backw-6, ghei]);
     }
     // fridge condensation drain holes through the bottom of each bay
-    for(c=[0:cols-1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:5])
+    for(c=[0:cols-1]) for(i=[0:len(bays)-1]) for(jx=[0:3]) for(jy=[0:dny])
       translate([colL(c)+25+jx*42, 40+jy*52, -1]) cylinder(h=shelf+2, d=5);
     // LIGHT: open up the INTERNAL shelves + bottom only (hidden) -> saves material.
     // TOP stays solid for privacy; i goes 0..len-1 so the top slab is untouched.
@@ -83,7 +85,7 @@ module frame(){
   color("#9aa3b2") for(c=[0:cols-1]) for(i=[0:len(bays)-1]){
     gz=zb(i)+(bays[i][0]-ghei)/2;
     for(fx=[colL(c)-gdep, colR(c)])
-      translate([fx, 126, gz]) cube([gdep, 4, 0.8]);   // rides with 0.2 clearance, soft catch
+      translate([fx, stop_y, gz]) cube([gdep, 4, 0.8]);   // rides with 0.2 clearance, soft catch
   }
 }
 
