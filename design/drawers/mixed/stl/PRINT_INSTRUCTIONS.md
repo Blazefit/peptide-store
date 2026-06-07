@@ -79,3 +79,11 @@ Frame is now **one column** (≈188 × 372 × 136 mm), so print **one of each dr
 `frame_light` ×1, `drawer_vial_light` ×1, `drawer_pen_light` ×1, `drawer_supply_light` ×1.
 Frame drops to ~878 cm³ (was ~1655). Capacity: 80× 3 mL + 26× 10 mL vials, 14 pens,
 6 supply cells. (Set `cols=2` in the .scad to go back to the double-wide cabinet.)
+
+---
+## HALF-DEPTH version — current default
+Cabinet is now **≈188 × 186 × 136 mm** (~7.4 × 7.3 × 5.3 in). Pens still fit (they
+lie across the width). Print one of each: `frame_light` + `drawer_{vial,pen,supply}_light`.
+Material ≈ **1333 cm³** total (frame 518). Capacity: ~35× 3 mL + 12× 10 mL vials,
+6 pens, 6 supply cells. Fit verified (0.00 cm³ interference). Set `D=372` in the
+.scad for the full-depth cabinet.
