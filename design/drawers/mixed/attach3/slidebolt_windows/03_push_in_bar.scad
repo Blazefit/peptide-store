@@ -1,131 +1,130 @@
 // 03_push_in_bar.scad
-// Variant 3: Push-in bar (+Y direction) with captive T-slot rail and 3 front tongues
-// The entire actuator bar rides in a T-slot channel on top of the new tray
-// and is pushed INWARD (toward back, +Y). Tongues project forward (-Y) through
-// the front wall into the three front windows. Over-travel stop: shoulder on bar
-// hits end of channel.
+// Variant 3: Push-in bar with T-slot captive rail and 3 tongues.
+// Bar lives in a recessed T-slot channel on EXTERIOR of new tray front face.
+// Push bar +Y to lock (tongues enter windows). Pull back to unlock.
+// T-slot geometry provides captive rail without separate assembly.
+// Generous 14mm travel gives easy one-finger actuation.
+// Finger grip: wide tab at center front that sticks out at y<-20 (easy reach).
 //
-// Extra feature: a spring leaf flexure (simulated as detent) holds locked position.
-// Back side: 3 fixed posts for passive rear capture.
-// End hooks on x=0 and x=305 grip rim of top tray.
-//
-// lock=0: bar retracted toward front (y≈0), tongues behind front wall
-// lock=1: bar pushed in (+Y by TRAVEL), tongues protrude into windows
+// lock=0: bar retracted (tongues at y<0, top tray can lift straight up)
+// lock=1: bar pushed in (tongues at y=0..8, inside front windows)
 
 lock = 1;
 $fn = 48;
 
-// ── Tray dims ──────────────────────────────────────────────────────────────
 TW = 305; TD = 102; TH_NEW = 50; TH_TOP = 33; WALL = 3;
 TOP_BASE_Z = TH_NEW;
 
 WIN_W = 45; WIN_H = 16; WIN_Z_CTR = 64;
-WIN_Z_BOT = WIN_Z_CTR - WIN_H/2;   // 56
-WIN_Z_TOP = WIN_Z_CTR + WIN_H/2;   // 72
+WIN_Z_BOT = WIN_Z_CTR - WIN_H/2;
 WIN_XS = [TW*1/4, TW*2/4, TW*3/4];
 
-// ── Mechanism dims ─────────────────────────────────────────────────────────
-TONGUE_W = 28;  TONGUE_H = 10;
-// In LOCKED state tongue front face should reach y ≈ 0 (inside window opening)
-// Tongue extends from bar's y_front backward.  Bar body starts at WALL.
-// When bar at y_offset=TRAVEL, tongue_front = WALL + TRAVEL - TONGUE_REACH
-// We want tongue_front < 3 (into window), so TONGUE_REACH = WALL + TRAVEL - 1
+TONGUE_W = 30; TONGUE_H = 10; CL = 1.2;
 
-TRAVEL = 11;          // push bar +Y this far
-TONGUE_REACH = WALL + TRAVEL - 1; // tongue length in −Y so tip at WALL+TRAVEL-TONGUE_REACH=1
+// T-slot channel on exterior of new tray front face
+// Bar body rides in this channel at correct window height
+BAR_W    = TW - 2*WALL - 6;
+BAR_H    = WIN_H + 4;     // Z
+BAR_D    = 16;            // Y exterior depth (bigger = easier to hold)
+BAR_Z0   = WIN_Z_BOT - 2;
 
-// Bar body
-BAR_W = TW - 2*WALL - 8;
-BAR_H = TONGUE_H + 4;
-BAR_D = 18;  // Y span of bar body itself
+// T-slot dimensions
+TS_STEM_W  = BAR_W;          // X width of stem
+TS_STEM_H  = BAR_H;          // Z
+TS_STEM_D  = BAR_D;          // Y depth of main channel
+TS_FLANGE  = 3;              // Z flange on top and bottom of T
+TS_FL_Y    = 4;              // Y depth of T flange
 
-// T-slot channel cut into new tray top surface
-TS_W   = BAR_W + 1.2;  // X slot width (bar fits loosely)
-TS_H   = BAR_H + 1.2;  // Z slot height
-TS_D   = BAR_D + TRAVEL + 4; // Y slot depth
-TS_X0  = WALL + 4;
-TS_Z0  = TH_NEW - TS_H - 0.5;
+// Travel
+TONGUE_REACH  = 10;  // tongue sticks out -Y from bar face
+TONGUE_ENGAGE = 8;   // how deep tongue goes into window when locked
+TRAVEL        = TONGUE_REACH + TONGUE_ENGAGE;  // 18mm
 
-// Finger tab on front face of bar, projecting out at y=-6 area
-TAB_W = 30; TAB_D = 7; TAB_H = 8;
+// Finger tab
+TAB_W = 50; TAB_H = 12; TAB_D = 10;
 
-// Detent nub + groove
-DET_R = 1.8;
+// Detent
+DET_R = 2.2;
 
 // Rear posts
-POST_W = 28; POST_H = 14; POST_D = 5;
+RPOST_W = 28; RPOST_H = 14; RPOST_D = WALL;
 
-// Colors
-COL_NEW  = "#1565C0";
-COL_TOP  = "#90A4AE";
-COL_BOLT = "#C62828";
+// End hooks
+LIP_T = WALL; LIP_W = 28; LIP_H = 8;
+
+COL_NEW  = "#1565C0"; COL_TOP = "#90A4AE"; COL_BOLT = "#C62828";
 
 module new_tray() {
-    color(COL_NEW)
-    union() {
+    color(COL_NEW) union() {
         difference() {
             cube([TW, TD, TH_NEW]);
             translate([WALL, WALL, WALL])
                 cube([TW-2*WALL, TD-2*WALL, TH_NEW-WALL+0.1]);
-            // T-slot channel in front region of top surface
-            translate([TS_X0, WALL - 0.1, TS_Z0])
-                cube([TS_W, TS_D + 0.1, TS_H]);
-            // front opening slot so tongue can poke through front wall
+            // tongue slots in front wall
             for (wx = WIN_XS)
-                translate([wx - TONGUE_W/2 - 0.5, -0.1, WIN_Z_BOT + 1.5])
-                    cube([TONGUE_W+1, WALL + 0.2, TONGUE_H]);
-            // detent groove – locked
-            translate([TW/2, TS_D - TRAVEL - DET_R, TH_NEW - 1])
+                translate([wx - TONGUE_W/2 - CL, -0.1, WIN_Z_BOT + CL])
+                    cube([TONGUE_W + 2*CL, WALL + 0.2, TONGUE_H]);
+            // T-slot stem pocket (on exterior front face)
+            translate([WALL+3, -TS_STEM_D - 0.5, BAR_Z0 - 0.5])
+                cube([TS_STEM_W - 2, TS_STEM_D, TS_STEM_H + 1]);
+            // detent sockets
+            translate([TW/2, -TS_STEM_D/2 - 0.5, BAR_Z0 + BAR_H/2 + 2])
                 sphere(r=DET_R);
-            // detent groove – unlocked
-            translate([TW/2, TS_D - TRAVEL - DET_R - TRAVEL, TH_NEW - 1])
+            translate([TW/2, -TS_STEM_D/2 - 0.5 - TRAVEL, BAR_Z0 + BAR_H/2 + 2])
                 sphere(r=DET_R);
         }
 
-        // Rear capture posts (passive, within footprint)
-        for (wx = WIN_XS)
-            translate([wx - POST_W/2, TD - WALL - POST_D, TH_NEW])
-                cube([POST_W, POST_D, POST_H]);
+        // T-slot flange rails (top and bottom, captive)
+        translate([WALL+3, -TS_STEM_D - TS_FL_Y - 0.5, BAR_Z0 + BAR_H])
+            cube([TS_STEM_W - 2, TS_FL_Y, TS_FLANGE]);
+        translate([WALL+3, -TS_STEM_D - TS_FL_Y - 0.5, BAR_Z0 - TS_FLANGE])
+            cube([TS_STEM_W - 2, TS_FL_Y, TS_FLANGE]);
 
-        // End hooks on short sides
-        translate([0,      TD/2 - 12, TH_NEW]) cube([WALL, 24, 10]);
-        translate([TW-WALL, TD/2 - 12, TH_NEW]) cube([WALL, 24, 10]);
+        // End stops (prevent bar from sliding out x-direction)
+        translate([WALL + 1, -TS_STEM_D - TS_FL_Y - 0.5, BAR_Z0 - TS_FLANGE])
+            cube([2, TS_FL_Y, TS_STEM_H + 2*TS_FLANGE]);
+        translate([TW - WALL - 3, -TS_STEM_D - TS_FL_Y - 0.5, BAR_Z0 - TS_FLANGE])
+            cube([2, TS_FL_Y, TS_STEM_H + 2*TS_FLANGE]);
+
+        // Rear capture posts
+        for (wx = WIN_XS)
+            translate([wx - RPOST_W/2, TD - WALL - RPOST_D, TOP_BASE_Z])
+                cube([RPOST_W, RPOST_D, RPOST_H]);
+
+        // End rim-lip hooks
+        translate([0, TD/2 - LIP_W/2, TOP_BASE_Z])
+            cube([LIP_T, LIP_W, LIP_H]);
+        translate([TW - LIP_T, TD/2 - LIP_W/2, TOP_BASE_Z])
+            cube([LIP_T, LIP_W, LIP_H]);
     }
 }
 
 module top_tray() {
-    color(COL_TOP)
-    translate([0, 0, TOP_BASE_Z])
-    difference() {
+    color(COL_TOP) translate([0, 0, TOP_BASE_Z]) difference() {
         cube([TW, TD, TH_TOP]);
-        translate([WALL, WALL, WALL])
-            cube([TW-2*WALL, TD-2*WALL, TH_TOP]);
+        translate([WALL, WALL, WALL]) cube([TW-2*WALL, TD-2*WALL, TH_TOP]);
         for (wx = WIN_XS)
-            translate([wx - WIN_W/2, -0.1, WIN_Z_BOT - TOP_BASE_Z])
-                cube([WIN_W, WALL+0.2, WIN_H]);
+            translate([wx-WIN_W/2, -0.1, WIN_Z_BOT-TOP_BASE_Z]) cube([WIN_W, WALL+0.2, WIN_H]);
         for (wx = WIN_XS)
-            translate([wx - WIN_W/2, TD-WALL-0.1, WIN_Z_BOT - TOP_BASE_Z])
-                cube([WIN_W, WALL+0.2, WIN_H]);
+            translate([wx-WIN_W/2, TD-WALL-0.1, WIN_Z_BOT-TOP_BASE_Z]) cube([WIN_W, WALL+0.2, WIN_H]);
     }
 }
 
 module push_bar(off_y) {
-    // off_y = 0 → retracted, TRAVEL → locked
-    color(COL_BOLT)
-    translate([0, off_y, 0]) {
-        // bar body inside channel
-        translate([TS_X0 + 0.6, WALL, TS_Z0 + 0.6])
-            cube([TS_W - 1.2, BAR_D, TS_H - 1.2]);
-        // tongues – extend from bar front face toward −Y through front wall
+    color(COL_BOLT) translate([0, off_y, 0]) {
+        // bar body in T-slot
+        translate([WALL+3 + 0.6, -TS_STEM_D, BAR_Z0])
+            cube([TS_STEM_W - 3.2, TS_STEM_D - 0.5, BAR_H]);
+        // tongues
         for (wx = WIN_XS)
-            translate([wx - TONGUE_W/2, WALL - TONGUE_REACH, WIN_Z_BOT + 3])
-                cube([TONGUE_W, TONGUE_REACH, TONGUE_H]);
-        // finger tab sticking out at front face
-        translate([TW/2 - TAB_W/2, WALL - TONGUE_REACH - TAB_D, WIN_Z_BOT + 3])
+            translate([wx - TONGUE_W/2, -TONGUE_REACH, WIN_Z_BOT + CL])
+                cube([TONGUE_W, TONGUE_REACH + TONGUE_ENGAGE + WALL, TONGUE_H]);
+        // wide finger tab at center (extends far forward for easy push)
+        translate([TW/2 - TAB_W/2, -TS_STEM_D - TAB_D, BAR_Z0 + 2])
             cube([TAB_W, TAB_D, TAB_H]);
         // detent nub
-        translate([TW/2, TS_D - TRAVEL - DET_R + WALL, TH_NEW - 1])
-            sphere(r=DET_R * 0.8);
+        translate([TW/2, -TS_STEM_D/2, BAR_Z0 + BAR_H/2 + 2])
+            sphere(r=DET_R * 0.82);
     }
 }
 

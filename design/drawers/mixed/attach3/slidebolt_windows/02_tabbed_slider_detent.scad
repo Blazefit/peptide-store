@@ -1,120 +1,133 @@
 // 02_tabbed_slider_detent.scad
-// Variant 2: Tabbed slider with strong spring-detent and captive end-stops
-// The bar slides in X (left-right). In the LOCKED position the bar is shifted
-// left so that the 3 tongue tabs (which are part of the bar) align with the
-// front windows and project into them.  In UNLOCKED position the tongues are
-// offset sideways so they clear the windows completely.
+// Variant 2: X-sliding bar with strong detent – bar shifts LEFT/RIGHT to align tongues with windows.
+// Housing on exterior of new tray front face (y<0). Bar slides in X direction.
+// UNLOCKED: bar shifted so tongues are BETWEEN windows (not aligned → no collision on drop).
+// LOCKED: bar shifted back, tongues centered on window X positions.
+// Then bar also moves +Y by small ENGAGE amount to seat tongues into windows.
+// Separate detent holds each position.
 //
-// This gives a truly captive, captive slider with hard end-stops machined
-// into the channel, and a deep detent ball/groove for positive lock feel.
+// Benefit: can be operated end-on from the short ends (x=0 or x=305 face).
+// Rear: 3 fixed capture posts inside footprint.
 //
-// lock=0: slider centered, tongues mis-aligned with windows → clear
-// lock=1: slider shifted -X by SHIFT, tongues inside windows
+// lock=0: bar shifted right (unlocked, tongues between windows)
+// lock=1: bar centered (locked, tongues in windows)
 
-lock = 1; // 0=unlocked, 1=locked
+lock = 1;
 $fn = 48;
 
-// ── Tray dims ──────────────────────────────────────────────────────────────
 TW = 305; TD = 102; TH_NEW = 50; TH_TOP = 33; WALL = 3;
 TOP_BASE_Z = TH_NEW;
 
 WIN_W = 45; WIN_H = 16; WIN_Z_CTR = 64;
-WIN_Z_BOT = WIN_Z_CTR - WIN_H/2;
-WIN_XS = [TW*1/4, TW*2/4, TW*3/4];
+WIN_Z_BOT = WIN_Z_CTR - WIN_H/2;   // 56
+WIN_Z_TOP = WIN_Z_CTR + WIN_H/2;   // 72
+WIN_XS = [TW*1/4, TW*2/4, TW*3/4]; // 76.25, 152.5, 228.75
 
-// ── Slider geometry ────────────────────────────────────────────────────────
-TONGUE_W = 28;   TONGUE_H = 10;   TONGUE_L = 10; // tongue dims (Y=into window)
-SHIFT = (WIN_W - TONGUE_W)/2 - 1; // ~8 mm lateral shift to unlock
+TONGUE_W = 30; TONGUE_H = 10; CL = 1.2;
 
-// Bar sliding in X inside front pocket
-BAR_RAIL_W = TW - 2*WALL - 4;  // channel x range
-BAR_H = TONGUE_H + 4;
-BAR_D = 14;       // Y
-BAR_X0 = WALL + 2; // channel start X
+// Lateral shift to unlock: move tongues between windows
+// Gap between adjacent windows: (WIN_XS[1]-WIN_XS[0]) - WIN_W = 76.25 - 45 = 31.25mm
+// Shift by half gap (15.6mm) centers tongues in the gap between windows
+SHIFT = 22;   // X shift to unlock (tongue lands between windows, fully on solid wall)
 
-// Vertical position: bar rides inside a slot on top of new tray front area
-CH_H  = BAR_H + 1.5;
-CH_Z0 = TH_NEW - CH_H - 0.5;  // channel floor
+// Bar body
+BAR_W = TW + 2*SHIFT;   // wider to slide without exposing ends
+BAR_H = WIN_H + 6;
+BAR_Z0 = WIN_Z_BOT - 3;
+BAR_D = 12;    // Y exterior depth
 
-// Detent groove positions: two grooves in channel bottom
-DET_R = 1.8;
+// Tongue height in window
+TONGUE_ENGAGE = 5;  // Y penetration into window when locked
 
-// Rear capture posts (passive)
-POST_W = 30; POST_H = 14; POST_D = 5;
+// Housing flanges
+HSG_X0 = -SHIFT; HSG_XLEN = TW + 2*SHIFT;
 
-// Colors
+// Detent
+DET_R = 2.0;
+
+// Rear posts
+RPOST_W = 28; RPOST_H = 14; RPOST_D = WALL;
+
+// End hooks
+LIP_T = WALL; LIP_W = 28; LIP_H = 8;
+
 COL_NEW  = "#1565C0";
 COL_TOP  = "#90A4AE";
 COL_BOLT = "#F9A825";
 
 module new_tray() {
-    color(COL_NEW)
-    union() {
+    color(COL_NEW) union() {
         difference() {
             cube([TW, TD, TH_NEW]);
             translate([WALL, WALL, WALL])
                 cube([TW-2*WALL, TD-2*WALL, TH_NEW-WALL+0.1]);
-            // front bar channel (open at y=0)
-            translate([BAR_X0 - 0.1, -0.1, CH_Z0])
-                cube([BAR_RAIL_W + 0.2, BAR_D + SHIFT + 3, CH_H]);
-            // end-stop notches (bar can't slide past)
-            translate([BAR_X0 - 2, -0.1, CH_Z0])
-                cube([2, BAR_D + SHIFT + 3, CH_H]);
-            translate([BAR_X0 + BAR_RAIL_W, -0.1, CH_Z0])
-                cube([2, BAR_D + SHIFT + 3, CH_H]);
-            // detent socket – locked (bar shifted -X)
-            translate([TW/2 - SHIFT, BAR_D - 2, TH_NEW - 1.5])
-                sphere(r=DET_R);
-            // detent socket – unlocked
-            translate([TW/2, BAR_D - 2, TH_NEW - 1.5])
+            // tongue pass-through slots in front wall (window positions)
+            for (wx = WIN_XS)
+                translate([wx - TONGUE_W/2 - CL, -0.1, WIN_Z_BOT + CL])
+                    cube([TONGUE_W + 2*CL, WALL + 0.2, TONGUE_H]);
+            // channel for bar rail on exterior (pocket in front face exterior region)
+            translate([0, -BAR_D - 1, BAR_Z0 - 1])
+                cube([TW, BAR_D + 0.5, BAR_H + 2]);
+            // detent sockets in locked and unlocked positions
+            translate([TW/2, -BAR_D/2, BAR_Z0 + BAR_H/2])
                 sphere(r=DET_R);
         }
-        // rear capture posts
+
+        // Housing top and bottom flanges (keep bar captive in Z)
+        translate([0, -BAR_D - 1.5, BAR_Z0 + BAR_H + 1])
+            cube([TW, BAR_D + 0.5, WALL]);
+        translate([0, -BAR_D - 1.5, BAR_Z0 - WALL])
+            cube([TW, BAR_D + 0.5, WALL]);
+
+        // Rear capture posts
         for (wx = WIN_XS)
-            translate([wx - POST_W/2, TD - WALL - POST_D, TH_NEW])
-                cube([POST_W, POST_D, POST_H]);
+            translate([wx - RPOST_W/2, TD - WALL - RPOST_D, TOP_BASE_Z])
+                cube([RPOST_W, RPOST_D, RPOST_H]);
+
+        // End rim-lip hooks
+        translate([0, TD/2 - LIP_W/2, TOP_BASE_Z])
+            cube([LIP_T, LIP_W, LIP_H]);
+        translate([TW - LIP_T, TD/2 - LIP_W/2, TOP_BASE_Z])
+            cube([LIP_T, LIP_W, LIP_H]);
     }
 }
 
 module top_tray() {
-    color(COL_TOP)
-    translate([0, 0, TOP_BASE_Z])
-    difference() {
+    color(COL_TOP) translate([0, 0, TOP_BASE_Z]) difference() {
         cube([TW, TD, TH_TOP]);
-        translate([WALL, WALL, WALL])
-            cube([TW-2*WALL, TD-2*WALL, TH_TOP]);
+        translate([WALL, WALL, WALL]) cube([TW-2*WALL, TD-2*WALL, TH_TOP]);
         for (wx = WIN_XS)
-            translate([wx - WIN_W/2, -0.1, WIN_Z_BOT - TOP_BASE_Z])
+            translate([wx-WIN_W/2, -0.1, WIN_Z_BOT-TOP_BASE_Z])
                 cube([WIN_W, WALL+0.2, WIN_H]);
         for (wx = WIN_XS)
-            translate([wx - WIN_W/2, TD-WALL-0.1, WIN_Z_BOT - TOP_BASE_Z])
+            translate([wx-WIN_W/2, TD-WALL-0.1, WIN_Z_BOT-TOP_BASE_Z])
                 cube([WIN_W, WALL+0.2, WIN_H]);
     }
 }
 
-module slide_bar(shift_x) {
-    // shift_x: 0=unlocked (tongues beside windows), -SHIFT=locked (tongues in windows)
+module slide_bar_x(shift_x) {
+    // shift_x = 0 → locked (tongues on windows), SHIFT → unlocked (tongues between windows)
     color(COL_BOLT)
     translate([shift_x, 0, 0]) {
-        // bar body
-        translate([BAR_X0, WALL, CH_Z0 + 0.75])
-            cube([BAR_RAIL_W, BAR_D, BAR_H - 1.5]);
-        // tongues project forward through front face
+        // bar body exterior
+        translate([0, -BAR_D - 0.5, BAR_Z0])
+            cube([TW, BAR_D, BAR_H]);
+        // 3 tongues pointing +Y at correct Z
         for (wx = WIN_XS)
-            translate([wx - TONGUE_W/2, WALL - TONGUE_L, WIN_Z_BOT + 3])
-                cube([TONGUE_W, TONGUE_L, TONGUE_H]);
-        // finger tab protruding from right end at front
-        translate([BAR_X0 + BAR_RAIL_W, WALL, CH_Z0 + 1])
-            cube([10, 12, BAR_H - 2]);
+            translate([wx - TONGUE_W/2, -TONGUE_ENGAGE - WALL, WIN_Z_BOT + CL])
+                cube([TONGUE_W, TONGUE_ENGAGE + WALL, TONGUE_H]);
+        // end-pull tab (right end, accessible from x=305 face)
+        translate([TW + 2, -BAR_D/2 - 6, BAR_Z0 + 2])
+            cube([8, 12, BAR_H - 4]);
         // detent nub
-        translate([TW/2, BAR_D - 2 + WALL, TH_NEW - 1.5])
-            sphere(r=DET_R * 0.75);
+        translate([TW/2, -BAR_D/2 - 0.5, BAR_Z0 + BAR_H/2])
+            sphere(r=DET_R * 0.82);
     }
 }
 
 // ── Assembly ───────────────────────────────────────────────────────────────
-bar_shift = (lock == 1) ? -SHIFT : 0;
+bar_shift = (lock == 1) ? 0 : SHIFT;
 
 new_tray();
 top_tray();
-slide_bar(bar_shift);
+slide_bar_x(bar_shift);
