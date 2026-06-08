@@ -86,50 +86,34 @@ module c_jaw(side, lock_state) {
     hook_z = lock_state==1 ? JAW_HOOK_Z_LOCK : JAW_HOOK_Z_UNLOCK;
     outer_z0 = hook_z - JAW_H_OUTER;   // outer flange bottom z
 
-    // Left jaw: outer flange at x = -(JAW_T+JAW_GAP)..-JAW_GAP
-    //           inner arm at x = END_WALL_T+JAW_GAP .. END_WALL_T+JAW_GAP+JAW_T
-    // Right jaw: mirror in X
+    // Jaw is built as a solid block then the gap (end-wall space) is subtracted
+    // X extents:
+    of_x0 = side==0 ? -(JAW_T+JAW_GAP) : NTX+JAW_GAP;   // outer face
+    ia_x1 = side==0 ? END_WALL_T+JAW_GAP+JAW_T : NTX-END_WALL_T-JAW_GAP; // inner face
+    full_xw = abs(ia_x1 - of_x0);
+    blk_x0 = min(of_x0, ia_x1 - full_xw);
 
-    // For left (side=0):
-    //   outer flange: x from -(JAW_T+JAW_GAP) to -JAW_GAP
-    //   connecting web (C-bottom): x from -(JAW_T+JAW_GAP) to END_WALL_T+JAW_GAP+JAW_T
-    //   inner arm: x from END_WALL_T+JAW_GAP to END_WALL_T+JAW_GAP+JAW_T
-    of_x0 = side==0 ? -(JAW_T+JAW_GAP) : NTX+JAW_GAP;
-    of_x1 = side==0 ? -JAW_GAP         : NTX+JAW_GAP+JAW_T;
-    ia_x0 = side==0 ? END_WALL_T+JAW_GAP         : NTX-END_WALL_T-JAW_GAP-JAW_T;
-    ia_x1 = side==0 ? END_WALL_T+JAW_GAP+JAW_T   : NTX-END_WALL_T-JAW_GAP;
-    // C-web x span
-    web_x0 = min(of_x0, ia_x0);
-    web_x1 = max(of_x1, ia_x1);
-    web_h  = 3;  // web height at bottom of C
+    // Gap: the space for the new tray end wall + clearance
+    gap_x0 = side==0 ? -JAW_GAP      : NTX - END_WALL_T - JAW_GAP;
+    gap_x1 = side==0 ?  END_WALL_T + JAW_GAP : NTX + JAW_GAP;
+    gap_h  = JAW_H_OUTER - 3;   // leave 3mm web at bottom
 
     color("#D84315")
     translate([0, JAW_Y0, 0])
-    union() {
-        // Outer flange (long, stays on outside of new tray end face)
-        translate([of_x0, 0, outer_z0])
-            cube([JAW_T, JAW_YW, JAW_H_OUTER]);
-
-        // C-web connecting outer flange to inner arm (at bottom)
-        translate([web_x0, 0, outer_z0])
-            cube([web_x1-web_x0, JAW_YW, web_h]);
-
-        // Inner arm (short, rises to hook over top tray end wall)
-        translate([ia_x0, 0, hook_z - JAW_H_INNER])
-            cube([JAW_T, JAW_YW, JAW_H_INNER]);
-
-        // Hook nose bridges gap over end wall top: x=0..END_WALL_T+(HOOK_DEPTH/2)
-        // This means for left (side=0): hook x from -(JAW_GAP) to END_WALL_T+JAW_GAP+JAW_T
-        //                 i.e. from ~-0.6 to ~7.6 covering x=0..3 (end wall top)
-        // For right (side=1): mirror — hook from NTX-END_WALL_T-JAW_GAP-JAW_T to NTX+JAW_GAP
-        hook_x0 = side==0 ? -JAW_GAP : NTX-END_WALL_T-JAW_GAP-JAW_T;
-        hook_x1 = side==0 ? END_WALL_T+JAW_GAP+JAW_T : NTX+JAW_GAP;
-        translate([hook_x0, 0, hook_z])
-            cube([hook_x1-hook_x0, JAW_YW, HOOK_H]);
-
-        // Thumb push tab on outer flange (finger grip to push jaw up)
-        translate([of_x0, JAW_YW/2-8, hook_z - 8])
-            cube([JAW_T + 6, 16, 8]);
+    difference() {
+        // Solid block for the C-jaw
+        translate([blk_x0, 0, outer_z0])
+            cube([full_xw, JAW_YW, JAW_H_OUTER + HOOK_H]);
+        // Cut the gap (space for end wall to slide in)
+        translate([gap_x0, -0.1, outer_z0 + 3])
+            cube([gap_x1-gap_x0, JAW_YW+0.2, gap_h]);
+        // Cut the top of inner arm away (leave only HOOK_H on top as hook nose)
+        // The inner arm: from x=END_WALL_T+JAW_GAP inward, only top HOOK_H stays
+        // trim inner arm to JAW_H_INNER tall (plus hook nose on top)
+        ia_trim_x0 = side==0 ? END_WALL_T+JAW_GAP : blk_x0;
+        ia_trim_x1 = side==0 ? blk_x0+full_xw : NTX-END_WALL_T-JAW_GAP;
+        translate([ia_trim_x0, -0.1, outer_z0+3])
+            cube([abs(ia_trim_x1-ia_trim_x0)+0.1, JAW_YW+0.2, JAW_H_OUTER - JAW_H_INNER - 3]);
     }
 }
 
