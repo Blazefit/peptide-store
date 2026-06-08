@@ -1,27 +1,23 @@
-// 02_discrete_cams.scad
-// FLIP-LEVER RIM CLAMP — Variant (b): THREE discrete front cam levers aligned
-// to the front windows + an end clamp at each SHORT END. NONE on back/door.
+// 05_ends_plus_center.scad
+// FLIP-LEVER RIM CLAMP — Minimalist 3-latch: ONE central FRONT cam lever +
+// one END clamp at each SHORT END. Three clamp points form a stable tripod
+// (front-center + two ends) that pins the rigid top tray down; the BACK/door
+// edge is held by the flush back guide wall + the tray's own corners.
+// NONE on back/door.
 //
-// Each front lever flips up-and-IN. Its cam lip reaches OVER the rim top (z>=83)
-// rather than into the window: the window is on the NEW tray wall (z56..72) and
-// is below the rim, so hooking the rim gives a positive downward clamp on the
-// rigid top tray. (Window entry would only catch the new tray's own wall, which
-// does not clamp the TOP tray — so we hook the rim. Justified.)
-//
-// Hinges: living-hinge web on FRONT outer wall, axis along X at z=44.
+// Living-hinge web on FRONT outer wall; end clamps on the END walls.
 include <common.scad>
-C_lever = "#EF6C00";
+C_lever = "#2E7D32";
 lock = 0;
 $fn = 48;
 
-hinge_z   = NH - 6;        // z=44
+hinge_z   = NH - 6;
 arm_len   = rim_top_z - hinge_z + 4;
-bar_t     = 3.0;
+bar_t     = 3.2;
 lhinge_t  = 0.6;
-lip_ext   = 5;
+lip_ext   = 6;
 lip_t     = 3.0;
-cam_w     = 40;
-windows_x = [76.25, 152.5, 228.75];
+cam_w     = 70;            // wide central lever
 
 ang_open   = -105;
 ang_locked = 6;
@@ -36,13 +32,13 @@ module front_cam(cx) {
         translate([0, 0, arm_len-lip_t]) cube([cam_w, lip_ext, lip_t]);
         translate([0, lip_ext, arm_len-lip_t])
             rotate([45,0,0]) translate([0,-1.2,-1.2]) cube([cam_w,1.7,1.7]);
-        translate([cam_w/2-8, -bar_t-5, 2]) cube([16,5,7]);
+        translate([cam_w/2-14, -bar_t-6, 2]) cube([28,6,8]);
     }
     color(C_lever)
     translate([cx-cam_w/2, 0, hinge_z-3]) cube([cam_w, lhinge_t, 3]);
 }
 
-end_w = 26;
+end_w = 34;
 module end_clamp(side) {
     xbase = side<0 ? lhinge_t : NW - lhinge_t;
     eang = lock ? 6 : -105;
@@ -54,13 +50,13 @@ module end_clamp(side) {
     union() {
         translate([sx<0 ? -bar_t:0, 0, 0]) cube([bar_t, end_w, arm_len]);
         translate([sx<0 ? -lip_ext:0, 0, arm_len-lip_t]) cube([lip_ext, end_w, lip_t]);
-        translate([sx<0 ? -bar_t-5:bar_t, end_w/2-3, 2]) cube([5,6,7]);
+        translate([sx<0 ? -bar_t-6:bar_t, end_w/2-4, 2]) cube([6,8,8]);
     }
 }
 
 new_tray();
 back_guide();
 top_tray();
-for (cx = windows_x) front_cam(cx);
+front_cam(NW/2);
 end_clamp(-1);
 end_clamp(1);

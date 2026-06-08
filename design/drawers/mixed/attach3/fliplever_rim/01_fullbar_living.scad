@@ -1,135 +1,99 @@
 // 01_fullbar_living.scad
-// FLIP-LEVER / CAM-LATCH RIM CLAMP — Variant 1
-// One full-length flip bar per long side, living hinge (thinned wall ~0.6mm).
-// Hinge root on new tray outer wall at z≈46 (4mm below top face).
-// Open (lock=0): bar lies outward/down at ~100° from vertical (below new tray rim).
-// Locked (lock=1): bar flips UP-AND-IN, cam lip hooks over top tray rim (z=83).
-// A small detent bump on the bar snaps into a pocket on the tray wall at locked pos.
-// TOP TRAY: FIXED REFERENCE — zero geometry added.
+// FLIP-LEVER RIM CLAMP — Variant (a): one FULL-LENGTH flip bar on the FRONT
+// (living hinge) + one end clamp at each SHORT END. NOTHING on the back/door.
 //
-// Usage: openscad -D 'lock=0' or -D 'lock=1'
-
-lock = 0;  // 0=open/folded-out, 1=closed/clamped
-
-// ── master dims ────────────────────────────────────────────────
-TW = 305;  TD = 102;  TH = 33;   // top tray (FIXED)
-NW = 305;  ND = 102;  NH = 50;   // new tray
-wall = 3;
-
-// rim geometry
-rim_top_z = NH + TH;  // = 83
-
-// ── bar geometry ───────────────────────────────────────────────
-bar_len   = 260;   // full-length bar along X (centered)
-bar_h     = 14;    // bar arm height (radial length from hinge)
-bar_t     = 3.0;   // bar arm thickness
-lhinge_t  = 0.6;   // living hinge thickness at root
-lip_ext   = 5;     // cam lip horizontal reach over rim (inward)
-lip_t     = 3.5;   // cam lip vertical thickness (hooks UNDER rim top)
-lip_ramp  = 2;     // chamfer on leading edge of lip
-
-// hinge pivot location on new tray outer wall
-hinge_z   = NH - 4;   // z=46, just below new tray top
-
-// clearance for top tray wall when bar is closed
-tray_wall_gap = 0.6;   // gap between bar inner face and top tray outer wall
-
-// open angle: bar tips outward-down from hinge (measured from +Z up axis, rotating outward)
-ang_open   = 100;   // 100° = bar lies below horizontal, out of the way
-ang_locked = -8;    // -8° = bar slightly past vertical inward → cam lip hooks over rim
-
-bar_ang = lock ? ang_locked : ang_open;
-
-// detent bump
-det_r = 1.2;
-det_h = 1.0;
-
-// ── colours ────────────────────────────────────────────────────
-C_new   = "#1565C0";
-C_top   = "#90A4AE";
-C_lever = "#EF6C00";
-
+// Hinge: living hinge (thinned 0.6mm web) at the bar root on the FRONT outer
+// wall, axis horizontal along X at z=44 (6mm below new-tray top, well below rim).
+// OPEN  (lock=0): bar folded DOWN-AND-OUT flat against front wall (-Y), low
+//                 profile, leaves the vertical drop path clear -> top lifts up.
+// LOCKED(lock=1): bar flips UP-AND-IN; cam lip reaches over the rim (z>=83)
+//                 and a wall detent holds it. End clamps swing in over the rim
+//                 corners.
+//
+// Render: -D 'lock=0' or -D 'lock=1'
+include <common.scad>
+C_lever = "#2E7D32";
+lock = 0;
 $fn = 48;
 
-// ── modules ────────────────────────────────────────────────────
-module new_tray() {
-    color(C_new)
-    difference() {
-        cube([NW, ND, NH]);
-        translate([wall, wall, wall])
-            cube([NW-2*wall, ND-2*wall, NH]);
-        // living-hinge thinned groove on front outer face (y=0 side)
-        // groove is a shallow slot at z=hinge_z to create a flex point
-        translate([(NW-bar_len)/2 - 2, -0.1, hinge_z - lhinge_t/2])
-            cube([bar_len + 4, wall - lhinge_t + 0.1, lhinge_t]);
-        // same on back face
-        translate([(NW-bar_len)/2 - 2, ND - wall + lhinge_t - 0.1, hinge_z - lhinge_t/2])
-            cube([bar_len + 4, wall - lhinge_t + 0.1, lhinge_t]);
-        // detent socket at locked position — front face
-        translate([NW/2, -0.1, hinge_z + bar_h - 2])
-            rotate([-90,0,0])
-            cylinder(r=det_r+0.15, h=det_h+0.1);
-        translate([NW/2, ND - wall + lhinge_t, hinge_z + bar_h - 2])
-            rotate([-90,0,0])
-            cylinder(r=det_r+0.15, h=det_h+0.1);
-    }
-}
+// ── front bar geometry ─────────────────────────────────────────
+hinge_z   = NH - 6;        // z=44 pivot, below rim
+bar_len   = 250;           // along X, centered
+bar_t     = 3.0;           // bar thickness (radial)
+arm_len   = rim_top_z - hinge_z + 4;   // reach from pivot up past rim = ~43
+lhinge_t  = 0.6;           // living hinge web
+lip_ext   = 5;             // cam lip inward reach over rim
+lip_t     = 3.0;           // lip thickness (sits at/above rim top)
 
-module top_tray() {
-    color(C_top)
-    translate([0, 0, NH])
-    difference() {
-        cube([TW, TD, TH]);
-        translate([wall, wall, 0])
-            cube([TW-2*wall, TD-2*wall, TH-wall]);
-    }
-}
+// Angle: bar measured about +X axis. 0 = pointing straight UP (+Z).
+// open: rotate -100deg so the arm lies down/out toward -Y (front, outward).
+// locked: rotate to ~+6deg so the arm leans slightly inward, lip over rim.
+ang_open   = -105;
+ang_locked = 6;
+bar_ang = lock ? ang_locked : ang_open;
 
-// One full-length flip bar.
-// Hinge root at local origin. Bar arm goes in +Z when angle=0.
-// lip curls inward (+Y for front, -Y for back).
-// inward_sign: +1 = toward +Y (back side), -1 = toward -Y (front side)
-module flip_bar(inward_sign) {
+// rotate about X at pivot. Front pivot sits at y = lhinge_t (just off wall).
+module front_flip_bar() {
     color(C_lever)
-    rotate([bar_ang * inward_sign, 0, 0])  // rotate about X axis
+    translate([(NW-bar_len)/2, lhinge_t, hinge_z])
+    rotate([bar_ang, 0, 0])
     union() {
-        // bar arm shaft
-        translate([0, 0, 0])
-            cube([bar_len, bar_t, bar_h]);
-        // cam lip at top — curls inward
-        translate([0, bar_t * (inward_sign > 0 ? 1 : -1) * 0 - (inward_sign > 0 ? 0 : lip_ext),
-                   bar_h - lip_t])
-            difference() {
-                cube([bar_len, lip_ext + bar_t, lip_t]);
-                // leading-edge chamfer on lip
-                translate([0, 0, lip_t])
-                    rotate([45, 0, 0])
-                    cube([bar_len, lip_ramp * 1.4, lip_ramp * 1.4]);
-            }
-        // detent bump at mid-length on the back face of bar (contacts tray wall when locked)
-        translate([bar_len/2 - det_r, 0, bar_h - 2 - det_r])
-            rotate([90, 0, 0])
-            cylinder(r=det_r, h=det_h);
-        // finger tab at far end
-        translate([bar_len - 18, bar_t, bar_h * 0.3])
-            cube([16, 6, bar_h * 0.5]);
+        // arm shaft (grows in +Z; thickness in -Y so lip curls toward +Y inward)
+        translate([0, -bar_t, 0]) cube([bar_len, bar_t, arm_len]);
+        // cam lip at top, curls INWARD (+Y) over the rim
+        translate([0, 0, arm_len - lip_t])
+            cube([bar_len, lip_ext, lip_t]);
+        // lead chamfer on lip underside
+        translate([0, lip_ext, arm_len - lip_t])
+            rotate([45,0,0]) translate([0,-1.2,-1.2]) cube([bar_len,1.7,1.7]);
+        // detent bump (back face of arm) that snaps to wall pocket when locked
+        translate([bar_len/2-6, -bar_t-0.8, arm_len*0.45])
+            rotate([0,90,0]) cylinder(r=1.1, h=12);
+        // finger tab projecting outward (-Y) at one end
+        translate([bar_len-26, -bar_t-5, 2]) cube([22, 5, 7]);
     }
 }
 
-// Front face flip bar: pivot at y=0, rotates outward in -Y direction when open
-module front_bar() {
-    translate([(NW - bar_len)/2, lhinge_t, hinge_z])
-        flip_bar(-1);
+// living-hinge web connecting bar root to front wall (drawn at rest, vertical)
+module front_hinge_web() {
+    color(C_lever)
+    translate([(NW-bar_len)/2, 0, hinge_z-3])
+        cube([bar_len, lhinge_t, 3]);
 }
 
-// Back face flip bar: pivot at y=ND, rotates outward in +Y direction when open
-module back_bar() {
-    translate([(NW - bar_len)/2, ND - lhinge_t - bar_t, hinge_z])
-        flip_bar(1);
+// ── END CLAMP (short ends x=0 and x=305) ───────────────────────
+// Pin/living-hinge lever on the END wall, axis horizontal along Y at z=44.
+// Swings up-and-over the rim CORNER. side = -1 (x=0 end) or +1 (x=305 end).
+end_arm_len = arm_len;
+end_w       = 26;          // width along Y
+module end_clamp(side) {
+    // place at x=0 (side -1) or x=305 (side +1); pivot just off the end face
+    xbase = side<0 ? lhinge_t : NW - lhinge_t;
+    // open: fold out along the end (away in X); locked: up-and-in over corner
+    eo = -105; el = 6;
+    eang = lock ? el : eo;
+    yoff = (ND-end_w)/2;
+    color(C_lever)
+    translate([xbase, yoff, hinge_z])
+    // rotate about Y axis; mirror for the +X end
+    rotate([0, side<0 ? -eang : eang, 0])
+    union() {
+        // arm grows +Z; thickness pushes outward in X then lip curls in
+        sx = side<0 ? 1 : -1;
+        translate([sx<0 ? -bar_t:0, 0, 0]) cube([bar_t, end_w, end_arm_len]);
+        // lip curls inward over rim corner
+        translate([sx<0 ? -lip_ext:0, 0, end_arm_len-lip_t])
+            cube([lip_ext, end_w, lip_t]);
+        // finger tab
+        translate([sx<0 ? -bar_t-5:bar_t, end_w/2-3, 2]) cube([5,6,7]);
+    }
 }
 
-// ── scene ──────────────────────────────────────────────────────
+// ── assembly ───────────────────────────────────────────────────
 new_tray();
+back_guide();
 top_tray();
-front_bar();
-back_bar();
+front_hinge_web();
+front_flip_bar();
+end_clamp(-1);
+end_clamp(1);
