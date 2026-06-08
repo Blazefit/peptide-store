@@ -1,209 +1,206 @@
-// 01_frontbar_endclamps.scad
-// Variant 1: Full-length front flip-bar + two end flip-clamps
-// Place-then-secure: top tray drops straight down ~0.6mm loose,
-// then flip levers up-and-in to lock.
+// 01_frontbar_endclamps.scad  —  Variant 1: front flip-bar + two end cam-clamps
+// Place-then-secure: top tray drops straight down (~0.6 mm loose), levers lock it.
 //
-// New tray: 304.8(X) x 101.6(Y) x 50(Z), walls 3mm, open top
-// Top tray seated at z=50 (origin = new tray front-left-bottom):
-//   End walls top z=83, front top-rail z=75..78, slot z=59..74
+// New tray origin = front-left-bottom:  304.8 x 101.6 x 50 mm, 3 mm walls
+// Seated top tray (z=50 base):
+//   End walls top z=83   |  Front rail z=75..78  |  Back y=98.6..101.6 flush
 
-show  = "all"; // [all,new,top]
-lock  = 1;     // 0=open, 1=closed
+show = "all";  // [all,new,top]
+lock = 1;      // 0=open, 1=closed
 
 include <../top_ref.scad>
 
-// ---- Tray constants -------------------------------------------------------
-NT_X = 304.8;
-NT_Y = 101.6;
-NT_Z = 50;
-NT_W = 3;
+// ─── Tray dims ──────────────────────────────────────────────────────────────
+NT_X = 304.8;  NT_Y = 101.6;  NT_Z = 50;  NT_W = 3;
 
-// Seated top-tray geometry
-END_TOP_Z      = 83;   // short end walls top z
-FRONT_RAIL_TOP = 78;   // front long-side top rail top
-FRONT_RAIL_BOT = 75;
-BACK_RAIL_TOP  = 78;
-SLOT_TOP       = 74;
-SLOT_BOT       = 59;
+// Seated top-tray features
+FRONT_RAIL_TOP = 78;
+END_TOP_Z      = 83;
 
-// ---- Hinge / lever params ------------------------------------------------
-H_R   = 2.2;   // hinge bore radius (on tray)
-H_PIN = 1.6;   // hinge pin radius (on lever, H_PIN < H_R - 0.4)
-H_CLR = 0.4;   // radial clearance
+// ─── Lever / hinge params ───────────────────────────────────────────────────
+LT       = 4.5;   // lever arm thickness
+H_PIN_R  = 1.6;   // hinge pin radius  (on moving lever)
+H_BOR_R  = 2.2;   // hinge bore radius (fixed boss, 0.6 mm gap)
+CORNER   = 8;     // corner pocket clearance
 
-LEVER_T = 4.5; // lever arm thickness (Y direction for front, X for end)
-LIP_H   = 7.0; // lip height
-LIP_D   = 5.0; // lip overhang depth
+// ─── Front bar geometry ─────────────────────────────────────────────────────
+// Hinge axis runs along global X.  Pin centre: y=LT/2 (flush outer), z=47.
+// Open  (lock=0): arm rotated +90° about X → arm points −Z, tip z=47−32=15. Clear.
+// Closed(lock=1): arm at 0° → arm points +Z, tip z=47+32=79.
+//   Hook at tip: top cap extends +Y, then catch wall drops −Z to z≈72, gripping rail top z=78.
 
-// Front bar: hinge along X, runs full length minus corner pockets
-FB_X0 = 10;
-FB_X1 = NT_X - 10;
-FB_LEN = FB_X1 - FB_X0; // 284.8 mm
+FB_HY  = LT / 2;  // 2.25 mm from y=0
+FB_HZ  = 47;
+FB_ARM = 32;
+FB_X0  = CORNER;
+FB_X1  = NT_X - CORNER;
+FB_LEN = FB_X1 - FB_X0;   // 288.8 mm
 
-// Hinge position: on front wall (y~0 face), pin axis at y=H_R+0.5, z chosen
-// so lever tip clears lift path when open (folds DOWN against y<0 space)
-// and captures front rail at z=75..78 when closed
-// Hinge z: we want open lever to stay z<=50 (folded down)
-// closed: lever arm swings up-and-in; tip reaches z=front_rail_top
-// Let hinge be at z=47 (3mm below new tray top), arm length ~28mm
-// closed angle ~55° inward -> tip_z ~ 47 + 28*sin(55) ~ 47+23 = 70 -> ok for hooking rail
+HOOK_Y_EXT = 9;    // hook top-cap Y extension (into tray interior)
+HOOK_CAP_T = 2.5;  // cap thickness (Z)
+HOOK_WALL  = 8;    // catch wall height (Z drop from cap)
 
-FB_HINGE_Z = 47;  // z of hinge axis
-FB_HINGE_Y = NT_W + H_R + H_CLR + 0.3;  // ~6mm from front face
-FB_ARM_L   = 28;  // arm length from hinge to lip root
-OPEN_A  = -90; // open: folded straight down (below hinge)
-CLOSE_A =  58; // closed: flipped up-and-in
+// ─── End clamp geometry ─────────────────────────────────────────────────────
+// Hinge axis along global Y.  Left: pin centre x=LT/2, z=46.  Right: x=NT_X-LT/2, z=46.
+// Open : arm rotated 90° about Y → arm points ±X (outward), tip clears lift path.
+// Closed: arm at 0° → arm points +Z, tip z=46+37=83 = end wall top.
+//   Hook clips over end wall top edge.
 
-// End clamps
-EC_HINGE_Z   = 47;
-EC_HINGE_Y0  = (NT_Y - 20) / 2;  // centered in Y
-EC_W         = 20;    // clamp width in Y
-EC_ARM_L     = 26;    // arm length from hinge
-EC_HINGE_X_L = NT_W + H_R + H_CLR + 0.3;
-EC_HINGE_X_R = NT_X - NT_W - H_R - H_CLR - 0.3;
+EC_HZ    = 46;
+EC_ARM   = 37;    // 46+37=83 = END_TOP_Z ✓
+EC_W     = 22;    // lever width in Y, centred
+EC_HY0   = (NT_Y - EC_W) / 2;  // y-start of lever  (centred)
+EC_HOOK_D = 9;    // X-depth of catch lip over end wall
+EC_HOOK_T = 3;    // lip thickness Z
+EC_CAP_Z  = 3;    // cap at arm tip
 
-function la(lk) = lk ? CLOSE_A : OPEN_A;
+// ─── Angle helpers ──────────────────────────────────────────────────────────
+// fb_angle: rotation about X of front bar  (0=up/closed, 90=down/open)
+// ec_angle: rotation about Y of end clamps (0=up/closed, 90=out/open)
+function fb_angle(lk) = lk ? 0 : 90;   // front bar: 0=closed(+Z), 90=open(−Y outward)
+function ec_angle_L(lk) = lk ? 0 : -90; // left clamp: 0=closed(+Z), −90=open(−X outward)
+function ec_angle_R(lk) = lk ? 0 : 90;  // right clamp: 0=closed(+Z), +90=open(+X outward)
 
-// ============================================================================
-// NEW TRAY
-// ============================================================================
+// ─── New tray ────────────────────────────────────────────────────────────────
 module new_tray() {
     color("#1565C0")
     difference() {
         cube([NT_X, NT_Y, NT_Z]);
-        // hollow (open top)
         translate([NT_W, NT_W, NT_W])
             cube([NT_X - 2*NT_W, NT_Y - 2*NT_W, NT_Z]);
     }
 }
 
-// ============================================================================
-// FRONT BAR HINGE BOSSES (fixed on tray, part of new_tray geometry)
-// Axis along X. Two short boss cylinders flanking the bar.
-// ============================================================================
+// ─── Front bar hinge bosses (fixed, part of new tray geometry) ────────────
 module front_hinge_bosses() {
     color("#1565C0")
-    translate([0, FB_HINGE_Y, FB_HINGE_Z])
-    rotate([0, 90, 0]) {
-        // Left boss (at x=FB_X0-4..FB_X0)
-        translate([0, 0, FB_X0 - 5])
+    for (bx = [FB_X0 - 5.5, FB_X1 + 0.5]) {
+        translate([bx, FB_HY, FB_HZ])
+        rotate([0, 90, 0])
             difference() {
-                cylinder(h=5, r=H_R + 1.5, $fn=32);
-                cylinder(h=5, r=H_R, $fn=32);
-            }
-        // Right boss (at x=FB_X1..FB_X1+5)
-        translate([0, 0, FB_X1])
-            difference() {
-                cylinder(h=5, r=H_R + 1.5, $fn=32);
-                cylinder(h=5, r=H_R, $fn=32);
+                cylinder(h=5, r=H_BOR_R + 1.5, $fn=32);
+                cylinder(h=5, r=H_BOR_R, $fn=32);
             }
     }
 }
 
-// ============================================================================
-// FRONT FLIP BAR
-// Hinge pin along X axis. When open: arm folds straight DOWN (angle=-90).
-// When closed: arm sweeps up-and-in (~58°) so lip captures front top rail.
-// ============================================================================
+// ─── Front flip bar (moving lever) ───────────────────────────────────────────
 module front_bar(lk) {
-    ang = la(lk);
     color("#2E7D32")
-    translate([FB_X0, FB_HINGE_Y, FB_HINGE_Z])
-    rotate([0, 90, 0])  // now X is the hinge axis
-    {
-        // Pin runs along hinge axis (now local Z) for full bar length
-        cylinder(h=FB_LEN, r=H_PIN, $fn=32);
-        // Bar body: rotate about hinge axis
-        rotate([ang, 0, 0])
-        {
-            // Main arm slab: extends from hinge outward
-            // Local coords: Z=along bar, Y=arm direction, X=thickness
-            translate([-LEVER_T/2, 0, 0])
-                cube([LEVER_T, FB_ARM_L, FB_LEN]);
-            // Lip at tip: hooks OVER front top rail (from above at z=78)
-            // Extends inward (+Y local = inward toward tray when closed)
-            translate([-LEVER_T/2, FB_ARM_L - 2, 0])
-                cube([LEVER_T + LIP_D, LIP_H, FB_LEN]);
-            // Finger tab (outward, -Y local = toward front when closed)
-            translate([-LEVER_T/2 - 2, -8, 0])
-                cube([LEVER_T + 4, 8, FB_LEN]);
+    translate([FB_X0, FB_HY, FB_HZ]) {
+        // Pin runs along X (use rotate [0,90,0] to orient cylinder along X)
+        rotate([0, 90, 0])
+            cylinder(h=FB_LEN, r=H_PIN_R, $fn=32);
+        // Lever body pivots about X:
+        rotate([fb_angle(lk), 0, 0]) {
+            // Arm slab (default: arm along +Z from origin)
+            translate([-LT/2, -LT/2, 0])
+                cube([LT, LT, FB_ARM]);
+            // Hook at tip  (at local z=FB_ARM):
+            // top cap: extends in +Y (into tray when closed)
+            translate([-LT/2, -LT/2, FB_ARM])
+                cube([LT, LT + HOOK_Y_EXT, HOOK_CAP_T]);
+            // catch wall: drops −Z from far edge of cap
+            translate([-LT/2, LT/2 + HOOK_Y_EXT - LT/2, FB_ARM])
+                cube([LT, LT/2, -HOOK_WALL]);  // negative Z = drops down
+            // Finger tab (on outward −Y side of arm, mid-height)
+            translate([-LT/2 - 1.5, -LT/2 - 7, FB_ARM * 0.35])
+                cube([LT + 3, 7, 10]);
         }
     }
 }
 
-// ============================================================================
-// END CLAMP - LEFT (at x=0 short wall)
-// Hinge axis along Y. When open: folds down/out (-x direction, angle=-90).
-// When closed: sweeps in (+x, over end wall top at z=83).
-// ============================================================================
+// ─── Left end clamp (hinge on x≈0 short wall) ────────────────────────────
 module end_clamp_left(lk) {
-    ang = la(lk);
     color("#EF6C00")
-    translate([EC_HINGE_X_L, EC_HINGE_Y0, EC_HINGE_Z])
-    rotate([90, 0, 0])  // hinge axis along Y
-    {
-        // pin
-        cylinder(h=EC_W, r=H_PIN, $fn=32);
-        // arm body
-        rotate([0, ang, 0])
-        {
-            translate([0, -LEVER_T/2, 0])
-                cube([EC_ARM_L, LEVER_T, EC_W]);
-            // lip hooking over end wall top z=83
-            translate([EC_ARM_L - 2, -LEVER_T/2, 0])
-                cube([LIP_H, LEVER_T + LIP_D, EC_W]);
-            // finger tab
-            translate([-8, -LEVER_T/2 - 2, 0])
-                cube([8, LEVER_T + 4, EC_W]);
+    translate([LT/2, EC_HY0, EC_HZ]) {
+        // Pin along Y
+        rotate([90, 0, 0])
+        translate([0, 0, -EC_W/2])
+            cylinder(h=EC_W, r=H_PIN_R, $fn=32);
+        // Arm pivots about Y: closed=0(+Z), open=−90(−X outward)
+        rotate([0, ec_angle_L(lk), 0]) {
+            translate([-LT/2, 0, 0])
+                cube([LT, EC_W, EC_ARM]);
+            // Hook: top cap at tip
+            translate([-LT/2, 0, EC_ARM])
+                cube([LT, EC_W, EC_CAP_Z]);
+            // Catch wall on −X side (hooks over end wall)
+            translate([-LT/2 - EC_HOOK_D, 0, EC_ARM])
+                cube([EC_HOOK_D, EC_W, EC_HOOK_T]);
+            // Finger tab
+            translate([-LT/2 - 1.5, EC_W*0.3, EC_ARM * 0.4])
+                cube([LT + 3, EC_W * 0.4, 9]);
         }
     }
 }
 
-// ============================================================================
-// END CLAMP - RIGHT (at x=NT_X short wall)
-// Mirror of left.
-// ============================================================================
+// ─── Right end clamp (hinge on x≈NT_X short wall) ────────────────────────
 module end_clamp_right(lk) {
-    ang = la(lk);
     color("#EF6C00")
-    translate([EC_HINGE_X_R, EC_HINGE_Y0, EC_HINGE_Z])
-    rotate([90, 0, 0])
-    {
-        cylinder(h=EC_W, r=H_PIN, $fn=32);
-        rotate([0, -ang, 0])
-        {
-            translate([-EC_ARM_L, -LEVER_T/2, 0])
-                cube([EC_ARM_L, LEVER_T, EC_W]);
-            translate([-EC_ARM_L - LIP_H + 2, -LEVER_T/2, 0])
-                cube([LIP_H, LEVER_T + LIP_D, EC_W]);
-            translate([0, -LEVER_T/2 - 2, 0])
-                cube([8, LEVER_T + 4, EC_W]);
+    translate([NT_X - LT/2, EC_HY0, EC_HZ]) {
+        rotate([90, 0, 0])
+        translate([0, 0, -EC_W/2])
+            cylinder(h=EC_W, r=H_PIN_R, $fn=32);
+        // closed=0(+Z), open=+90(+X outward from right end)
+        rotate([0, ec_angle_R(lk), 0]) {
+            translate([-LT/2, 0, 0])
+                cube([LT, EC_W, EC_ARM]);
+            translate([-LT/2, 0, EC_ARM])
+                cube([LT, EC_W, EC_CAP_Z]);
+            // Catch wall on +X side
+            translate([LT/2, 0, EC_ARM])
+                cube([EC_HOOK_D, EC_W, EC_HOOK_T]);
+            translate([-LT/2 - 1.5, EC_W*0.3, EC_ARM * 0.4])
+                cube([LT + 3, EC_W * 0.4, 9]);
         }
     }
 }
 
-// ============================================================================
-// BACK PASSIVE TONGUE (flush in back slot y=98.6..101.6, slot z=59..74)
-// Just a slim tongue on the back wall that slides into the open slot.
-// Stays within y<=101.6, acts as a passive guide/backstop.
-// ============================================================================
-module back_tongue() {
-    color("#1565C0", 0.8)
-    translate([NT_W + 6, NT_Y - NT_W, SLOT_BOT + 2])
-        cube([NT_X - 2*NT_W - 12, 2, (SLOT_TOP - SLOT_BOT) - 4]);
+// Left and right hinge boss rings (fixed on new tray)
+module end_hinge_bosses() {
+    color("#1565C0")
+    // Left bosses
+    for (ey = [EC_HY0 - 5, EC_HY0 + EC_W]) {
+        translate([LT/2, ey, EC_HZ])
+        rotate([90, 0, 0])
+        translate([0, 0, -5])
+            difference() {
+                cylinder(h=5, r=H_BOR_R + 1.5, $fn=32);
+                cylinder(h=5, r=H_BOR_R, $fn=32);
+            }
+    }
+    // Right bosses
+    for (ey = [EC_HY0 - 5, EC_HY0 + EC_W]) {
+        translate([NT_X - LT/2, ey, EC_HZ])
+        rotate([90, 0, 0])
+        translate([0, 0, -5])
+            difference() {
+                cylinder(h=5, r=H_BOR_R + 1.5, $fn=32);
+                cylinder(h=5, r=H_BOR_R, $fn=32);
+            }
+    }
 }
 
-// ============================================================================
-// ASSEMBLY
-// ============================================================================
+// ─── Back passive tongue (flush at y≤101.6) ────────────────────────────────
+// Thin shelf on inner back face that slides into the back open slot passively.
+module back_tongue() {
+    color("#1565C0", 0.7)
+    translate([NT_W + 12, NT_Y - NT_W, 62])
+        cube([NT_X - 2*NT_W - 24, 2, 8]);
+}
+
+// ─── Full new-tray assembly ────────────────────────────────────────────────
 module new_assembly(lk=1) {
     new_tray();
     front_hinge_bosses();
+    end_hinge_bosses();
     front_bar(lk);
     end_clamp_left(lk);
     end_clamp_right(lk);
     back_tongue();
 }
 
+// ─── Render ────────────────────────────────────────────────────────────────
 if (show != "top") new_assembly(lock);
 if (show != "new") top_ref(50);

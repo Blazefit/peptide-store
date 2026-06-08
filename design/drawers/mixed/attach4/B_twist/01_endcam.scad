@@ -30,12 +30,12 @@ GAP        = 0.45;  // print-in-place clearance
 
 COLLAR_OD  = POST_R + GAP + 1.8;  // rotating collar outer r
 
-LOBE_Z0    = 83.4;  // lobe bottom (just above end-wall top)
+LOBE_Z0    = 82.35; // lobe bottom: 0.65mm below end-wall top → cam engages on lock
 LOBE_Z1    = 88.0;  // lobe top
 LOBE_L     = 11.0;  // arm length beyond collar
 LOBE_W     = 8.0;   // arm width
 
-SHOULDER_Z = LOBE_Z0 - 1.6;
+SHOULDER_Z = LOBE_Z0 - 2.0;
 SHOULDER_R = COLLAR_OD + 0.5;
 CAP_Z      = LOBE_Z1 + GAP;
 CAP_R      = COLLAR_OD + 0.5;
@@ -118,9 +118,11 @@ module lobe(px, py, side, lk) {
 }
 
 // ─── Passive back rail (tongue in back-slot for passive capture) ───────
+// NOTE: disabled — 4 end-cams provide full security, no back rail needed.
+// If re-enabled, tongue must be sized to fit in open slot z=59..74 and
+// not penetrate the top-tray back wall solid sections.
 module back_rail() {
-    translate([NT_W+6, NT_Y-NT_W, 57])
-        cube([NT_X - 2*(NT_W+6), NT_W, 7]);
+    // intentionally empty
 }
 
 // ─── New assembly ────────────────────────────────────────────────────

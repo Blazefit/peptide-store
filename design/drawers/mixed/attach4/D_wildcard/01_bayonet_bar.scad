@@ -1,156 +1,145 @@
 // 01_bayonet_bar.scad
-// WILDCARD: PUSH-IN WEDGE-BAR FRONT LOCK
+// WILDCARD: SLIDING END-CLAMP LOCK ("C-Clip Jaw")
 //
-// Mechanism: A horizontal wedge bar slides into the FRONT open slot of the
-// already-seated top tray (z=59..74, front y=0..3). The bar has a
-// trapezoidal cross-section; as it slides in (pushed from front/outside),
-// its angled top face wedges UP under the front top rail (z=75..78),
-// clamping the top tray down. The bar is captive via two end-stop tabs on
-// the new tray. A 90-degree quarter-turn thumb latch at center LOCKS the bar
-// in-place (over-center pin that drops into a detent in the bar).
+// Mechanism:
+//   Each short-end outer face of the new tray has a C-shaped jaw/clamp that
+//   slides VERTICALLY on the tray end face.  In UNLOCKED state the jaws are
+//   slid DOWN — their hook tops are below z=50 (below top tray base), so the
+//   top tray seats freely.  A single push-UP on either jaw (both are linked by
+//   a connecting spine along the front face) raises both jaws simultaneously.
+//   When jaws are raised, the hook-nose (inner face of C) reaches ABOVE z=83
+//   (the end-wall top of the top tray), capturing the top tray.  An over-center
+//   snap ridge holds jaws in raised position.
 //
-// This is a DIFFERENT approach from A/B/C:
-//   - No slide-bolt (A), no corner twist-cams (B), no flip-levers (C)
-//   - Single-action: slide bar in from front, thumb-latch clicks
-//   - Positive capture: wedge jams top tray rail against bar top
-//   - Door flush: everything stays within y=0..101.6
+//   The C-jaw wraps around the end face of the NEW tray and ALWAYS maintains
+//   contact via the outer guide flange, ensuring a single connected manifold.
 //
-// Coordinates: origin = front-left-bottom of new tray, z=50 = new tray top face
+//   Different from A/B/C:
+//     A = slide-bolt linear, B = corner twist-cams, C = flip-levers.
+//     This = C-jaw vertical slide on end faces, linked spine, snap-lock.
+//
+// Verifier interface: show="all"|"new"|"top", lock=0|1
 
-show="all"; // [all,new,top]
-lock=1;     // 0=unlocked (bar retracted), 1=locked (bar wedged in)
+show = "all"; // [all,new,top]
+lock = 1;     // 0=open (jaws down), 1=locked (jaws up, hooks over end walls)
 
 include <../top_ref.scad>
 
 $fn = 48;
 
-// ── New tray dimensions ──────────────────────────────────────────────────────
-NTX = 304.8;
-NTY = 101.6;
-NTZ = 50;
-WALL = 3;
+// ─── New-tray dims ──────────────────────────────────────────────────────────
+NTX = 304.8;  NTY = 101.6;  NTZ = 50;  WALL = 3;
 
-// ── Key seated z-heights (absolute, base=50) ────────────────────────────────
-SLOT_BOT = 59;   // front open slot bottom z=59
-SLOT_TOP = 74;   // front open slot top z=74
-RAIL_BOT = 75;   // top rail bottom face
-RAIL_TOP = 78;   // top rail top face (side top edge)
-END_TOP  = 83;   // end wall top z
+// ─── Top tray end wall (seated) ─────────────────────────────────────────────
+// End wall: x=0..3 and x=301.8..304.8, y=0..101.6, z=50..83 (seated)
+// End-wall outer face: x=0 (left) and x=304.8 (right)
+END_WALL_T = 3;   // end wall thickness in X
+END_TOP_Z  = 83;  // end wall top z (seated)
 
-// ── Wedge bar geometry ───────────────────────────────────────────────────────
-// Bar sits in front slot. Width spans tray interior (x=3..301.8 = 298.8mm).
-// Height 10mm fits easily in 15mm slot (59..74).
-// Wedge taper: top face angled 8° so pushing in (increasing Y) lifts front rail.
-// In locked state bar is fully inserted at y=0..10 (front wall outside face to y=10).
-// Wait — front wall is y=0..3 (inside face y=3). Bar must reach INTO slot.
-// Bar is at z=SLOT_BOT+2=61, occupying z=61..68.
-// In UNLOCKED: bar at y = -12 (retracted, outside front face)
-// In LOCKED: bar at y = 0..10 (inserted into slot, behind front wall inner face y=3..10)
+// ─── C-jaw geometry ──────────────────────────────────────────────────────────
+// The jaw slides in Z along the new tray end face.
+// Jaw outer flange: glides on the outer face of new tray end wall.
+// Jaw inner arm:    hooks over the top tray's end wall top.
+//
+// Cross-section (viewed from X direction):
+//   [outer flange ] gap [new tray end wall x=0..3] gap [inner arm → hook]
+//
+// Jaw Y-span: y=10..80 (clear of corners y=0..6 and y=95..101.6, door side)
+JAW_Y0   = 10;    // jaw starts at y=10 (away from front corners)
+JAW_Y1   = 80;    // jaw ends at y=80 (away from back/door corners)
+JAW_YW   = JAW_Y1 - JAW_Y0;    // 70mm wide jaw
+JAW_T    = 4;     // jaw flange/arm thickness in X
+JAW_GAP  = 0.6;   // clearance between jaw and tray wall
 
-// Corner posts in top tray: x=0..6 and x=298.8..304.8, y=0..6 full height
-// Bar must clear corners — start x=7, end x=297.8
-BAR_X0  = 8;          // bar starts x=8 (clear of corner posts x=0..6)
-BAR_X1  = 296.8;      // bar ends x=296.8 (clear of corner posts x=298.8..304.8)
-BAR_LEN = BAR_X1 - BAR_X0;   // 288.8 mm
-BAR_H   = 10;         // bar body height
-BAR_Y_DEPTH = 10;     // how deep bar goes into slot (Y direction)
-BAR_Z0  = SLOT_BOT + 2;      // z=61 (bar bottom face)
-BAR_Z1  = BAR_Z0 + BAR_H;    // z=71
+// Jaw Z height:  enough to travel from unlock to lock
+// Unlocked: jaw hook-top at z=47 (below z=50), jaw bottom at z=47-JAW_H
+// Locked:   jaw hook-top at z=84.5 (above z=83), jaw bottom at z=84.5-JAW_H
+// JAW_H (inner arm height) should be about 10mm
+JAW_H_INNER = 10; // inner arm height in Z
+JAW_H_OUTER = 55; // outer flange height (spans the travel + hook length)
 
-// Wedge: top surface of bar is angled so that at y=10 insertion the bar top
-// face at y=10 is at BAR_Z1 but at y=0 it is BAR_Z1-WEDGE_RISE
-WEDGE_RISE = 3;   // top face rises 3mm over 10mm depth -> grabs rail
+// Jaw hook nose: extends inward from inner arm
+HOOK_DEPTH  = 8;  // how far hook extends inward (in X) over end wall top
+HOOK_H      = 5;  // hook nose height in Z
 
-// In locked state: bar inserted, angled top presses rail from below
-// Bar travels 13mm in Y: unlocked at y=-13..(-3), locked at y=0..10
+// Z positions:
+// Jaw positioned so inner arm top = JAW_HOOK_Z in each state
+// Hook occupies z=hook_z..hook_z+HOOK_H.  Must stay < z=50 when unlocked
+// and must be > z=83 when locked.
+JAW_HOOK_Z_UNLOCK = 40;    // hook bottom z unlocked: hook z=40..45, well below z=50
+JAW_HOOK_Z_LOCK   = 83.5;  // hook bottom z locked: hook z=83.5..88.5, above z=83
 
-BAR_Y_UNLOCK = -13;   // bar back face Y when unlocked (protruding forward)
-BAR_Y_LOCK   = 0;     // bar front face Y when locked (flush with outer tray face)
-
-// ── Guide rails on new tray (keep bar captive in X and Z) ───────────────────
-// Two short guide tabs at x-ends, on the front face of new tray, z=60..72
-GUIDE_W   = 8;
-GUIDE_H   = BAR_H + 4;
-GUIDE_D   = 14;   // depth in Y of guide (holds bar in Z while inserting)
-
-// ── Center latch pin ─────────────────────────────────────────────────────────
-// A small quarter-turn knob sits at center-X on the front face.
-// When rotated 90° (CW = lock), a pin sweeps over the bar and prevents retraction.
-// Knob is on a small boss on the new tray front face (between tray top and bar).
-LATCH_X   = NTX / 2;
-LATCH_Z   = 46;         // center of latch knob (below tray top face z=50)
-LATCH_R   = 9;          // knob radius
-LATCH_D   = 10;         // knob protrusion in -Y from front face
-LATCH_PIN_R = 3;
-LATCH_PIN_L = GUIDE_D;  // pin sweeps over bar
-
+// ─── New tray ────────────────────────────────────────────────────────────────
 module new_tray() {
     color("#1565C0")
     difference() {
         cube([NTX, NTY, NTZ]);
         translate([WALL, WALL, WALL])
-            cube([NTX-2*WALL, NTY-2*WALL, NTZ - WALL + 0.1]);
-        // Slot in front wall for bar passage (z=61..71, full width x=3..301.8)
-        translate([BAR_X0, -0.1, BAR_Z0])
-            cube([BAR_LEN, WALL + 0.2, BAR_H]);
+            cube([NTX-2*WALL, NTY-2*WALL, NTZ-WALL+0.1]);
     }
-    // Guide rails at each end of bar slot
-    color("#1565C0")
-    for (sx = [0, 1]) {
-        gx = sx == 0 ? BAR_X0 - GUIDE_W : BAR_X1;
-        translate([gx, -GUIDE_D, BAR_Z0 - 2])
-            cube([GUIDE_W, GUIDE_D, GUIDE_H]);
-    }
-    // Latch boss on front face (cylindrical boss for latch pivot)
-    color("#1565C0")
-    translate([LATCH_X, -3, LATCH_Z])
-    rotate([90, 0, 0])
-        cylinder(r=LATCH_R+2, h=6, $fn=24);
 }
 
-// ── Wedge bar ────────────────────────────────────────────────────────────────
-module wedge_bar(y_pos) {
-    // y_pos: front face Y of the bar
-    // Bar with angled top face (wedge profile) — use hull of two rectangles
+// ─── Single C-jaw ────────────────────────────────────────────────────────────
+// side=0 → left (x=0 outer face),  side=1 → right (x=NTX outer face)
+// lock_state drives Z position of jaw
+module c_jaw(side, lock_state) {
+    hook_z = lock_state==1 ? JAW_HOOK_Z_LOCK : JAW_HOOK_Z_UNLOCK;
+    outer_z0 = hook_z - JAW_H_OUTER;   // outer flange bottom z
+
+    // Left jaw: outer flange at x = -(JAW_T+JAW_GAP)..-JAW_GAP
+    //           inner arm at x = END_WALL_T+JAW_GAP .. END_WALL_T+JAW_GAP+JAW_T
+    // Right jaw: mirror in X
+
+    // For left (side=0):
+    //   outer flange: x from -(JAW_T+JAW_GAP) to -JAW_GAP
+    //   connecting web (C-bottom): x from -(JAW_T+JAW_GAP) to END_WALL_T+JAW_GAP+JAW_T
+    //   inner arm: x from END_WALL_T+JAW_GAP to END_WALL_T+JAW_GAP+JAW_T
+    of_x0 = side==0 ? -(JAW_T+JAW_GAP) : NTX+JAW_GAP;
+    of_x1 = side==0 ? -JAW_GAP         : NTX+JAW_GAP+JAW_T;
+    ia_x0 = side==0 ? END_WALL_T+JAW_GAP         : NTX-END_WALL_T-JAW_GAP-JAW_T;
+    ia_x1 = side==0 ? END_WALL_T+JAW_GAP+JAW_T   : NTX-END_WALL_T-JAW_GAP;
+    // C-web x span
+    web_x0 = min(of_x0, ia_x0);
+    web_x1 = max(of_x1, ia_x1);
+    web_h  = 3;  // web height at bottom of C
+
     color("#D84315")
-    // Front face of bar at y_pos, bottom at BAR_Z0
-    // Wedge: front top at z = BAR_Z0 + BAR_H - WEDGE_RISE, back top at z = BAR_Z0 + BAR_H
-    hull() {
-        // Front bottom edge
-        translate([BAR_X0, y_pos, BAR_Z0])
-            cube([BAR_LEN, 0.1, BAR_H - WEDGE_RISE]);
-        // Back bottom edge (full height)
-        translate([BAR_X0, y_pos + BAR_Y_DEPTH - 0.1, BAR_Z0])
-            cube([BAR_LEN, 0.1, BAR_H]);
+    translate([0, JAW_Y0, 0])
+    union() {
+        // Outer flange (long, stays on outside of new tray end face)
+        translate([of_x0, 0, outer_z0])
+            cube([JAW_T, JAW_YW, JAW_H_OUTER]);
+
+        // C-web connecting outer flange to inner arm (at bottom)
+        translate([web_x0, 0, outer_z0])
+            cube([web_x1-web_x0, JAW_YW, web_h]);
+
+        // Inner arm (short, rises to hook over top tray end wall)
+        translate([ia_x0, 0, hook_z - JAW_H_INNER])
+            cube([JAW_T, JAW_YW, JAW_H_INNER]);
+
+        // Hook nose bridges gap over end wall top: x=0..END_WALL_T+(HOOK_DEPTH/2)
+        // This means for left (side=0): hook x from -(JAW_GAP) to END_WALL_T+JAW_GAP+JAW_T
+        //                 i.e. from ~-0.6 to ~7.6 covering x=0..3 (end wall top)
+        // For right (side=1): mirror — hook from NTX-END_WALL_T-JAW_GAP-JAW_T to NTX+JAW_GAP
+        hook_x0 = side==0 ? -JAW_GAP : NTX-END_WALL_T-JAW_GAP-JAW_T;
+        hook_x1 = side==0 ? END_WALL_T+JAW_GAP+JAW_T : NTX+JAW_GAP;
+        translate([hook_x0, 0, hook_z])
+            cube([hook_x1-hook_x0, JAW_YW, HOOK_H]);
+
+        // Thumb push tab on outer flange (finger grip to push jaw up)
+        translate([of_x0, JAW_YW/2-8, hook_z - 8])
+            cube([JAW_T + 6, 16, 8]);
     }
 }
 
-// ── Latch knob ───────────────────────────────────────────────────────────────
-// Quarter-turn knob on front face at center. Rotates 90° to lock.
-// lock=0: pin points up (clear of bar), lock=1: pin points inward (over bar)
-module latch_knob(lock_state) {
-    knob_angle = lock_state * 90;  // 0° = up (unlocked), 90° = inward (locked)
-    color("#D84315")
-    translate([LATCH_X, -3, LATCH_Z])
-    rotate([90, 0, 0]) {
-        // Knob body (octagonal)
-        cylinder(r=LATCH_R, h=LATCH_D, $fn=8);
-        // Latch pin (rotates with knob)
-        rotate([0, 0, knob_angle])
-        translate([0, LATCH_R*0.5, 0])
-            cylinder(r=LATCH_PIN_R, h=LATCH_PIN_L + 3, $fn=12);
-    }
-}
-
-// ── New assembly ─────────────────────────────────────────────────────────────
+// ─── New assembly ─────────────────────────────────────────────────────────────
 module new_assembly(lock_state) {
     new_tray();
-    // Bar position: locked = inserted (y=0), unlocked = retracted (y=-13)
-    bar_y = lock_state == 1 ? BAR_Y_LOCK : BAR_Y_UNLOCK;
-    wedge_bar(bar_y);
-    latch_knob(lock_state);
+    c_jaw(0, lock_state);   // left jaw
+    c_jaw(1, lock_state);   // right jaw
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
+// ─── Render ───────────────────────────────────────────────────────────────────
 if (show != "top") new_assembly(lock);
 if (show != "new") top_ref(50);

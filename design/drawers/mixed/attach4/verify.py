@@ -34,14 +34,48 @@ def export_new(scad, lock):
                        capture_output=True,text=True)
     if "ERROR" in (r.stderr or "") or not os.path.exists(f) or os.path.getsize(f)<100:
         print("  openscad export FAILED:\n",r.stderr[-800:]); return None
-    return trimesh.load(f)
+    m = trimesh.load(f)
+    return repair(m)
 
-def vol(a,b):
+def repair(m):
+    """Only touch meshes that are NOT already clean volumes (repair can harm good ones)."""
+    if m.is_volume:
+        return m
     try:
-        c = intersection([a,b], engine="manifold")
-        return float(abs(c.volume)) if (c is not None and len(c.faces)) else 0.0
+        m.merge_vertices()
+        m.update_faces(m.nondegenerate_faces())
+        m.update_faces(m.unique_faces())
+        m.remove_unreferenced_vertices()
+        m.fix_normals()
+        if not m.is_volume:
+            m.fill_holes(); m.fix_normals()
     except Exception as e:
-        print("   boolean err",e); return -1.0
+        print("   repair warn", e)
+    return m
+
+def vox_overlap(a, b, pitch=1.5):
+    """Robust fallback: shared solid volume via a common voxel lattice (winding-agnostic)."""
+    lo = np.maximum(a.bounds[0], b.bounds[0]); hi = np.minimum(a.bounds[1], b.bounds[1])
+    if np.any(lo >= hi): return 0.0
+    try:
+        A = a.voxelized(pitch).fill(); B = b.voxelized(pitch).fill()
+    except Exception:
+        return -1.0
+    gx = np.arange(lo[0]+pitch/2, hi[0], pitch)
+    gy = np.arange(lo[1]+pitch/2, hi[1], pitch)
+    gz = np.arange(lo[2]+pitch/2, hi[2], pitch)
+    if min(len(gx),len(gy),len(gz))==0: return 0.0
+    P = np.array(np.meshgrid(gx,gy,gz)).reshape(3,-1).T
+    return float((A.is_filled(P) & B.is_filled(P)).sum()*pitch**3)
+
+def vol(a, b):
+    try:
+        if a.is_volume and b.is_volume:
+            c = intersection([a, b], engine="manifold")
+            return float(abs(c.volume)) if (c is not None and len(c.faces)) else 0.0
+    except Exception as e:
+        print("   boolean err", e)
+    return vox_overlap(a, b)   # fallback when the export isn't a clean volume
 
 def main():
     scad=sys.argv[1]; name=os.path.basename(scad)
