@@ -40,32 +40,33 @@ prn_gap  = 0.4;     // print-in-place clearance (all around cam bore)
 stop_w   = 2.5;
 stop_h   = 3;
 
-// Posts just outside the 305×102 top-tray footprint
+// Posts just outside the 305×102 top-tray footprint — FRONT CORNERS ONLY
+// Back/door side is flush — no posts at back corners.
+// Back guide wall (flush, no protrusion) locates back of top tray.
 post_off = post_r + prn_gap + 1.0;  // clearance between post inner and tray outer wall
 corners = [
     [-post_off,        -post_off,        1],  // FL: inward dir = +X+Y = 45°
     [ TW + post_off,   -post_off,        2],  // FR: inward = -X+Y = 135°
-    [-post_off,         TD + post_off,   3],  // BL: inward = +X-Y = 315°
-    [ TW + post_off,    TD + post_off,   4],  // BR: inward = -X-Y = 225°
 ];
 
 // inward angle (toward tray centre) and open angle per corner id
 function inward_ang(id) =
     id == 1 ? 45 :
-    id == 2 ? 135 :
-    id == 3 ? 315 :
-    225;
+    135; // id==2
 
 function open_ang(id) = inward_ang(id) + 180;
 
 // ── modules ─────────────────────────────────────────────────────────
 
 module new_tray() {
-    color(C_new)
-    difference() {
-        cube([NW, ND, NH]);
-        translate([wall, wall, wall])
-            cube([NW-2*wall, ND-2*wall, NH]);
+    color(C_new) {
+        difference() {
+            cube([NW, ND, NH]);
+            translate([wall, wall, wall])
+                cube([NW-2*wall, ND-2*wall, NH]);
+        }
+        // Back guide wall — flush with y=ND, zero protrusion past y=102
+        translate([0, ND-wall, NH]) cube([NW, wall, 5]);
     }
 }
 
