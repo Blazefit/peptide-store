@@ -1,9 +1,12 @@
 // 02_widecam.scad — Quarter-turn WIDE single cam per end
 // One wide cam per short end (2 total), wide arm for large engagement area.
-// Demonstrates that even 2 cams (vs 4 in 01) can meet the capture threshold.
+// Demonstrates even 2 cams can meet the capture threshold.
 //
-// UNLOCKED (lock=0): lobe points OUTWARD, clear of all top-tray geometry.
+// UNLOCKED (lock=0): lobe points OUTWARD (+Y dir), clear of all top-tray geometry.
 // LOCKED   (lock=1): 90 deg twist → lobe INWARD over z=83 end-wall top edge.
+//
+// Manifold-safe lobe: arm extends from x=0 through collar (overlap), collar
+// hole punched by difference() at the lobe module level.
 
 show = "all"; // [all,new,top]
 lock = 1;
@@ -29,15 +32,15 @@ GAP       = 0.45;
 
 COLLAR_OD = POST_R + GAP + 2.2;  // = 8.15
 
-// Wide lobe parameters — tuned for capture >= 200 and seat <= 60
-// With 2 wide cams and LOBE_W=22:
-//   seat: 2 * 3(end wall) * 22 * (83 - LOBE_Z0) * 0.8 <= 60 → LOBE_Z0 >= 82.47
-//   capture: 2 * 3 * 22 * (85 - LOBE_Z0) * 0.8 >= 200 → LOBE_Z0 <= 82.95
-// Choose LOBE_Z0 = 82.5 (midpoint)
-LOBE_Z0   = 82.5;
-LOBE_Z1   = 89.0;
-LOBE_L    = 14.0;
-LOBE_W    = 22.0;
+// Wide lobe — tuned for capture >= 200, seat <= 60:
+// With POST_XL=-13.5, unlocked arm (90°) has x range: POST_XL ± LOBE_W/2
+// Need POST_XL + LOBE_W/2 < 0 → use POST_XL=-13.5, LOBE_W=24 → -13.5+12=-1.5 < 0 ✓
+// capture: 2 * 3 * LOBE_W * (85-LOBE_Z0) * 0.8 >= 200
+// seat: 2 * 3 * LOBE_W * (83-LOBE_Z0) * 0.8 <= 60
+LOBE_Z0   = 82.5;   // tuned value
+LOBE_Z1   = 89.5;
+LOBE_L    = 14.0;   // arm radial length (in +X dir from center when locked)
+LOBE_W    = 24.0;   // arm width (in Y direction)
 
 // Retainer geometry
 SHOULDER_Z = LOBE_Z0 - 2.5;
@@ -48,43 +51,43 @@ CAP_H      = 3.5;
 KNOB_R     = 8.5;
 KNOB_H     = 6.0;
 
-// Boss
+// Mounting boss
 BOSS_W     = 18.0;
-BOSS_YHALF = 13.0;
+BOSS_YHALF = 14.0;
 BOSS_Z0    = 40.0;
 
-// Single cam Y center
+// Cam Y center
 CAM_Y = NT_Y / 2;  // 50.8
 
-// Post X centers — far enough outside so arm never clips end wall when unlocked
-// Unlocked arm (pointing +Y/-Y from +X/−X): arm half-width in X = LOBE_W/2 = 11mm
-// Need POST_XL + 11 < 0 → POST_XL < -11 → use -13
+// Post X centers — far enough so unlocked arm never clips top-tray at x=0
+// Unlocked arm at 90°: arm occupies POST_XL ± LOBE_W/2 in X
+// Need POST_XL + LOBE_W/2 < 0 → POST_XL < -12 → use -13.5
 POST_XL = -13.5;
-POST_XR = NT_X + 13.5;
+POST_XR  = NT_X + 13.5;  // 318.3
 
-// ─── Angle logic ──────────────────────────────────────────────────────
+// ─── Angle logic ────────────────────────────────────────────────────────
+// Left:  locked=0°(+X inward), unlocked=90°(+Y, clear)
+// Right: locked=180°(-X inward), unlocked=90°(+Y, clear)
 function lobe_angle(lk, side) =
     (side == 0) ? (lk == 1 ?   0 : 90)
                 : (lk == 1 ? 180 : 90);
-// Left: locked=0°(arm in +X, over end-wall), unlocked=90°(arm in +Y, clear)
-// Right: locked=180°(arm in -X, over end-wall), unlocked=90°(arm in +Y, clear)
 
-// ─── Tray walls (manifold union) ──────────────────────────────────────
+// ─── Tray walls (manifold union) ──────────────────────────────────────────
 module tray_walls() {
-    cube([NT_X, NT_Y, NT_W]);                               // floor
-    cube([NT_X, NT_W, NT_Z]);                               // front wall
-    translate([0, NT_Y-NT_W, 0]) cube([NT_X, NT_W, NT_Z]); // back wall
-    translate([0, NT_W, 0]) cube([NT_W, NT_Y-2*NT_W, NT_Z]); // left wall
-    translate([NT_X-NT_W, NT_W, 0]) cube([NT_W, NT_Y-2*NT_W, NT_Z]); // right wall
+    cube([NT_X, NT_Y, NT_W]);
+    cube([NT_X, NT_W, NT_Z]);
+    translate([0, NT_Y-NT_W, 0]) cube([NT_X, NT_W, NT_Z]);
+    translate([0, NT_W, 0]) cube([NT_W, NT_Y-2*NT_W, NT_Z]);
+    translate([NT_X-NT_W, NT_W, 0]) cube([NT_W, NT_Y-2*NT_W, NT_Z]);
 }
 
-// ─── Mounting boss ─────────────────────────────────────────────────────
+// ─── Mounting boss ──────────────────────────────────────────────────────
 module end_boss(px) {
     translate([px - BOSS_W/2, CAM_Y - BOSS_YHALF, BOSS_Z0])
         cube([BOSS_W, BOSS_YHALF*2, NT_Z - BOSS_Z0]);
 }
 
-// ─── Fixed post + shoulder + cap + knob ───────────────────────────────
+// ─── Fixed post + shoulder + retainer cap + knob ───────────────────────
 module end_post(px) {
     translate([px, CAM_Y, POST_Z0])
         cylinder(r=POST_R, h=POST_Z1 - POST_Z0);
@@ -96,25 +99,29 @@ module end_post(px) {
         cylinder(r=KNOB_R, h=KNOB_H);
 }
 
-// ─── Rotating lobe (collar + arm) ─────────────────────────────────────
+// ─── Rotating lobe (MANIFOLD: arm overlaps collar, single difference) ──
+// Arm starts from x=0 (post center), overlaps collar, so union is clean.
+// Post hole punched by difference() here.
 module end_lobe(px, side, lk) {
     ang = lobe_angle(lk, side);
     translate([px, CAM_Y, 0])
-    rotate([0, 0, ang]) {
-        // Collar
-        translate([0, 0, LOBE_Z0])
-            difference() {
+    rotate([0, 0, ang])
+    difference() {
+        union() {
+            // Collar (solid, hole punched below by difference)
+            translate([0, 0, LOBE_Z0])
                 cylinder(r=COLLAR_OD, h=LOBE_Z1 - LOBE_Z0);
-                translate([0, 0, -0.1])
-                    cylinder(r=POST_R + GAP, h=LOBE_Z1 - LOBE_Z0 + 0.2);
-            }
-        // Wide arm
-        translate([COLLAR_OD, -LOBE_W/2, LOBE_Z0])
-            cube([LOBE_L, LOBE_W, LOBE_Z1 - LOBE_Z0]);
+            // Arm — starts from x=0 so it overlaps collar (no touching edge)
+            translate([0, -LOBE_W/2, LOBE_Z0])
+                cube([COLLAR_OD + LOBE_L, LOBE_W, LOBE_Z1 - LOBE_Z0]);
+        }
+        // Post hole (gap clearance)
+        translate([0, 0, LOBE_Z0 - 0.1])
+            cylinder(r=POST_R + GAP, h=LOBE_Z1 - LOBE_Z0 + 0.2);
     }
 }
 
-// ─── New assembly ─────────────────────────────────────────────────────
+// ─── New assembly ──────────────────────────────────────────────────────
 module new_assembly(lk=1) {
     color("#1565C0") {
         tray_walls();

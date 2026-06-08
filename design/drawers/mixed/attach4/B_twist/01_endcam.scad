@@ -99,21 +99,25 @@ module post_fixed(px, py) {
         cylinder(r=KNOB_R, h=KNOB_H);
 }
 
-// ─── Rotating lobe (print-in-place) ────────────────────────────────────
+// ─── Rotating lobe (print-in-place, manifold-safe) ─────────────────────
+// Arm starts from x=0 (overlaps collar) so union is clean; post hole punched
+// by a single difference() at the lobe level (not inside color block).
 module lobe(px, py, side, lk) {
     ang = lobe_angle(lk, side);
     translate([px, py, 0])
-    rotate([0, 0, ang]) {
-        // Collar
-        translate([0, 0, LOBE_Z0])
-            difference() {
+    rotate([0, 0, ang])
+    difference() {
+        union() {
+            // Collar (solid cylinder, hole punched below)
+            translate([0, 0, LOBE_Z0])
                 cylinder(r=COLLAR_OD, h=LOBE_Z1 - LOBE_Z0);
-                translate([0, 0, -0.1])
-                    cylinder(r=POST_R + GAP, h=LOBE_Z1 - LOBE_Z0 + 0.2);
-            }
-        // Arm
-        translate([COLLAR_OD, -LOBE_W/2, LOBE_Z0])
-            cube([LOBE_L, LOBE_W, LOBE_Z1 - LOBE_Z0]);
+            // Arm: starts at x=0 to overlap collar (no touching edge seam)
+            translate([0, -LOBE_W/2, LOBE_Z0])
+                cube([COLLAR_OD + LOBE_L, LOBE_W, LOBE_Z1 - LOBE_Z0]);
+        }
+        // Post-hole clearance
+        translate([0, 0, LOBE_Z0 - 0.1])
+            cylinder(r=POST_R + GAP, h=LOBE_Z1 - LOBE_Z0 + 0.2);
     }
 }
 
