@@ -31,10 +31,10 @@ POST_Z1   = 87.0;
 GAP       = 0.45;
 
 // Bar (horizontal, rotates around post Z axis)
-BAR_Z0    = 82.35;   // bar bottom (slightly below end-wall top for engagement)
+BAR_Z0    = 82.4;    // bar bottom (slightly below end-wall top for engagement)
 BAR_Z1    = 88.5;    // bar top
 BAR_H     = BAR_Z1 - BAR_Z0;
-BAR_THK   = 7.0;     // bar thickness in Y
+BAR_THK   = 20.0;    // bar width in Y (wide for capture)
 
 // Bar collar
 COLLAR_OD = POST_R + GAP + 2.0;
