@@ -86,41 +86,36 @@ module c_jaw(side, lock_state) {
     hook_z = lock_state==1 ? JAW_HOOK_Z_LOCK : JAW_HOOK_Z_UNLOCK;
     outer_z0 = hook_z - JAW_H_OUTER;
 
-    // For left (side=0):
-    //   Outer flange: x = -(JAW_T+JAW_GAP) .. -JAW_GAP    [outside tray, x<0]
-    //   Gap for wall: x = -JAW_GAP .. END_WALL_T+JAW_GAP   [new tray end wall zone]
-    //   Inner arm:    x = END_WALL_T+JAW_GAP .. END_WALL_T+JAW_GAP+JAW_T  [inside tray]
-    // For right (side=1): mirror at x=NTX
+    // Jaw is a simple L-shape on the OUTSIDE of the tray end face only.
+    // The vertical stem runs beside the outer face of the top tray end wall (x<0 or x>NTX).
+    // A hook nose on top extends INWARD over the end wall top edge.
+    //
+    // Left jaw (side=0): stem at x=-(JAW_T+JAW_GAP)..-JAW_GAP (= x=-4.6..-0.6)
+    //                    hook nose at z=hook_z, extends x=-JAW_GAP..(END_WALL_T+JAW_GAP)
+    //                    = x=-0.6..3.6 (bridges the end wall top)
+    // Right jaw (side=1): mirror at x=NTX
 
-    // Build C-jaw as three separate parts to ensure manifold geometry
-    // (union of outer flange + web at bottom + inner arm)
-
-    // Sign-corrected x positions
-    of_x  = side==0 ? -(JAW_T+JAW_GAP) : NTX+JAW_GAP;      // outer flange left x
-    ia_x  = side==0 ?  END_WALL_T+JAW_GAP : NTX-END_WALL_T-JAW_GAP-JAW_T; // inner arm left x
-    web_x = side==0 ? -(JAW_T+JAW_GAP) : NTX-END_WALL_T-JAW_GAP-JAW_T;  // web left x
-    web_w = side==0 ? (END_WALL_T+JAW_GAP+JAW_T + JAW_T+JAW_GAP)
-                    : (END_WALL_T+JAW_GAP+JAW_T + JAW_T+JAW_GAP); // total span
+    of_x = side==0 ? -(JAW_T+JAW_GAP) : NTX+JAW_GAP;   // stem left edge x
+    // Hook nose bridges from just inside outer gap to just past inner face of end wall
+    hook_x0 = side==0 ? -(JAW_T+JAW_GAP) : NTX-END_WALL_T-JAW_GAP;
+    hook_xw = JAW_T + END_WALL_T + 2*JAW_GAP;   // = 4+3+1.2 = 8.2mm spans end wall
 
     color("#D84315")
     translate([0, JAW_Y0, 0])
     union() {
-        // Outer flange (runs full height on outside of tray end)
+        // Vertical stem (outer face of top tray end wall, x outside tray)
         translate([of_x, 0, outer_z0])
-            cube([JAW_T, JAW_YW, JAW_H_OUTER + HOOK_H]);
+            cube([JAW_T, JAW_YW, JAW_H_OUTER]);
 
-        // Bottom web connecting outer flange to inner arm base
-        translate([web_x, 0, outer_z0])
-            cube([web_w, JAW_YW, 3]);
+        // Hook nose on top of stem, extending inward over end wall top
+        // In locked state this nose is at z=hook_z above z=83 → catches end wall
+        // In unlocked state this nose is at z=hook_z=40 → well below z=50 (clear)
+        translate([hook_x0, 0, hook_z])
+            cube([hook_xw, JAW_YW, HOOK_H]);
 
-        // Inner arm (starts at inner face of tray end wall + clearance)
-        // Runs only JAW_H_INNER tall from the hook position down
-        translate([ia_x, 0, hook_z - JAW_H_INNER])
-            cube([JAW_T, JAW_YW, JAW_H_INNER + HOOK_H]);
-
-        // Thumb tab for pushing jaw up (on outer flange side)
-        translate([of_x - (side==0?4:0), JAW_YW/2-10, hook_z - 10])
-            cube([JAW_T + 4, 20, 10]);
+        // Thumb push tab (integrated into stem, easier to push up)
+        translate([of_x - (side==0 ? 5 : 0), JAW_YW/2-10, outer_z0 + JAW_H_OUTER - 12])
+            cube([JAW_T+5, 20, 12]);
     }
 }
 
