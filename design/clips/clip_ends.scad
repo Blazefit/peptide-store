@@ -21,8 +21,9 @@ SP_Z0  = 33; SP_Z1 = 86;   // spine vertical span
 BB_Z0  = 33; BB_Z1 = 43;   // barb height (within window, top near z44)
 BB_X   = 4.6;              // reaches 1.6mm past the 3mm wall (sits inside the window)
 // top notch that grips L3 end-wall top (wall x0-3, top z83)
+CLR    = 0.4;              // assembly clearance for print-bureau tolerances (MJF/SLS/FDM)
 TN_OVER = 6;               // how far the over-top lip reaches inward
-IN_LIP_X0 = 3.0; IN_LIP_X1 = 5.4;  // inner catching lip (behind inner face x=3)
+IN_LIP_X0 = 3.0+CLR; IN_LIP_X1 = 3.0+CLR+2.4;  // inner catching lip (clears the 3mm wall)
 IN_LIP_Z0 = 78.5; IN_LIP_Z1 = 84.5;
 DET_Z  = 79;               // detent bump height (clicks under the inner top edge)
 
