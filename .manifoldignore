@@ -1,0 +1,7 @@
+# Globs (gitignore-style) for STLs the manifold CI should NOT gate on.
+# Use for intentional non-printable artifacts (visual mockups, broken concepts
+# kept for reference). One pattern per line. Baseline: nothing ignored — every
+# committed STL is currently watertight.
+#
+# example:
+# design/drawers/mixed/attach2/**/*.stl

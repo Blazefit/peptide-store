@@ -1,0 +1,37 @@
+name: manifold-audit
+
+# Gate every push/PR: no non-manifold STL may land in the repo.
+# (Catches preview-exported / open-edge meshes before they reach a printer.)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  stl-manifold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install mesh tools
+        run: pip install --quiet trimesh numpy networkx
+
+      - name: Check every STL is watertight/manifold
+        run: python3 tools/check_stl_manifold.py
+
+      # Best-effort: if the repo ships parametric audit scripts, run them too.
+      - name: Run design audit scripts (if present)
+        run: |
+          shopt -s globstar nullglob
+          found=0
+          for s in **/fit_audit.py **/checks*.py; do
+            echo "::group::$s"; python3 "$s" || exit 1; echo "::endgroup::"
+            found=1
+          done
+          [ "$found" = 0 ] && echo "no audit scripts found (ok)"
+        shell: bash
