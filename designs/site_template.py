@@ -203,6 +203,7 @@ SITE_TEMPLATE = r"""<!DOCTYPE html>
           <button class="btn btn-primary" id="downloadBtn">Download SVG</button>
           <button class="btn btn-primary" id="downloadPngBtn">Download PNG</button>
           <button class="btn btn-primary" id="downloadPrintfulBtn">Printful PNG (12&times;16)</button>
+          <button class="btn btn-primary" id="downloadPrintifyBtn">Printify PNG (15&times;18)</button>
           <button class="btn btn-ghost" id="addCartBtn">Add to cart (demo)</button>
         </div>
         <p class="hint">Demo prototype — "add to cart" is a placeholder. Download gives you the print-ready vector.</p>
@@ -663,28 +664,32 @@ function downloadPNG(){
 // Printful-exact export: the art (12x14in @ 300dpi = 1200x1400 art units) placed
 // centered on Printful's standard 12x16in DTG front print area (3600x4800px,
 // transparent). Drops straight into Printful's print zone with no rescaling.
-const PF_W=3600, PF_H=4800;            // 12in x 16in @ 300 DPI
-function downloadPrintful(){
+const PF_W=3600, PF_H=4800;            // Printful: 12in x 16in @ 300 DPI
+const PY_W=4500, PY_H=5400;            // Printify: 15in x 18in @ 300 DPI
+// Render the current art centered on a target print canvas (transparent PNG).
+function downloadTemplate(cw,ch,label){
   const raw=currentArt||recolorArt(currentDesignSVG(),garmentColor,accentColor);
-  const artW=PF_W, artH=Math.round(PF_W*1400/1200);   // 3600 x 4200 (keep 6:7)
-  const offY=Math.round((PF_H-artH)/2);               // center vertically in 16in
+  const artW=cw, artH=Math.round(cw*1400/1200);   // keep the 6:7 art ratio at full width
+  const offY=Math.round((ch-artH)/2);              // center vertically in the canvas
   const inner=raw.replace(/^<svg[^>]*>/i,'').replace(/<\/svg>\s*$/i,'');
-  const wrapped=`<svg xmlns="http://www.w3.org/2000/svg" width="${PF_W}" height="${PF_H}" viewBox="0 0 ${PF_W} ${PF_H}">`
+  const wrapped=`<svg xmlns="http://www.w3.org/2000/svg" width="${cw}" height="${ch}" viewBox="0 0 ${cw} ${ch}">`
     +`<svg x="0" y="${offY}" width="${artW}" height="${artH}" viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid meet">${inner}</svg></svg>`;
   const img=new Image();
   const url=URL.createObjectURL(new Blob([wrapped],{type:"image/svg+xml"}));
   img.onload=()=>{
-    const c=document.createElement('canvas');c.width=PF_W;c.height=PF_H;
-    c.getContext('2d').drawImage(img,0,0,PF_W,PF_H);
+    const c=document.createElement('canvas');c.width=cw;c.height=ch;
+    c.getContext('2d').drawImage(img,0,0,cw,ch);
     URL.revokeObjectURL(url);
     c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);
-      a.download=fileBase()+"_printful_3600x4800.png";a.click();URL.revokeObjectURL(a.href);},"image/png");
+      a.download=fileBase()+`_${label}_${cw}x${ch}.png`;a.click();URL.revokeObjectURL(a.href);},"image/png");
   };
-  img.onerror=()=>{URL.revokeObjectURL(url);alert("Printful PNG export failed in this browser — use the SVG.");};
+  img.onerror=()=>{URL.revokeObjectURL(url);alert(label+" PNG export failed in this browser — use the SVG.");};
   img.src=url;
 }
 const pfBtn=document.getElementById('downloadPrintfulBtn');
-if(pfBtn) pfBtn.onclick=downloadPrintful;
+if(pfBtn) pfBtn.onclick=()=>downloadTemplate(PF_W,PF_H,"printful");
+const pyBtn=document.getElementById('downloadPrintifyBtn');
+if(pyBtn) pyBtn.onclick=()=>downloadTemplate(PY_W,PY_H,"printify");
 const pngBtn=document.getElementById('downloadPngBtn');
 if(pngBtn) pngBtn.onclick=downloadPNG;
 document.getElementById('addCartBtn').onclick=()=>alert("Demo only — this is where checkout would go.\n\nStack: "+selected.join(" + "));

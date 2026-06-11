@@ -509,37 +509,47 @@ def light_variant(svg):
 
 # Printful standard front DTG print area: 12in x 16in @ 300 DPI = 3600 x 4800 px.
 # Our art is 12in x 14in (1200x1400, 6:7); we center it on the 16in-tall canvas.
-PF_W, PF_H = 3600, 4800
-PF_ART_W, PF_ART_H = 3600, 4200            # art keeps 6:7 at full width
-PF_OFF_Y = (PF_H - PF_ART_H) // 2          # 300px top/bottom margin
-DO_PRINTFUL = False                        # set True via --printful; heavy 3600x4800 batch
+PF_W, PF_H = 3600, 4800                    # Printful: 12x16in @ 300 DPI
+PY_W, PY_H = 4500, 5400                    # Printify: 15x18in @ 300 DPI
+DO_PRINTFUL = False                        # set True via --printful; heavy batch
+DO_PRINTIFY = False                        # set True via --printify; heavy batch
 
 
-def printful_wrap(svg):
-    """Center the 1200x1400 art on Printful's 3600x4800 transparent print area."""
+def template_wrap(svg, cw, ch):
+    """Center the 1200x1400 art on a cw x ch transparent print canvas, keeping
+    the art's 6:7 ratio at full width."""
+    art_w, art_h = cw, round(cw * 1400 / 1200)
+    off_y = (ch - art_h) // 2
     inner = re.sub(r'^\s*<\?xml[^>]*\?>', '', svg)
     inner = re.sub(r'^\s*<svg[^>]*>', '', inner).rsplit('</svg>', 1)[0]
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{PF_W}" height="{PF_H}" '
-            f'viewBox="0 0 {PF_W} {PF_H}">'
-            f'<svg x="0" y="{PF_OFF_Y}" width="{PF_ART_W}" height="{PF_ART_H}" '
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" '
+            f'viewBox="0 0 {cw} {ch}">'
+            f'<svg x="0" y="{off_y}" width="{art_w}" height="{art_h}" '
             f'viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid meet">{inner}</svg></svg>')
 
 
-def render_printful(svg, png_path, light=False):
-    """Render a Printful-template PNG: art centered on a 3600x4800 transparent
-    canvas (12x16in @ 300 DPI), ready to drop straight into Printful's print zone.
-
-    Skipped unless DO_PRINTFUL is on (pass --printful). These 3600x4800 renders
-    are heavy, so routine regens stay fast; run with --printful when you need
-    fresh upload-ready Printful files."""
-    if not DO_PRINTFUL:
-        return
+def render_template(svg, png_path, cw, ch, light=False):
+    """Render the art centered on a cw x ch transparent canvas (print-ready PNG)."""
     art = strip_bg(svg)
     if light:
         art = light_variant(art)
-    art = printful_wrap(art)
-    subprocess.run(["rsvg-convert", "-w", str(PF_W), "-h", str(PF_H), "-o", png_path, "-"],
+    art = template_wrap(art, cw, ch)
+    subprocess.run(["rsvg-convert", "-w", str(cw), "-h", str(ch), "-o", png_path, "-"],
                    input=art.encode("utf-8"), check=True)
+
+
+def render_printful(svg, png_path, light=False):
+    """Printful 12x16in template (3600x4800). Skipped unless --printful (heavy)."""
+    if not DO_PRINTFUL:
+        return
+    render_template(svg, png_path, PF_W, PF_H, light=light)
+
+
+def render_printify(svg, png_path, light=False):
+    """Printify 15x18in template (4500x5400). Skipped unless --printify (heavy)."""
+    if not DO_PRINTIFY:
+        return
+    render_template(svg, png_path, PY_W, PY_H, light=light)
 
 
 def render_print(svg, png_path, light=False):
@@ -560,6 +570,8 @@ def main():
     print_light_dir = os.path.join(print_dir, "light")  # light-garment variant
     pf_dir = os.path.join(here, "print", "printful")        # Printful 3600x4800 (dark ink)
     pf_light_dir = os.path.join(pf_dir, "light")            # Printful 3600x4800 (light-garment ink)
+    py_dir = os.path.join(here, "print", "printify")        # Printify 4500x5400 (dark ink)
+    py_light_dir = os.path.join(py_dir, "light")            # Printify 4500x5400 (light-garment ink)
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
     os.makedirs(print_dir, exist_ok=True)
@@ -567,6 +579,9 @@ def main():
     if DO_PRINTFUL:
         os.makedirs(pf_dir, exist_ok=True)
         os.makedirs(pf_light_dir, exist_ok=True)
+    if DO_PRINTIFY:
+        os.makedirs(py_dir, exist_ok=True)
+        os.makedirs(py_light_dir, exist_ok=True)
 
     made = []
     printed = 0
@@ -583,6 +598,8 @@ def main():
         render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
         render_printful(svg, os.path.join(pf_dir, base + ".png"))
         render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
+        render_printify(svg, os.path.join(py_dir, base + ".png"))
+        render_printify(svg, os.path.join(py_light_dir, base + ".png"), light=True)
         printed += 1
         made.append(base)
 
@@ -598,6 +615,8 @@ def main():
         render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
         render_printful(svg, os.path.join(pf_dir, base + ".png"))
         render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
+        render_printify(svg, os.path.join(py_dir, base + ".png"))
+        render_printify(svg, os.path.join(py_light_dir, base + ".png"), light=True)
         printed += 1
         made.append(base)
 
@@ -615,6 +634,8 @@ def main():
         render_print(svg, os.path.join(print_light_dir, base + ".png"), light=True)
         render_printful(svg, os.path.join(pf_dir, base + ".png"))
         render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
+        render_printify(svg, os.path.join(py_dir, base + ".png"))
+        render_printify(svg, os.path.join(py_light_dir, base + ".png"), light=True)
         printed += 1
         made.append(base)
 
@@ -641,6 +662,8 @@ def main():
         render_print(fsvg, os.path.join(print_light_dir, fbase + ".png"), light=True)
         render_printful(fsvg, os.path.join(pf_dir, fbase + ".png"))
         render_printful(fsvg, os.path.join(pf_light_dir, fbase + ".png"), light=True)
+        render_printify(fsvg, os.path.join(py_dir, fbase + ".png"))
+        render_printify(fsvg, os.path.join(py_light_dir, fbase + ".png"), light=True)
         printed += 1
         made.append(fbase)
 
@@ -664,8 +687,14 @@ def main():
               f"(print/printful/) @ {PF_W}x{PF_H}")
     else:
         print("Printful 12x16 batch skipped (run with --printful to render upload-ready files)")
+    if DO_PRINTIFY:
+        print(f"Printify 15x18 PNGs: {printed} dark + {printed} light "
+              f"(print/printify/) @ {PY_W}x{PY_H}")
+    else:
+        print("Printify 15x18 batch skipped (run with --printify to render upload-ready files)")
 
 
 if __name__ == "__main__":
-    DO_PRINTFUL = ("--printful" in sys.argv)
+    DO_PRINTFUL = ("--printful" in sys.argv) or ("--all" in sys.argv)
+    DO_PRINTIFY = ("--printify" in sys.argv) or ("--all" in sys.argv)
     main()
