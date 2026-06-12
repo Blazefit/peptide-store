@@ -187,23 +187,26 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
     cx = tx + tw / 2
 
     # ---- top corners ----
+    # Print-visibility note: all small labels are BOLD at >=0.75 opacity and the
+    # divider is 6 units wide -- thin/faded strokes get flagged by POD pre-checks
+    # (and vanish entirely at sticker sizes). Content/layout unchanged.
     if fam == "PEP":
         if name_num:
             tl_big, tl_label = name_num, "SERIES"
-            tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="3"
-        text-anchor="end" fill="{WHITE}" fill-opacity="0.6">AMINO ACIDS</text>
+            tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="32" font-weight="700" letter-spacing="3"
+        text-anchor="end" fill="{WHITE}" fill-opacity="0.85">AMINO ACIDS</text>
   <text x="{tx+tw-45}" y="{ty+126}" font-family="{MONO}" font-size="62" font-weight="700"
         text-anchor="end" fill="{acc}">{count}</text>'''
         else:
             tl_big, tl_label = str(count), "AMINO ACIDS"
-            tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="4"
-        text-anchor="end" fill="{WHITE}" fill-opacity="0.6">PEPTIDE</text>'''
+            tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="32" font-weight="700" letter-spacing="4"
+        text-anchor="end" fill="{WHITE}" fill-opacity="0.85">PEPTIDE</text>'''
     else:  # HOR or MOL : numbered by molecular weight
         tl_big, tl_label = str(count), "g/mol"
         fam_word = "HORMONE" if fam == "HOR" else "MOLECULE"
-        tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="28" letter-spacing="4"
-        text-anchor="end" fill="{WHITE}" fill-opacity="0.6">{fam_word}</text>
-  <text x="{tx+tw-45}" y="{ty+120}" font-family="{SANS}" font-size="34" letter-spacing="1"
+        tr = f'''<text x="{tx+tw-45}" y="{ty+58}" font-family="{MONO}" font-size="32" font-weight="700" letter-spacing="4"
+        text-anchor="end" fill="{WHITE}" fill-opacity="0.85">{fam_word}</text>
+  <text x="{tx+tw-45}" y="{ty+120}" font-family="{SANS}" font-size="36" font-weight="700" letter-spacing="1"
         text-anchor="end" fill="{acc}">{esc(formula)}</text>'''
 
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -211,15 +214,15 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
   <!-- HUMAN+ tile : {esc(full)} -->
   <text x="600" y="190" font-family="{SANS}" font-size="92" font-weight="800"
         text-anchor="middle" letter-spacing="6" fill="{WHITE}">HUMAN<tspan fill="{acc}">+</tspan></text>
-  <text x="600" y="240" font-family="{MONO}" font-size="26" text-anchor="middle"
-        letter-spacing="8" fill="{WHITE}" fill-opacity="0.45">THE PERIODIC TABLE OF ENHANCEMENT</text>
+  <text x="600" y="240" font-family="{MONO}" font-size="30" font-weight="700" text-anchor="middle"
+        letter-spacing="8" fill="{WHITE}" fill-opacity="0.75">THE PERIODIC TABLE OF ENHANCEMENT</text>
 
   <rect x="{tx}" y="{ty}" width="{tw}" height="{th}" rx="20" fill="none" stroke="{acc}" stroke-width="10"/>
-  <line x1="{tx}" y1="{ty+170}" x2="{tx+tw}" y2="{ty+170}" stroke="{acc}" stroke-width="3" stroke-opacity="0.4"/>
+  <line x1="{tx}" y1="{ty+170}" x2="{tx+tw}" y2="{ty+170}" stroke="{acc}" stroke-width="6" stroke-opacity="0.75"/>
 
   <!-- top-left number (roomy spacing above the divider) -->
   <text x="{tx+45}" y="{ty+102}" font-family="{MONO}" font-size="80" font-weight="700" fill="{acc}">{tl_big}</text>
-  <text x="{tx+48}" y="{ty+150}" font-family="{MONO}" font-size="26" letter-spacing="3" fill="{WHITE}" fill-opacity="0.6">{tl_label}</text>
+  <text x="{tx+48}" y="{ty+150}" font-family="{MONO}" font-size="30" font-weight="700" letter-spacing="3" fill="{WHITE}" fill-opacity="0.85">{tl_label}</text>
 
   <!-- top-right -->
   {tr}
@@ -231,15 +234,15 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
   <!-- full name -->
   <text x="{cx}" y="{ty+665}" font-family="{SANS}" font-size="74" font-weight="800"
         text-anchor="middle" fill="{acc}">{esc(full)}</text>
-  <text x="{cx}" y="{ty+712}" font-family="{SANS}" font-size="33" letter-spacing="2"
-        text-anchor="middle" fill="{WHITE}" fill-opacity="0.7">{esc(sub.upper())}</text>
+  <text x="{cx}" y="{ty+712}" font-family="{SANS}" font-size="34" font-weight="700" letter-spacing="2"
+        text-anchor="middle" fill="{WHITE}" fill-opacity="0.85">{esc(sub.upper())}</text>
 
   <!-- tagline -->
   <text x="{cx}" y="{ty+772}" font-family="{MONO}" font-size="33" font-weight="700" letter-spacing="6"
         text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
 
-  <text x="600" y="1300" font-family="{MONO}" font-size="28" letter-spacing="4"
-        text-anchor="middle" fill="{WHITE}" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+  <text x="600" y="1300" font-family="{MONO}" font-size="30" font-weight="700" letter-spacing="4"
+        text-anchor="middle" fill="{WHITE}" fill-opacity="0.7">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
 </svg>'''
     return svg
 

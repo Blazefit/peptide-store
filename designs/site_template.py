@@ -249,29 +249,29 @@ function heroTileSVG(e){
   let tlBig,tlLabel,tr;
   if(e.fam==="PEP"){
     if(e.name_num){tlBig=e.name_num;tlLabel="SERIES";
-      tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="28" letter-spacing="3" text-anchor="end" fill="#fff" fill-opacity=".6">AMINO ACIDS</text>
+      tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="32" font-weight="700" letter-spacing="3" text-anchor="end" fill="#fff" fill-opacity=".85">AMINO ACIDS</text>
           <text x="${tx+tw-45}" y="${ty+126}" font-family="${MONO}" font-size="62" font-weight="700" text-anchor="end" fill="${acc}">${e.count}</text>`;
     } else {tlBig=e.count;tlLabel="AMINO ACIDS";
-      tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="28" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".6">PEPTIDE</text>`;}
+      tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="32" font-weight="700" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".85">PEPTIDE</text>`;}
   } else {
     tlBig=e.count;tlLabel="g/mol";
     const famWord = e.fam==="MOL"?"MOLECULE":"HORMONE";
-    tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="28" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".6">${famWord}</text>
-        <text x="${tx+tw-45}" y="${ty+120}" font-family="${SANS}" font-size="34" letter-spacing="1" text-anchor="end" fill="${acc}">${esc(e.formula)}</text>`;
+    tr=`<text x="${tx+tw-45}" y="${ty+58}" font-family="${MONO}" font-size="32" font-weight="700" letter-spacing="4" text-anchor="end" fill="#fff" fill-opacity=".85">${famWord}</text>
+        <text x="${tx+tw-45}" y="${ty+120}" font-family="${SANS}" font-size="36" font-weight="700" letter-spacing="1" text-anchor="end" fill="${acc}">${esc(e.formula)}</text>`;
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400">
     <text x="600" y="190" font-family="${SANS}" font-size="92" font-weight="800" text-anchor="middle" letter-spacing="6" fill="#fff">HUMAN<tspan fill="${acc}">+</tspan></text>
-    <text x="600" y="240" font-family="${MONO}" font-size="26" text-anchor="middle" letter-spacing="8" fill="#fff" fill-opacity=".45">THE PERIODIC TABLE OF ENHANCEMENT</text>
+    <text x="600" y="240" font-family="${MONO}" font-size="30" font-weight="700" text-anchor="middle" letter-spacing="8" fill="#fff" fill-opacity=".75">THE PERIODIC TABLE OF ENHANCEMENT</text>
     <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="20" fill="none" stroke="${acc}" stroke-width="10"/>
-    <line x1="${tx}" y1="${ty+170}" x2="${tx+tw}" y2="${ty+170}" stroke="${acc}" stroke-width="3" stroke-opacity=".4"/>
+    <line x1="${tx}" y1="${ty+170}" x2="${tx+tw}" y2="${ty+170}" stroke="${acc}" stroke-width="6" stroke-opacity=".75"/>
     <text x="${tx+45}" y="${ty+102}" font-family="${MONO}" font-size="80" font-weight="700" fill="${acc}">${tlBig}</text>
-    <text x="${tx+48}" y="${ty+150}" font-family="${MONO}" font-size="26" letter-spacing="3" fill="#fff" fill-opacity=".6">${tlLabel}</text>
+    <text x="${tx+48}" y="${ty+150}" font-family="${MONO}" font-size="30" font-weight="700" letter-spacing="3" fill="#fff" fill-opacity=".85">${tlLabel}</text>
     ${tr}
     <text x="${cx}" y="${ty+475}" font-family="${SANS}" font-size="340" font-weight="800" text-anchor="middle" fill="#fff">${esc(e.sym)}</text>
     <text x="${cx}" y="${ty+665}" font-family="${SANS}" font-size="74" font-weight="800" text-anchor="middle" fill="${acc}">${esc(e.full)}</text>
-    <text x="${cx}" y="${ty+712}" font-family="${SANS}" font-size="33" letter-spacing="2" text-anchor="middle" fill="#fff" fill-opacity=".7">${esc(e.sub.toUpperCase())}</text>
+    <text x="${cx}" y="${ty+712}" font-family="${SANS}" font-size="34" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#fff" fill-opacity=".85">${esc(e.sub.toUpperCase())}</text>
     <text x="${cx}" y="${ty+772}" font-family="${MONO}" font-size="33" font-weight="700" letter-spacing="6" text-anchor="middle" fill="#fff">${esc(e.tag)}</text>
-    <text x="600" y="1300" font-family="${MONO}" font-size="28" letter-spacing="4" text-anchor="middle" fill="#fff" fill-opacity=".4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+    <text x="600" y="1300" font-family="${MONO}" font-size="30" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#fff" fill-opacity=".7">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
   </svg>`;
 }
 
