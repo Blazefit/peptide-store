@@ -247,6 +247,44 @@ def hero_tile(sym, full, sub, fam, name_num, count, tagline, formula):
     return svg
 
 
+def sticker_tile(sym, full, sub, fam, name_num, count, tagline, formula):
+    """Simplified STICKER variant: a single bold periodic cell that stays legible
+    at small (3-4in) sizes. Drops the page header, sub-name and footer/fine print;
+    keeps symbol + number + full name + tagline. Square-ish 1200x1200 canvas,
+    thick border, everything heavy and high-contrast. Same data, no thin strokes."""
+    acc = PALETTE[fam]
+    W = 1200
+    bx, by, bw, bh = 90, 90, W - 180, W - 180   # big rounded cell almost full-bleed
+    cx = W / 2
+    # top-left number + unit, top-right family
+    if fam == "PEP":
+        tl_big = name_num if name_num else str(count)
+        unit = "AMINO ACIDS"
+        fam_word = "PEPTIDE"
+        tr_extra = ""
+    else:
+        tl_big = str(count)
+        unit = "g/mol"
+        fam_word = "HORMONE" if fam == "HOR" else "MOLECULE"
+        tr_extra = (f'<text x="{bx+bw-40}" y="{by+150}" font-family="{SANS}" font-size="40" '
+                    f'font-weight="700" text-anchor="end" fill="{acc}">{esc(formula)}</text>')
+    name_fs, _ = fit_text(full, bw - 90, 88)
+    return f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {W}" width="{W}" height="{W}">
+  <!-- HUMAN+ sticker : {esc(full)} -->
+  <rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="40" fill="none" stroke="{acc}" stroke-width="16"/>
+  <line x1="{bx}" y1="{by+210}" x2="{bx+bw}" y2="{by+210}" stroke="{acc}" stroke-width="8" stroke-opacity="0.85"/>
+  <text x="{bx+45}" y="{by+125}" font-family="{MONO}" font-size="96" font-weight="700" fill="{acc}">{tl_big}</text>
+  <text x="{bx+50}" y="{by+180}" font-family="{MONO}" font-size="34" font-weight="700" letter-spacing="3" fill="{WHITE}" fill-opacity="0.85">{unit}</text>
+  <text x="{bx+bw-40}" y="{by+70}" font-family="{MONO}" font-size="36" font-weight="700" letter-spacing="3" text-anchor="end" fill="{WHITE}" fill-opacity="0.85">{fam_word}</text>
+  {tr_extra}
+  <text x="{cx}" y="{by+540}" font-family="{SANS}" font-size="360" font-weight="800" text-anchor="middle" fill="{WHITE}">{esc(sym)}</text>
+  <text x="{cx}" y="{by+678}" font-family="{SANS}" font-size="{name_fs}" font-weight="800" text-anchor="middle" fill="{acc}">{esc(full)}</text>
+  <text x="{cx}" y="{by+730}" font-family="{SANS}" font-size="34" font-weight="700" letter-spacing="2" text-anchor="middle" fill="{WHITE}" fill-opacity="0.85">{esc(sub.upper())}</text>
+  <text x="{cx}" y="{by+790}" font-family="{MONO}" font-size="38" font-weight="700" letter-spacing="4" text-anchor="middle" fill="{WHITE}">{esc(tagline)}</text>
+</svg>'''
+
+
 def modified_human():
     """The 'Factory Default -> Human+' two-tile concept."""
     acc = "#2BE8B0"
@@ -575,10 +613,16 @@ def main():
     pf_light_dir = os.path.join(pf_dir, "light")            # Printful 3600x4800 (light-garment ink)
     py_dir = os.path.join(here, "print", "printify")        # Printify 4500x5400 (dark ink)
     py_light_dir = os.path.join(py_dir, "light")            # Printify 4500x5400 (light-garment ink)
+    sticker_prev_dir = os.path.join(here, "sticker")            # sticker previews
+    sticker_print_dir = os.path.join(here, "print", "sticker")  # high-res sticker (dark ink)
+    sticker_light_dir = os.path.join(sticker_print_dir, "light") # dark ink for white/clear stickers
     os.makedirs(svg_dir, exist_ok=True)
     os.makedirs(prev_dir, exist_ok=True)
     os.makedirs(print_dir, exist_ok=True)
     os.makedirs(print_light_dir, exist_ok=True)
+    os.makedirs(sticker_prev_dir, exist_ok=True)
+    os.makedirs(sticker_print_dir, exist_ok=True)
+    os.makedirs(sticker_light_dir, exist_ok=True)
     if DO_PRINTFUL:
         os.makedirs(pf_dir, exist_ok=True)
         os.makedirs(pf_light_dir, exist_ok=True)
@@ -603,6 +647,16 @@ def main():
         render_printful(svg, os.path.join(pf_light_dir, base + ".png"), light=True)
         render_printify(svg, os.path.join(py_dir, base + ".png"))
         render_printify(svg, os.path.join(py_light_dir, base + ".png"), light=True)
+        # simplified sticker variant (legible at small sizes): preview + high-res dark + dark-ink
+        st = sticker_tile(*el)
+        ssp = os.path.join(svg_dir, "sticker_" + base + ".svg")
+        with open(ssp, "w") as f:
+            f.write(st)
+        render_png(ssp, os.path.join(sticker_prev_dir, base + ".png"))
+        subprocess.run(["rsvg-convert", "-w", "2400", "-o", os.path.join(sticker_print_dir, base + ".png"), "-"],
+                       input=strip_bg(st).encode("utf-8"), check=True)
+        subprocess.run(["rsvg-convert", "-w", "2400", "-o", os.path.join(sticker_light_dir, base + ".png"), "-"],
+                       input=light_variant(strip_bg(st)).encode("utf-8"), check=True)
         printed += 1
         made.append(base)
 
