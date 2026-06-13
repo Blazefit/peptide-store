@@ -55,6 +55,31 @@
           txt(860, 850, BRAND.sans, 38, 700, 0, "middle", g, 1, "Human plus") +
           txt(860, 895, BRAND.mono, 22, 700, 2, "middle", g, .8, "ENHANCED");
       }
+    },
+    avatar_square: {
+      label: "Avatar (square)",
+      vb: [1024, 1024],
+      build: function (t, g) {
+        return '<rect width="1024" height="1024" rx="200" fill="#0d0d12"/>' +
+          '<rect x="104" y="104" width="816" height="816" rx="132" fill="none" stroke="' + g + '" stroke-width="20"/>' +
+          txt(168, 270, BRAND.mono, 92, 700, 0, "start", g, 1, "01") +
+          txt(856, 262, BRAND.mono, 50, 700, 3, "end", "#FFFFFF", .7, "ENHANCED") +
+          hplus(512, 595, 400, 0, "middle", "#FFFFFF", g) +
+          tspanLine(512, 775, 92, 2, "middle", g, g) +
+          txt(512, 838, BRAND.mono, 38, 700, 6, "middle", "#FFFFFF", .55, "HOMO SAPIENS · UPGRADED");
+      }
+    },
+    avatar_circle: {
+      label: "Avatar (circle)",
+      vb: [1024, 1024],
+      build: function (t, g) {
+        return '<circle cx="512" cy="512" r="508" fill="#0d0d12"/>' +
+          '<circle cx="512" cy="512" r="470" fill="none" stroke="' + g + '" stroke-width="22"/>' +
+          txt(512, 300, BRAND.mono, 66, 700, 10, "middle", g, 1, "01") +
+          hplus(512, 565, 310, 0, "middle", "#FFFFFF", g) +
+          tspanLine(512, 710, 82, 2, "middle", g, g) +
+          txt(512, 766, BRAND.mono, 33, 700, 7, "middle", "#FFFFFF", .55, "ENHANCED");
+      }
     }
   };
 
@@ -65,6 +90,12 @@
     return '<text x="' + x + '" y="' + y + '" font-family="' + BRAND.sans +
       '" font-size="' + size + '" font-weight="800" letter-spacing="' + ls +
       '" text-anchor="' + anchor + '" fill="' + fill + '">HUMAN<tspan fill="' + green + '">+</tspan></text>';
+  }
+  // "H" + green "+" monogram (avatars)
+  function hplus(x, y, size, ls, anchor, fill, green) {
+    return '<text x="' + x + '" y="' + y + '" font-family="' + BRAND.sans +
+      '" font-size="' + size + '" font-weight="800" letter-spacing="' + ls +
+      '" text-anchor="' + anchor + '" fill="' + fill + '">H<tspan fill="' + green + '">+</tspan></text>';
   }
   function tagline(x, y, size, ls, anchor, fill) {
     return '<text x="' + x + '" y="' + y + '" font-family="' + BRAND.mono +
@@ -97,7 +128,10 @@
     a.href = url; a.download = name; a.click();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
-  function fname(ext) { return "human-plus-" + state.variant + "-" + state.mode + "." + ext; }
+  function isAvatar() { return state.variant.indexOf("avatar") === 0; }
+  function fname(ext) {
+    return "human-plus-" + (isAvatar() ? state.variant.replace("_", "-") : state.variant + "-" + state.mode) + "." + ext;
+  }
 
   function downloadSVG() {
     downloadBlob(new Blob([buildSVG(state.variant, state.mode)], { type: "image/svg+xml" }), fname("svg"));
@@ -105,7 +139,7 @@
   function downloadPNG() {
     var svg = buildSVG(state.variant, state.mode);
     var v = VARIANTS[state.variant].vb;
-    var longEdge = 4000, scale = longEdge / Math.max(v[0], v[1]);
+    var longEdge = isAvatar() ? 1024 : 4000, scale = longEdge / Math.max(v[0], v[1]);
     var W = Math.round(v[0] * scale), H = Math.round(v[1] * scale);
     var img = new Image();
     img.onload = function () {
@@ -118,11 +152,19 @@
 
   function renderPreview() {
     var box = root.querySelector(".lk-preview");
-    box.style.background = state.mode === "ink" ? "#e9e9ef" : "#0d0d12";
+    var av = isAvatar();
+    box.style.background = av ? "#33343f" : (state.mode === "ink" ? "#e9e9ef" : "#0d0d12");
     box.innerHTML = buildSVG(state.variant, state.mode);
     var svgEl = box.querySelector("svg");
     svgEl.removeAttribute("width"); svgEl.removeAttribute("height");
     svgEl.style.maxWidth = "100%"; svgEl.style.maxHeight = "300px";
+    // color choice only applies to the logo variants, not the fixed-palette avatars
+    var colorRow = root.querySelector(".lk-color-row");
+    if (colorRow) colorRow.style.display = av ? "none" : "";
+    var sub = root.querySelector(".lk-sub");
+    if (sub) sub.textContent = av
+      ? "Profile picture · upload-ready · vector SVG + 1024px PNG"
+      : "Transparent background · vector SVG + 4000px PNG · front-chest ready";
     root.querySelectorAll("[data-variant]").forEach(function (b) {
       b.classList.toggle("on", b.dataset.variant === state.variant);
     });
@@ -168,14 +210,14 @@
     root.className = "lk-overlay";
     root.innerHTML =
       '<div class="lk-panel" role="dialog" aria-label="HUMAN+ logo download">' +
-      '<div class="lk-head"><h3>HUMAN<span>+</span> Logo Kit</h3><button class="lk-x" aria-label="Close">×</button></div>' +
+      '<div class="lk-head"><h3>HUMAN<span>+</span> Brand Kit</h3><button class="lk-x" aria-label="Close">×</button></div>' +
       '<div class="lk-sub">Transparent background · vector SVG + 4000px PNG · front-chest ready</div>' +
       '<div class="lk-preview"></div>' +
-      '<div class="lk-row"><span class="lk-label">Placement</span>' +
+      '<div class="lk-row"><span class="lk-label">Logo &amp; avatar</span>' +
       Object.keys(VARIANTS).map(function (k) {
         return '<button class="lk-chip" data-variant="' + k + '">' + VARIANTS[k].label + '</button>';
       }).join("") + '</div>' +
-      '<div class="lk-row"><span class="lk-label">Color</span>' +
+      '<div class="lk-row lk-color-row"><span class="lk-label">Color</span>' +
       '<button class="lk-chip" data-mode="light">Light (dark garments)</button>' +
       '<button class="lk-chip" data-mode="ink">Ink (light garments)</button></div>' +
       '<div class="lk-actions"><button class="lk-svg">Download SVG</button><button class="lk-png">Download PNG</button></div>' +
