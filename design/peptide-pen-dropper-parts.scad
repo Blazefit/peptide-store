@@ -42,7 +42,12 @@ module cushion_fingers() {
 //  SHUTTER  — one flat slide. Closed = covers the window; pull it forward to drop.
 // =============================================================================
 z_sh = axle_z - shroud_ir - shutter_gap - shutter_th;   // sits just below the window
-sw   = 2*upright_x_in - 1;                               // full width (ends in tracks)
+// FIX: original `2*upright_x_in - 1` put the ends at ±(upright_x_in-0.5), which is
+// 0.4 mm SHORT of the track-groove inner edge (upright_x_in-0.1), so the shutter never
+// engaged its rails and pens spilled. Extend the ends `track_engage` mm INTO the 3 mm
+// groove so they seat and are captured.
+track_engage = 1.5;                                      // ends sit this far into the groove
+sw   = 2*(upright_x_in + track_engage);                  // full width (ends seated in tracks)
 hw   = min(2*upright_x_in - 20, 46);                     // handle width (narrower)
 win_y = shroud_ir*sin(win_ang);
 
