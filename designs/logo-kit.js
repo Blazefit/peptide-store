@@ -131,9 +131,10 @@
     });
   }
 
-  function ensureModal() {
-    if (root) return;
+  function injectStyles() {
+    if (document.getElementById("logokit-styles")) return;
     var style = document.createElement("style");
+    style.id = "logokit-styles";
     style.textContent =
       ".logokit-trigger{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font:700 .8rem/1 " + BRAND.sans + ";letter-spacing:.5px;color:#bdf5e4;background:rgba(43,232,176,.10);border:1px solid rgba(43,232,176,.40);border-radius:8px;cursor:pointer;transition:.15s;text-decoration:none;}" +
       ".logokit-trigger:hover{background:" + BRAND.green + ";color:#08110d;border-color:" + BRAND.green + ";}" +
@@ -159,7 +160,10 @@
       ".lk-png{background:" + BRAND.green + ";color:#08110d;}" +
       ".lk-png:hover{filter:brightness(1.08);}";
     document.head.appendChild(style);
+  }
 
+  function ensureModal() {
+    if (root) return;
     root = document.createElement("div");
     root.className = "lk-overlay";
     root.innerHTML =
@@ -190,6 +194,11 @@
       if (e.key === "Escape" && root.classList.contains("open")) closeLogoKit();
     });
   }
+
+  // Inject styles immediately on load so the header trigger is styled before any click
+  // (not lazily on first open — otherwise the button renders as a default browser box).
+  if (document.head) injectStyles();
+  else document.addEventListener("DOMContentLoaded", injectStyles);
 
   window.openLogoKit = function () { ensureModal(); renderPreview(); root.classList.add("open"); };
   window.closeLogoKit = function () { if (root) root.classList.remove("open"); };
