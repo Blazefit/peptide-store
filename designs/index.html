@@ -199,6 +199,7 @@
           <button class="btn btn-primary" id="downloadPngBtn">Download PNG</button>
           <button class="btn btn-primary" id="downloadPrintfulBtn">Printful PNG (12&times;16)</button>
           <button class="btn btn-primary" id="downloadPrintifyBtn">Printify PNG (15&times;18)</button>
+          <button class="btn btn-primary" id="downloadStickerBtn" style="display:none;">Download Sticker</button>
           <button class="btn btn-ghost" id="addCartBtn">Add to cart (demo)</button>
         </div>
         <p class="hint">Demo prototype — "add to cart" is a placeholder. Download gives you the print-ready vector.</p>
@@ -1132,6 +1133,33 @@ function fitFS(text,maxW,base,avg=0.82){
   return Math.floor(maxW/(text.length*avg));
 }
 
+/* simplified STICKER variant (mirrors sticker_tile in generate_tiles.py) */
+function stickerSVG(e){
+  const acc=accentOf(e), W=1200, bx=90, by=90, bw=W-180, bh=W-180, cx=W/2;
+  let tlBig,unit,famWord,trExtra="";
+  if(e.fam==="PEP"){tlBig=e.name_num?e.name_num:(""+e.count);unit="AMINO ACIDS";famWord="PEPTIDE";}
+  else{tlBig=""+e.count;unit="g/mol";famWord=e.fam==="MOL"?"MOLECULE":"HORMONE";
+    trExtra=`<text x="${bx+bw-40}" y="${by+150}" font-family="${SANS}" font-size="40" font-weight="700" text-anchor="end" fill="${acc}">${esc(e.formula)}</text>`;}
+  const nameFs=fitFS(e.full,bw-90,88);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}">
+    <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="40" fill="none" stroke="${acc}" stroke-width="16"/>
+    <line x1="${bx}" y1="${by+210}" x2="${bx+bw}" y2="${by+210}" stroke="${acc}" stroke-width="8" stroke-opacity=".85"/>
+    <text x="${bx+45}" y="${by+125}" font-family="${MONO}" font-size="96" font-weight="700" fill="${acc}">${tlBig}</text>
+    <text x="${bx+50}" y="${by+180}" font-family="${MONO}" font-size="34" font-weight="700" letter-spacing="3" fill="#fff" fill-opacity=".85">${unit}</text>
+    <text x="${bx+bw-40}" y="${by+70}" font-family="${MONO}" font-size="36" font-weight="700" letter-spacing="3" text-anchor="end" fill="#fff" fill-opacity=".85">${famWord}</text>
+    ${trExtra}
+    <text x="${cx}" y="${by+540}" font-family="${SANS}" font-size="360" font-weight="800" text-anchor="middle" fill="#fff">${esc(e.sym)}</text>
+    <text x="${cx}" y="${by+678}" font-family="${SANS}" font-size="${nameFs}" font-weight="800" text-anchor="middle" fill="${acc}">${esc(e.full)}</text>
+    <text x="${cx}" y="${by+730}" font-family="${SANS}" font-size="34" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#fff" fill-opacity=".85">${esc(e.sub.toUpperCase())}</text>
+    <text x="${cx}" y="${by+790}" font-family="${MONO}" font-size="38" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#fff">${esc(e.tag)}</text>
+  </svg>`;
+}
+/* the single selected element, if exactly one plain element is chosen (for stickers) */
+function soloElement(){
+  if(selected.length===1){const e=EL[selected[0]]; if(!e.blend) return e;}
+  return null;
+}
+
 /* fit font-size to a width (mirrors python _fit) */
 function fitW(t,maxW,base,avg){return (t.length*avg*base<=maxW)?base:Math.max(12,Math.floor(maxW/(t.length*avg)));}
 /* component display fields, element OR blend (mirrors comp_display) */
@@ -1454,6 +1482,8 @@ function buildGarmentPage(){
   // front-style picker only when viewing the front of a split design
   document.getElementById('frontStyleRow').style.display=(split&&designSide==="front")?"":"none";
   document.querySelectorAll('#frontSeg button').forEach(b=>b.classList.toggle('on',b.dataset.fs===frontStyle));
+  // sticker download only for a single plain element (stickers are per-element)
+  document.getElementById('downloadStickerBtn').style.display=soloElement()?"":"none";
   // recolor the artwork to match the chosen garment + accent, then use that SAME
   // art for the flat preview, the garment mockup, AND the downloads (so files match)
   currentArt=recolorArt(currentDesignSVG(designSide),garmentColor,accentColor);
@@ -1544,6 +1574,26 @@ const pyBtn=document.getElementById('downloadPrintifyBtn');
 if(pyBtn) pyBtn.onclick=()=>downloadTemplate(PY_W,PY_H,"printify");
 const pngBtn=document.getElementById('downloadPngBtn');
 if(pngBtn) pngBtn.onclick=downloadPNG;
+// Sticker download: 2400x2400 transparent PNG of the single selected element.
+// Honors the garment-color choice (light garment/material -> dark ink) via recolorArt.
+function downloadSticker(){
+  const e=soloElement(); if(!e){alert("Pick a single element to download its sticker.");return;}
+  const art=recolorArt(stickerSVG(e),garmentColor,accentColor).replace(/^<svg /i,'<svg width="2400" height="2400" ');
+  const img=new Image();
+  const url=URL.createObjectURL(new Blob([art],{type:"image/svg+xml"}));
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=2400;c.height=2400;
+    c.getContext('2d').drawImage(img,0,0,2400,2400);
+    URL.revokeObjectURL(url);
+    const tone=luminance(garmentColor)>0.6?"light":"dark";
+    c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);
+      a.download=`${e.full.replace(/\s+/g,"_")}_sticker_${tone}_2400.png`;a.click();URL.revokeObjectURL(a.href);},"image/png");
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);alert("Sticker export failed in this browser.");};
+  img.src=url;
+}
+const stkBtn=document.getElementById('downloadStickerBtn');
+if(stkBtn) stkBtn.onclick=downloadSticker;
 document.getElementById('addCartBtn').onclick=()=>alert("Demo only — this is where checkout would go.\n\nStack: "+selected.join(" + "));
 
 renderGrid();renderBlends();renderPresets();renderTray();
