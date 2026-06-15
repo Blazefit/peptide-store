@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2BE8B0"/><stop offset="33%" stop-color="#7C5CFC"/><stop offset="66%" stop-color="#FF5C8A"/><stop offset="100%" stop-color="#38BDF8"/></linearGradient></defs>
+  <text x="600" y="210" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" text-anchor="middle" letter-spacing="8" fill="#FFFFFF" fill-opacity="0.45">HUMAN+ STACK SERIES</text>
+  <text x="600" y="370" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="188" font-weight="800" text-anchor="middle" fill="url(#g)">SPARTAN</text>
+  <text x="600" y="450" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" letter-spacing="6" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.75">RECOVERY / REPAIR</text>
+  
+  <rect x="41.0" y="640" width="227" height="300" rx="14" fill="none" stroke="#2BE8B0" stroke-width="7"/>
+  <text x="154.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="116" font-weight="800" text-anchor="middle" fill="#FFFFFF">Bp</text>
+  <text x="154.5" y="852" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#2BE8B0">BPC-157</text>
+  <text x="154.5" y="895" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">15aa</text><text x="303.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="80" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="338.0" y="640" width="227" height="300" rx="14" fill="none" stroke="#7C5CFC" stroke-width="7"/>
+  <text x="451.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="116" font-weight="800" text-anchor="middle" fill="#FFFFFF">Tb</text>
+  <text x="451.5" y="852" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#7C5CFC">TB-500</text>
+  <text x="451.5" y="895" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">43aa</text><text x="600.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="80" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="635.0" y="640" width="227" height="300" rx="14" fill="none" stroke="#FF5C8A" stroke-width="7"/>
+  <text x="748.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="116" font-weight="800" text-anchor="middle" fill="#FFFFFF">Cj</text>
+  <text x="748.5" y="852" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#FF5C8A">CJC-1295</text>
+  <text x="748.5" y="895" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">29aa</text><text x="897.0" y="820.0" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="80" font-weight="800" text-anchor="middle" fill="#2BE8B0">+</text>
+  <rect x="932.0" y="640" width="227" height="300" rx="14" fill="none" stroke="#38BDF8" stroke-width="7"/>
+  <text x="1045.5" y="790" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="116" font-weight="800" text-anchor="middle" fill="#FFFFFF">Ip</text>
+  <text x="1045.5" y="852" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#38BDF8">Ipamorelin</text>
+  <text x="1045.5" y="895" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="22" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.6">5aa</text>
+  
+  <text x="600" y="1090" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="40" font-weight="700" letter-spacing="8" text-anchor="middle" fill="#FFFFFF">NO RETREAT</text>
+  <text x="600" y="1320" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="26" letter-spacing="4" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.4">MODIFIED &#183; ENHANCED &#183; OPTIMIZED</text>
+</svg>

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUMAN+ — MYTHOS</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --bg:#0d0d12;--surface:#16161f;--surface2:#1e1e2c;--border:#2a2a40;
+    --text:#e6e6f2;--text2:#9393b0;--green:#2BE8B0;--amber:#FFB020;
+    --violet:#7C5CFC;--blue:#38BDF8;--accent:#C9A24B;
+    --display:'Space Grotesk',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{background:
+      radial-gradient(110% 70% at 78% -12%, rgba(201,162,75,.14), transparent 58%),
+      radial-gradient(90% 60% at 10% 10%, rgba(43,232,176,.08), transparent 60%),
+      var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;overflow-x:hidden;}
+  body.arcane{--accent:var(--blue);
+    background:radial-gradient(110% 70% at 78% -12%, rgba(56,189,248,.16), transparent 58%),
+      radial-gradient(90% 60% at 10% 10%, rgba(43,232,176,.08), transparent 60%),var(--bg);}
+  a{color:inherit;}
+  header{position:sticky;top:0;z-index:50;background:rgba(13,13,18,.92);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:12px;justify-content:space-between;}
+  .logo{font-size:1.5rem;font-weight:800;letter-spacing:1px;text-decoration:none;white-space:nowrap;}
+  .logo span{color:var(--green);}
+  .series-pill{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--text2);
+    border:1px solid var(--border);border-radius:999px;padding:7px 11px;white-space:nowrap;}
+  .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;min-width:0;}
+  .btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:9px;
+    padding:8px 13px;font-size:.8rem;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;transition:border-color .15s,background .15s;}
+  .btn:hover{border-color:var(--accent);background:rgba(255,255,255,.03);}
+  .toggle{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0;}
+  .toggle button{border:none;background:transparent;color:var(--text2);padding:8px 14px;font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:1px;min-width:0;overflow:hidden;}
+  .toggle button.on{background:var(--accent);color:#120f08;}
+  body.arcane .toggle button.on{color:#03121c;}
+  main{max-width:1440px;margin:0 auto;padding:22px 18px 84px;}
+  .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center;padding:12px 0 18px;}
+  .hero>*{min-width:0;}
+  @media(min-width:940px){.hero{grid-template-columns:minmax(0,.82fr) minmax(560px,1.18fr);}}
+  .eyebrow{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:4px;color:var(--green);margin-bottom:10px;}
+  .hero h1{font-size:clamp(2.1rem,5vw,5.6rem);line-height:.94;font-weight:900;letter-spacing:0;}
+  .hero h1 span{color:var(--accent);}
+  .hero h1 .plus{color:var(--green);}
+  .hero p{color:var(--text2);margin-top:14px;font-size:1rem;line-height:1.55;max-width:62ch;}
+  .quicknav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .quicknav .btn{padding:10px 15px;}
+  .studio-panel{margin-top:18px;background:rgba(22,22,31,.72);border:1px solid var(--border);border-radius:14px;padding:14px;
+    min-width:0;max-width:100%;}
+  .choice-toggle,.garment-toggle,.compound-filter{display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);
+    border-radius:10px;overflow:hidden;min-width:0;max-width:100%;}
+  .compound-filter{grid-template-columns:repeat(4,1fr);margin-top:10px;}
+  .choice-toggle button,.garment-toggle button,.compound-filter button{border:none;background:transparent;color:var(--text2);padding:10px 12px;font-weight:800;
+    cursor:pointer;font-size:.78rem;letter-spacing:1px;min-width:0;white-space:normal;line-height:1.15;overflow:hidden;}
+  .choice-toggle button.on,.garment-toggle button.on,.compound-filter button.on{background:var(--accent);color:#120f08;}
+  body.arcane .choice-toggle button.on,body.arcane .garment-toggle button.on,body.arcane .compound-filter button.on{color:#03121c;}
+  .selected-summary{margin:13px 0 12px;padding:12px;border:1px solid var(--border);border-radius:11px;background:rgba(13,13,18,.58);}
+  .selected-summary .k{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--accent);}
+  .selected-summary .n{font-size:1.35rem;font-weight:900;margin-top:3px;}
+  .selected-summary .s{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:2px;color:var(--text2);margin-top:2px;}
+  .selected-summary .c{font-size:.78rem;color:var(--text2);line-height:1.4;margin-top:8px;}
+  .garment-toggle{grid-template-columns:repeat(3,1fr);margin-bottom:12px;}
+  .quick-picks,.selected-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .selected-chips{min-height:32px;}
+  .chip{border:1px solid var(--border);background:rgba(13,13,18,.74);color:var(--text);border-radius:999px;
+    padding:8px 10px;font-size:.74rem;font-weight:800;letter-spacing:.5px;cursor:pointer;}
+  .chip:hover,.chip.on{border-color:var(--accent);color:var(--accent);}
+  .chip.remove{padding-right:8px;}
+  .chip .xmini{color:var(--text2);margin-left:6px;}
+  .picker-grid{display:flex;flex-direction:column;gap:8px;max-height:330px;overflow:auto;padding-right:2px;min-width:0;max-width:100%;margin-top:10px;}
+  .pick-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;padding:10px 11px;
+    transition:border-color .14s,transform .14s,box-shadow .14s;}
+  .pick-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .pick-card.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent);}
+  .pick-card img{display:none;}
+  .pick-card .pname{font-size:.88rem;font-weight:850;line-height:1.18;padding:0;min-height:0;}
+  .pick-card .psub{font-family:ui-monospace,monospace;font-size:.58rem;color:var(--text2);letter-spacing:1px;padding:3px 0 0;}
+  .builder-note{font-size:.76rem;color:var(--text2);line-height:1.45;margin-top:9px;}
+  .custom-note{color:var(--accent);}
+  .studio-actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;}
+  .product-stage{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media(min-width:640px){.product-stage{grid-template-columns:minmax(270px,.9fr) minmax(260px,1fr);}}
+  .panel{background:rgba(22,22,31,.82);border:1px solid var(--border);border-radius:14px;overflow:hidden;min-width:0;}
+  .tee-panel{min-height:420px;display:flex;align-items:center;justify-content:center;padding:22px;position:relative;}
+  .tee{position:relative;width:min(100%,360px);aspect-ratio:.74/1;}
+  .tee-body{position:absolute;left:18%;right:18%;top:13%;bottom:2%;background:linear-gradient(180deg,#171821,#090a0f);
+    border:1px solid #303044;border-radius:46% 46% 10% 10%;box-shadow:0 28px 80px rgba(0,0,0,.55);}
+  .tee-sleeve{position:absolute;top:19%;width:27%;height:29%;background:#101119;border:1px solid #303044;border-radius:22px;z-index:1;}
+  .tee-sleeve.left{left:3%;transform:rotate(18deg);} .tee-sleeve.right{right:3%;transform:rotate(-18deg);}
+  .tee-neck{position:absolute;left:39%;right:39%;top:12%;height:11%;background:var(--bg);border:1px solid #303044;
+    border-radius:0 0 999px 999px;z-index:4;}
+  .tee-print{position:absolute;left:31%;top:31%;width:38%;z-index:5;border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 12px 34px rgba(0,0,0,.55);background:#050506;}
+  .tee-print img{display:block;width:100%;aspect-ratio:6/7;object-fit:cover;}
+  .hood{display:none;position:absolute;left:30%;right:30%;top:3%;height:22%;border:1px solid #303044;background:#101119;
+    border-radius:46% 46% 18% 18%;z-index:0;}
+  .tee-pocket{display:none;position:absolute;left:35%;right:35%;bottom:17%;height:12%;border:1px solid #303044;
+    background:rgba(255,255,255,.025);border-radius:8px;z-index:6;}
+  .garment.hoodie .hood,.garment.hoodie .tee-pocket{display:block;}
+  .garment.hoodie .tee-body{top:17%;border-radius:34% 34% 10% 10%;}
+  .garment.long .tee-sleeve{top:19%;height:54%;border-radius:24px 24px 16px 16px;}
+  .garment.long .tee-sleeve.left{left:0;transform:rotate(12deg);}
+  .garment.long .tee-sleeve.right{right:0;transform:rotate(-12deg);}
+  .feature-panel{display:grid;grid-template-rows:1fr auto;background:linear-gradient(180deg,rgba(30,30,44,.94),rgba(13,13,18,.94));}
+  .feature-panel img{width:100%;height:100%;max-height:520px;object-fit:contain;background:#050506;padding:14px;}
+  .feature-meta{border-top:1px solid var(--border);padding:13px 14px;}
+  .feature-meta .k{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:3px;color:var(--accent);}
+  .feature-meta .n{font-size:1.2rem;font-weight:850;margin-top:3px;}
+  .jumpbar{position:sticky;top:66px;z-index:30;display:flex;gap:8px;flex-wrap:wrap;background:rgba(13,13,18,.88);
+    backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:13px;padding:8px;margin:8px 0 24px;}
+  .jumpbar a{font-family:ui-monospace,monospace;font-size:.72rem;letter-spacing:2px;text-decoration:none;color:var(--text2);
+    border-radius:9px;padding:8px 10px;}
+  .jumpbar a:hover{color:var(--text);background:var(--surface2);}
+  .jumpbar,#featured,#evolutions,#bases{display:none;}
+  .section{margin-top:28px;}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;}
+  h2.sec{font-size:1.12rem;letter-spacing:1px;font-weight:800;}
+  .muted{color:var(--text2);font-size:.86rem;line-height:1.45;max-width:72ch;}
+  .feature-rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:16px;margin-top:12px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;
+    transition:transform .14s,box-shadow .14s,border-color .14s;}
+  .card.evo{border-color:color-mix(in srgb,var(--accent) 45%,var(--border));}
+  .card.feature{background:linear-gradient(180deg,rgba(30,30,44,.95),rgba(18,18,25,.95));}
+  .card:hover{transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,.6);border-color:var(--accent);}
+  .card img{width:100%;display:block;aspect-ratio:6/7;object-fit:cover;background:#000;}
+  .card .cap{padding:10px 11px 11px;}
+  .card .cn{font-weight:800;font-size:.94rem;letter-spacing:1px;}
+  .card .cr{font-family:ui-monospace,monospace;font-size:.63rem;color:var(--text2);letter-spacing:2px;margin-top:3px;}
+  .card .ce{font-family:ui-monospace,monospace;font-size:.64rem;color:var(--accent);margin-top:7px;font-weight:700;}
+  .card .kind{display:inline-block;font-family:ui-monospace,monospace;font-size:.56rem;letter-spacing:2px;color:var(--text2);
+    border:1px solid var(--border);border-radius:999px;padding:4px 7px;margin-top:8px;}
+  /* lightbox */
+  .lb{position:fixed;inset:0;z-index:90;background:rgba(4,4,8,.94);display:none;align-items:flex-start;justify-content:center;
+    padding:24px;overflow:auto;}
+  .lb.show{display:flex;}
+  .lb-inner{max-width:min(1540px,calc(100vw - 48px));width:100%;display:grid;grid-template-columns:1fr;gap:22px;margin:auto 0;}
+  @media(min-width:820px){.lb-inner{grid-template-columns:minmax(0,1fr) minmax(280px,360px);align-items:start;}}
+  .lb-card{display:block;width:min(760px,100%);max-width:100%;height:auto;margin:0 auto;object-fit:contain;border-radius:14px;
+    border:1px solid var(--border);background:#000;box-shadow:0 24px 70px rgba(0,0,0,.62);}
+  .lb .meta{align-self:center;padding:4px 0 24px;}
+  .lb .meta h3{font-size:clamp(2rem,5vw,4rem);line-height:.94;letter-spacing:0;font-weight:900;}
+  .lb .meta .sub{color:var(--accent);font-family:ui-monospace,monospace;letter-spacing:3px;margin:8px 0 16px;}
+  .lb .meta .lore{font-style:italic;color:var(--text);font-size:1.05rem;margin-bottom:18px;line-height:1.5;}
+  .lb .meta .stat{display:flex;gap:10px;margin:7px 0;font-size:.9rem;}
+  .lb .meta .stat b{color:var(--text2);font-family:ui-monospace,monospace;font-size:.72rem;letter-spacing:2px;min-width:120px;text-transform:uppercase;}
+  .lb .chain{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+  .lb .chain .lab{font-family:ui-monospace,monospace;font-size:.7rem;letter-spacing:3px;color:var(--text2);}
+  .lb .chain .to{font-size:1.3rem;font-weight:800;margin-top:4px;}
+  .lb .x{position:fixed;top:14px;right:18px;font-size:2rem;color:var(--text2);cursor:pointer;background:none;border:none;z-index:95;}
+  .mock-mini{margin-top:20px;display:grid;grid-template-columns:105px 1fr;gap:13px;align-items:center;background:rgba(22,22,31,.75);
+    border:1px solid var(--border);border-radius:12px;padding:12px;max-width:440px;}
+  .mock-mini .tee{width:96px;}
+  .mock-mini .copy{font-size:.86rem;color:var(--text2);line-height:1.4;}
+  .mock-mini .copy b{display:block;color:var(--text);font-size:.95rem;margin-bottom:2px;}
+  .dlrow{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;}
+  @media(max-width:760px){
+    header{display:grid;grid-template-columns:1fr;align-items:flex-start;gap:8px;padding:14px 18px;}
+    main{max-width:100%;padding:18px 14px 76px;}
+    .series-pill{order:3;width:100%;text-align:center;}
+    .nav{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .nav .btn{text-align:center;padding:8px 6px;}
+    .toggle{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;}
+    .toggle button{flex:1;}
+    .hero{gap:16px;}
+    .hero p{max-width:100%;}
+    .quicknav{display:grid;grid-template-columns:1fr 1fr;width:100%;}
+    .quicknav .btn{text-align:center;padding:10px 8px;}
+    .quicknav .btn:last-child{grid-column:1 / -1;}
+    .studio-panel{padding:12px;margin-top:14px;}
+    .picker-grid{max-height:260px;}
+    .choice-toggle button,.garment-toggle button,.compound-filter button{padding:10px 7px;font-size:.7rem;letter-spacing:.5px;}
+    .tee-panel{min-height:360px;padding:14px;}
+    .tee{width:min(100%,300px);}
+    .jumpbar{top:116px;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:12px;}
+    .feature-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+    .lb{padding:52px 14px 20px;}
+    .lb-inner{max-width:100%;}
+    .lb-card{width:100%;}
+    .mock-mini{grid-template-columns:92px 1fr;}
+  }
+  /* ===== cohesion with the Periodic line ===== */
+  .logo,h1,h2,.sec{font-family:var(--display);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px;}
+  .btn.primary{background:var(--green);color:#08110d;border-color:var(--green);font-weight:700;}
+  .btn.primary:hover{filter:brightness(1.08);}
+  .site-footer{border-top:1px solid var(--border);margin-top:30px;padding:40px 18px 60px;text-align:center;
+    background:radial-gradient(80% 100% at 50% 0%,rgba(201,162,75,.06),transparent 70%);}
+  .foot-brand{font-family:var(--display);font-weight:700;font-size:1.5rem;letter-spacing:1px;}
+  .foot-brand span{color:var(--green);}
+  .foot-nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 8px;}
+  .foot-nav a{color:var(--text2);text-decoration:none;font-size:.85rem;border:1px solid var(--border);
+    border-radius:8px;padding:8px 14px;transition:border-color .15s,color .15s;}
+  .foot-nav a:hover{color:var(--text);border-color:var(--accent);}
+  .foot-nav a.primary{color:var(--green);border-color:var(--green);}
+  .foot-fine{color:#55556a;font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:3px;margin-top:14px;}
+  /* ===== mythos: picker search, clickable artwork, simplified detail ===== */
+  .mythos-search{width:100%;margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    color:var(--text);padding:11px 12px;font-size:.85rem;}
+  .mythos-search::placeholder{color:var(--text2);}
+  .mythos-search:focus{outline:none;border-color:var(--accent);}
+  .pick-empty{grid-column:1/-1;color:var(--text2);font-size:.82rem;padding:16px;border:1px dashed var(--border);border-radius:10px;}
+  .product-stage{grid-template-columns:1fr;}
+  .feature-panel{display:flex;flex-direction:column;width:100%;text-align:left;font:inherit;color:inherit;cursor:zoom-in;padding:0;
+    background:linear-gradient(180deg,rgba(30,30,44,.95),rgba(18,18,25,.95));}
+  .feature-panel img{width:100%;max-height:560px;object-fit:contain;background:#050506;padding:16px;}
+  .feature-panel:hover{border-color:var(--accent);box-shadow:0 16px 44px rgba(0,0,0,.5);}
+  .feature-panel:hover .feature-hint{color:var(--text);}
+  .feature-hint{font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:2px;color:var(--accent);margin-top:8px;text-transform:uppercase;}
+  .aura-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:-1px;
+    border:1px solid rgba(255,255,255,.3);box-shadow:0 0 8px currentColor;}
+  .lb .meta .stat span{display:inline-flex;align-items:center;}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="home.html">HUMAN<span>+</span></a>
+  <div class="series-pill">MYTHOS SERIES</div>
+  <div class="nav">
+    <div class="toggle" id="styleToggle">
+      <button data-s="mythic" class="on">MYTHIC</button>
+      <button data-s="arcane">ANIME</button>
+    </div>
+    <a class="btn" href="home.html">&#8962; Hub</a>
+    <a class="btn primary" href="index.html">Periodic table</a>
+    <button class="logokit-trigger" type="button" onclick="openLogoKit()">Logo</button>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">MYTHOS SERIES</div>
+      <h1>HUMAN<span class="plus">+</span> <span>APPAREL</span></h1>
+      <p>Build the MYTHOS figure from a compound or stack. Known setups resolve to their deity; custom blends inherit the closest evolution.</p>
+      <div class="studio-panel" id="studio">
+        <div class="choice-toggle" id="designMode">
+          <button data-mode="compound" class="on">SINGLE COMPOUND</button>
+          <button data-mode="evo">STACK BUILDER</button>
+        </div>
+        <input class="mythos-search" id="mythosSearch" type="search" autocomplete="off" placeholder="Type HGH, Somatropin, KLOW, BPC-157...">
+        <div class="compound-filter" id="compoundFilter">
+          <button data-fam="PEP" class="on">PEPTIDES</button>
+          <button data-fam="HOR">HORMONES</button>
+          <button data-fam="MOL">MOLECULES</button>
+          <button data-fam="ALL">ALL</button>
+        </div>
+        <div class="selected-chips" id="selectedChips"></div>
+        <div class="quick-picks" id="quickPicks"></div>
+        <div class="picker-grid" id="pickerGrid"></div>
+        <div class="selected-summary">
+          <div class="k" id="selectedKind"></div>
+          <div class="n" id="selectedName"></div>
+          <div class="s" id="selectedSub"></div>
+          <div class="c" id="selectedChain"></div>
+        </div>
+        <div class="studio-actions">
+          <button class="btn" id="viewDetails">View details</button>
+          <button class="btn" id="clearChoices">Clear choices</button>
+          <button class="btn" id="dlDeityPng">Deity PNG</button>
+          <button class="btn" id="dlCardSvg">Card SVG</button>
+          <button class="btn" id="dlCardPng">Card PNG</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-stage">
+      <button class="panel feature-panel" id="featurePanel" type="button" aria-label="Open full details">
+        <img id="featureCard" alt="">
+        <div class="feature-meta">
+          <div class="k" id="featureKind"></div>
+          <div class="n" id="featureName"></div>
+          <div class="muted" id="featureSub"></div>
+          <div class="feature-hint">Tap to enlarge &rarr;</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <nav class="jumpbar">
+    <a href="#featured">FEATURED EVOLUTIONS</a>
+    <a href="#evolutions">ALL STACKS</a>
+    <a href="#bases">BASE COMPOUNDS</a>
+  </nav>
+
+  <section class="section" id="featured">
+    <div class="sec-head">
+      <div>
+        <h2 class="sec">Featured Stack Evolutions</h2>
+        <p class="muted">The larger forged forms are surfaced first so the line reads as apparel, not just a card archive.</p>
+      </div>
+    </div>
+    <div class="feature-rail" id="featureRail"></div>
+  </section>
+
+  <section class="section" id="evolutions">
+    <div class="sec-head">
+      <div>
+        <h2 class="sec">All Stack Evolutions</h2>
+        <p class="muted">When compounds combine, they ascend. These are the bigger forged forms that anchor the MYTHOS series.</p>
+      </div>
+    </div>
+    <div class="grid" id="evoGrid"></div>
+  </section>
+
+  <section class="section" id="bases">
+    <div class="sec-head">
+      <div>
+        <h2 class="sec">Base Compound Forms</h2>
+        <p class="muted">Each peptide, hormone and molecule as a single HUMAN+ character card with its stack evolution called out.</p>
+      </div>
+    </div>
+    <div class="grid" id="compGrid"></div>
+  </section>
+</main>
+
+<div class="lb" id="lb">
+  <button class="x" id="lbX">&times;</button>
+  <div class="lb-inner">
+    <img class="lb-card" id="lbImg" alt="">
+    <div class="meta">
+      <h3 id="lbName"></h3>
+      <div class="sub" id="lbSub"></div>
+      <div class="lore" id="lbLore"></div>
+      <div class="stat" id="lbEssRow"><b>Essence</b> <span id="lbPval"></span></div>
+      <div class="stat"><b>Aura</b> <span id="lbAura"></span></div>
+      <div class="dlrow">
+        <button class="btn" id="lbDeityPng">Deity PNG</button>
+        <button class="btn" id="lbCardSvg">Card SVG</button>
+        <button class="btn" id="lbCardPng">Card PNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DB = {"compounds": [{"sym": "Gh", "title": "THE PROGENITOR", "real": "Somatropin", "arch": "ascendant", "aura": "gold", "lore": "First flame of growth, from which all forms rise.", "fam": "PEP", "plabel": "ESSENCE", "pval": 191, "evo": "WORKHORSE"}, {"sym": "Bp", "title": "THE MENDER", "real": "BPC-157", "arch": "warden", "aura": "emerald", "lore": "Stitches living flesh back from ruin.", "fam": "PEP", "plabel": "ESSENCE", "pval": 15, "evo": "WOLVERINE"}, {"sym": "Tb", "title": "THE RESTORER", "real": "TB-500", "arch": "warden", "aura": "emerald", "lore": "What is torn, it makes whole again.", "fam": "PEP", "plabel": "ESSENCE", "pval": 43, "evo": "WOLVERINE"}, {"sym": "Sg", "title": "THE FAMINE", "real": "Semaglutide", "arch": "hunter", "aura": "silver", "lore": "Hunger itself kneels before its gaze.", "fam": "PEP", "plabel": "ESSENCE", "pval": 31, "evo": "SHREDDER"}, {"sym": "Tz", "title": "THE TWINBLADE", "real": "Tirzepatide", "arch": "hunter", "aura": "silver", "lore": "Two appetites severed with a single edge.", "fam": "PEP", "plabel": "ESSENCE", "pval": 39, "evo": ""}, {"sym": "Re", "title": "THE TRIUNE", "real": "Retatrutide", "arch": "hunter", "aura": "sapphire", "lore": "Three hungers bound to one lean will.", "fam": "PEP", "plabel": "ESSENCE", "pval": 39, "evo": "THE HOLY TRINITY"}, {"sym": "Ip", "title": "THE PULSE", "real": "Ipamorelin", "arch": "ascendant", "aura": "gold", "lore": "A clean, rhythmic call to the deep.", "fam": "PEP", "plabel": "ESSENCE", "pval": 5, "evo": "SPARTAN"}, {"sym": "Cj", "title": "THE SUSTAINER", "real": "CJC-1295", "arch": "ascendant", "aura": "gold", "lore": "Holds the signal long after others fade.", "fam": "PEP", "plabel": "ESSENCE", "pval": 29, "evo": "SPARTAN"}, {"sym": "Sr", "title": "THE WAKER", "real": "Sermorelin", "arch": "ascendant", "aura": "gold", "lore": "Rouses the sleeping engine of youth.", "fam": "PEP", "plabel": "ESSENCE", "pval": 29, "evo": ""}, {"sym": "Tm", "title": "THE CARVER", "real": "Tesamorelin", "arch": "hunter", "aura": "silver", "lore": "Pares the hidden weight from within.", "fam": "PEP", "plabel": "ESSENCE", "pval": 44, "evo": ""}, {"sym": "Gk", "title": "THE BLUE WEAVER", "real": "GHK-Cu", "arch": "warden", "aura": "verdigris", "lore": "Copper-born, it reweaves skin and strand.", "fam": "PEP", "plabel": "ESSENCE", "pval": 3, "evo": "ADAMANTIUM"}, {"sym": "Mt", "title": "THE SUNBRINGER", "real": "Melanotan II", "arch": "seraph", "aura": "bronze", "lore": "Carries the sun beneath the skin.", "fam": "PEP", "plabel": "ESSENCE", "pval": 7, "evo": "SHOWTIME"}, {"sym": "Pt", "title": "THE LONGING", "real": "PT-141", "arch": "seraph", "aura": "crimson", "lore": "Looses the old arrow of wanting.", "fam": "PEP", "plabel": "ESSENCE", "pval": 7, "evo": ""}, {"sym": "Ox", "title": "THE BOND", "real": "Oxytocin", "arch": "seraph", "aura": "rose", "lore": "Binds two souls with an unseen thread.", "fam": "PEP", "plabel": "ESSENCE", "pval": 9, "evo": ""}, {"sym": "Sk", "title": "THE STILL MIND", "real": "Selank", "arch": "sage", "aura": "violet", "lore": "Quiets the storm without dulling the blade.", "fam": "PEP", "plabel": "ESSENCE", "pval": 7, "evo": "STOIC"}, {"sym": "Sx", "title": "THE FOCUSED", "real": "Semax", "arch": "sage", "aura": "violet", "lore": "Narrows the world to a single bright point.", "fam": "PEP", "plabel": "ESSENCE", "pval": 7, "evo": "LIMITLESS"}, {"sym": "Ep", "title": "THE TIMELESS", "real": "Epitalon", "arch": "ascendant", "aura": "silver", "lore": "Turns the falling sand back up the glass.", "fam": "PEP", "plabel": "ESSENCE", "pval": 4, "evo": "PHOENIX"}, {"sym": "Ta", "title": "THE SENTINEL", "real": "Thymosin a-1", "arch": "warden", "aura": "emerald", "lore": "Stands the long watch against the unseen.", "fam": "PEP", "plabel": "ESSENCE", "pval": 28, "evo": ""}, {"sym": "Ig", "title": "THE AMPLIFIER", "real": "IGF-1 LR3", "arch": "titan", "aura": "gold", "lore": "Takes the whisper of growth and roars it.", "fam": "PEP", "plabel": "ESSENCE", "pval": 83, "evo": "BLACK LABEL"}, {"sym": "Mc", "title": "THE CORE", "real": "MOTS-c", "arch": "ascendant", "aura": "sapphire", "lore": "Speaks the old language of the furnace within.", "fam": "PEP", "plabel": "ESSENCE", "pval": 16, "evo": "REACTOR"}, {"sym": "Gn", "title": "THE AXIS", "real": "Gonadorelin", "arch": "alchemist", "aura": "bronze", "lore": "Restarts the wheel from which all turns.", "fam": "PEP", "plabel": "ESSENCE", "pval": 10, "evo": ""}, {"sym": "Ks", "title": "THE SPARK", "real": "Kisspeptin-10", "arch": "seraph", "aura": "crimson", "lore": "Ignites the cascade that wakes the line.", "fam": "PEP", "plabel": "ESSENCE", "pval": 10, "evo": ""}, {"sym": "Hx", "title": "THE SURGE", "real": "Hexarelin", "arch": "ascendant", "aura": "gold", "lore": "A sudden flood where there was a trickle.", "fam": "PEP", "plabel": "ESSENCE", "pval": 6, "evo": ""}, {"sym": "Gp", "title": "THE RAVENER", "real": "GHRP-6", "arch": "ascendant", "aura": "gold", "lore": "Brings hunger and growth in the same breath.", "fam": "PEP", "plabel": "ESSENCE", "pval": 6, "evo": ""}, {"sym": "Ad", "title": "THE EMBER", "real": "AOD-9604", "arch": "hunter", "aura": "silver", "lore": "A small fire that eats only fat.", "fam": "PEP", "plabel": "ESSENCE", "pval": 16, "evo": ""}, {"sym": "Ss", "title": "THE WARD", "real": "SS-31", "arch": "warden", "aura": "sapphire", "lore": "Armor for the engine-room of the cell.", "fam": "PEP", "plabel": "ESSENCE", "pval": 4, "evo": "REACTOR"}, {"sym": "Kp", "title": "THE QUELLER", "real": "KPV", "arch": "warden", "aura": "emerald", "lore": "Where it walks, the fire of inflammation dies.", "fam": "PEP", "plabel": "ESSENCE", "pval": 3, "evo": "ADAMANTIUM"}, {"sym": "Ds", "title": "THE DREAMER", "real": "DSIP", "arch": "sage", "aura": "violet", "lore": "Pulls the mind down into deep, dark water.", "fam": "PEP", "plabel": "ESSENCE", "pval": 9, "evo": ""}, {"sym": "In", "title": "THE MASTER KEY", "real": "Insulin", "arch": "alchemist", "aura": "gold", "lore": "The one key that opens every cellular door.", "fam": "PEP", "plabel": "ESSENCE", "pval": 51, "evo": ""}, {"sym": "Hc", "title": "THE BEACON", "real": "HCG", "arch": "alchemist", "aura": "bronze", "lore": "Keeps the home fires of the axis lit.", "fam": "PEP", "plabel": "ESSENCE", "pval": 237, "evo": "THE FOUNDATION"}, {"sym": "Te", "title": "THE TITAN", "real": "Testosterone", "arch": "titan", "aura": "bronze", "lore": "The original crown. The first upgrade.", "fam": "HOR", "plabel": "MASS", "pval": 288, "evo": "THE FOUNDATION"}, {"sym": "Nd", "title": "THE IRONBOUND", "real": "Nandrolone", "arch": "titan", "aura": "bronze", "lore": "Mass with mercy for the joints that carry it.", "fam": "HOR", "plabel": "MASS", "pval": 274, "evo": "OLD GUARD"}, {"sym": "Oa", "title": "THE WHITTLER", "real": "Oxandrolone", "arch": "hunter", "aura": "bronze", "lore": "Strips away all that is not the cut.", "fam": "HOR", "plabel": "MASS", "pval": 306, "evo": ""}, {"sym": "Es", "title": "THE BALANCE", "real": "Estradiol", "arch": "alchemist", "aura": "rose", "lore": "Holds the equation in perfect tension.", "fam": "HOR", "plabel": "MASS", "pval": 272, "evo": ""}, {"sym": "Dh", "title": "THE PRECURSOR", "real": "DHEA", "arch": "alchemist", "aura": "bronze", "lore": "The seed from which the others are grown.", "fam": "HOR", "plabel": "MASS", "pval": 288, "evo": ""}, {"sym": "T3", "title": "THE FURNACE", "real": "Liothyronine", "arch": "alchemist", "aura": "crimson", "lore": "Throttles the fire at the body's center.", "fam": "HOR", "plabel": "MASS", "pval": 651, "evo": ""}, {"sym": "Ml", "title": "THE DUSK", "real": "Melatonin", "arch": "sage", "aura": "violet", "lore": "Draws the curtain so the work can begin.", "fam": "HOR", "plabel": "MASS", "pval": 232, "evo": ""}, {"sym": "Na", "title": "THE CURRENT", "real": "NAD+", "arch": "ascendant", "aura": "violet", "lore": "The coin every cell must spend to live.", "fam": "MOL", "plabel": "MASS", "pval": 663, "evo": "PHOENIX"}, {"sym": "Mq", "title": "THE UNMAKER", "real": "5-Amino-1MQ", "arch": "alchemist", "aura": "violet", "lore": "Deletes the gene that hoards the fat.", "fam": "MOL", "plabel": "MASS", "pval": 159, "evo": "OVERDRIVE"}, {"sym": "Mb", "title": "THE AZURE", "real": "Methylene Blue", "arch": "alchemist", "aura": "sapphire", "lore": "Lends electrons to the failing light.", "fam": "MOL", "plabel": "MASS", "pval": 320, "evo": "LIMITLESS"}], "evolutions": [{"name": "WOLVERINE", "sub": "Recovery / Repair", "comps": ["Bp", "Tb"], "arch": "berserker", "aura": "steel", "lore": "Heals as fast as it tears. It does not stop.", "tag": "REGENERATE EVERYTHING", "forged": "BPC-157 + TB-500", "extras": ""}, {"name": "ADAMANTIUM", "sub": "Recovery / Repair", "comps": ["Bp", "Tb", "Kp", "Gk"], "arch": "colossus", "aura": "steel", "lore": "Forged unbreakable, bone laced with metal.", "tag": "UNBREAKABLE", "forged": "BPC-157 + TB-500 + KPV + GHK-Cu", "extras": ""}, {"name": "SPARTAN", "sub": "Recovery / Repair", "comps": ["Bp", "Tb", "Cj", "Ip"], "arch": "berserker", "aura": "bronze", "lore": "No retreat. No surrender. Only the line.", "tag": "NO RETREAT", "forged": "BPC-157 + TB-500 + CJC-1295 + Ipamorelin", "extras": ""}, {"name": "FIELD REPAIR", "sub": "Recovery / Repair", "comps": ["Bp", "Gk"], "arch": "warden", "aura": "emerald", "lore": "Patch the wound and march on.", "tag": "PATCH AND DEPLOY", "forged": "BPC-157 + GHK-Cu", "extras": ""}, {"name": "PHOENIX", "sub": "Recovery / Repair", "comps": ["Ep", "Na", "Bp", "Tb"], "arch": "seraph", "aura": "crimson", "lore": "Burns to ash, then rises from it whole.", "tag": "RISE FROM THE ASHES", "forged": "Epitalon + NAD+ + BPC-157 + TB-500", "extras": ""}, {"name": "THE FOUNDATION", "sub": "Hormone Performance", "comps": ["Te", "Hc"], "arch": "titan", "aura": "bronze", "lore": "Everything great is built upon this stone.", "tag": "BUILT ON BEDROCK", "forged": "Testosterone + HCG", "extras": "estrogen management"}, {"name": "WORKHORSE", "sub": "Hormone Performance", "comps": ["Te", "Gh"], "arch": "titan", "aura": "bronze", "lore": "It shows up. Every single day.", "tag": "SHOW UP EVERY DAY", "forged": "Testosterone + Somatropin", "extras": ""}, {"name": "PRIME", "sub": "Hormone Performance", "comps": ["Te", "Gh", "Hc"], "arch": "titan", "aura": "gold", "lore": "Held at the very peak of condition.", "tag": "PEAK CONDITION", "forged": "Testosterone + Somatropin + HCG", "extras": ""}, {"name": "THE HOLY TRINITY", "sub": "Body Composition", "comps": ["Te", "Gh", "Re"], "arch": "ascendant", "aura": "gold", "lore": "Three powers. Nothing more is needed.", "tag": "THREE IS ALL YOU NEED", "forged": "Testosterone + Somatropin + Retatrutide", "extras": ""}, {"name": "THE OVERHAUL", "sub": "Recomp / Repair", "comps": ["Gh", "Re", "Kl"], "arch": "colossus", "aura": "verdigris", "lore": "Rebuilt from scratch, every weak link replaced.", "tag": "REBUILD FROM SCRATCH", "forged": "Somatropin + Retatrutide + BPC-157 + TB-500 + GHK-Cu + KPV", "extras": ""}, {"name": "BLACK LABEL", "sub": "Body Composition", "comps": ["Te", "Gh", "Ig", "Re"], "arch": "colossus", "aura": "obsidian", "lore": "Top shelf only. Reserved for the few.", "tag": "TOP SHELF ONLY", "forged": "Testosterone + Somatropin + IGF-1 LR3 + Retatrutide", "extras": "KLOW blend"}, {"name": "OLD GUARD", "sub": "Body Composition", "comps": ["Te", "Nd", "Gh", "Re"], "arch": "titan", "aura": "bronze", "lore": "Earned across years. Never simply given.", "tag": "EARNED NOT GIVEN", "forged": "Testosterone + Nandrolone + Somatropin + Retatrutide", "extras": "KLOW blend"}, {"name": "GREEK GOD", "sub": "Body Composition", "comps": ["Te", "Gh", "Cj"], "arch": "titan", "aura": "marble", "lore": "Carved from marble in a forgotten age.", "tag": "CARVED FROM MARBLE", "forged": "Testosterone + Somatropin + CJC-1295", "extras": "GH peptide support"}, {"name": "MASS MONSTER", "sub": "Body Composition", "comps": ["Te", "Gh", "Ig"], "arch": "colossus", "aura": "crimson", "lore": "Maximum overload. The mountain that walks.", "tag": "MAXIMUM OVERLOAD", "forged": "Testosterone + Somatropin + IGF-1 LR3", "extras": ""}, {"name": "SHREDDER", "sub": "Body Composition", "comps": ["Te", "Sg", "Gh", "Re"], "arch": "hunter", "aura": "silver", "lore": "Shrink-wrapped down to the living architecture.", "tag": "SHRINK-WRAPPED", "forged": "Testosterone + Semaglutide + Somatropin + Retatrutide", "extras": ""}, {"name": "STOIC", "sub": "Cognitive / Nootropic", "comps": ["Sk"], "arch": "sage", "aura": "stone", "lore": "Unmoved by the storm. Unshaken at the core.", "tag": "UNSHAKEABLE", "forged": "Selank", "extras": "adaptogen + nootropic support"}, {"name": "LIMITLESS", "sub": "Cognitive / Nootropic", "comps": ["Sx", "Mb"], "arch": "sage", "aura": "violet", "lore": "No ceiling remains above the cleared mind.", "tag": "NO CEILING", "forged": "Semax + Methylene Blue", "extras": "nootropic support"}, {"name": "LOCK IN", "sub": "Cognitive / Nootropic", "comps": ["Sx"], "arch": "sage", "aura": "sapphire", "lore": "Tunnel vision. The world goes quiet.", "tag": "TUNNEL VISION", "forged": "Semax", "extras": "caffeine + L-theanine + tyrosine"}, {"name": "IRON MIND", "sub": "Cognitive / Nootropic", "comps": ["Sk"], "arch": "sage", "aura": "bronze", "lore": "The mind, forged and hammered into iron.", "tag": "FORGE THE MIND", "forged": "Selank", "extras": "Lion's Mane + Rhodiola + Bacopa"}, {"name": "CLEAR HEAD", "sub": "Cognitive / Nootropic", "comps": ["Sk"], "arch": "sage", "aura": "silver", "lore": "Signal, with all the noise stripped away.", "tag": "SIGNAL NO NOISE", "forged": "Selank", "extras": "magnesium + L-theanine"}, {"name": "GAME DAY", "sub": "Cognitive / Nootropic", "comps": ["Sx"], "arch": "hunter", "aura": "gold", "lore": "Everything sharpened to a single point: now.", "tag": "GO TIME", "forged": "Semax", "extras": "performance nootropic support"}, {"name": "REACTOR", "sub": "Mito / Longevity", "comps": ["Ss", "Mc"], "arch": "ascendant", "aura": "sapphire", "lore": "The core powered to a steady, endless hum.", "tag": "POWER THE CORE", "forged": "SS-31 + MOTS-c", "extras": ""}, {"name": "OVERDRIVE", "sub": "Mito / Longevity", "comps": ["Mc", "Mq", "Na"], "arch": "ascendant", "aura": "violet", "lore": "The engine redlined past every safe limit.", "tag": "REDLINE THE ENGINE", "forged": "MOTS-c + 5-Amino-1MQ + NAD+", "extras": ""}, {"name": "SHOWTIME", "sub": "Mito / Aesthetic", "comps": ["Gk", "Mt"], "arch": "seraph", "aura": "bronze", "lore": "Made to be seen. Made to steal the light.", "tag": "STEAL THE STAGE", "forged": "GHK-Cu + Melanotan II", "extras": "aesthetic support"}, {"name": "THE VAULT", "sub": "Mito / Longevity", "comps": ["Mc", "Ss", "Na"], "arch": "warden", "aura": "silver", "lore": "Longevity, sealed and locked away for keeps.", "tag": "LOCK IN LONGEVITY", "forged": "MOTS-c + SS-31 + NAD+", "extras": ""}], "auras": {"gold": "#C9A24B", "bronze": "#A9772F", "emerald": "#3E9E6E", "sapphire": "#3E72C9", "crimson": "#B23A48", "violet": "#7A5AA8", "silver": "#AEB7C2", "verdigris": "#3FA7B8", "rose": "#C46A8A", "steel": "#6E7B8C", "marble": "#CDBE94", "obsidian": "#6B5E83", "stone": "#9A9486"}};
+const EXTRA_STACKS = [
+  {name:"KLOW",sub:"Full Repair Blend",comps:["Bp","Tb","Gk","Kp"],arch:"colossus",aura:"verdigris",lore:"The complete repair blend, plated and rebuilt.",tag:"THE COMPLETE OVERHAUL",forged:"BPC-157 + TB-500 + GHK-Cu + KPV",extras:""},
+  {name:"GLOW",sub:"Skin / Hair / Recovery",comps:["Gk","Bp","Tb"],arch:"seraph",aura:"verdigris",lore:"Skin, strand and tissue lit from within.",tag:"FROM THE INSIDE OUT",forged:"GHK-Cu + BPC-157 + TB-500",extras:""},
+  // --- 12 fused-art stacks wired 2026-06-13 (cards in mythic_preview/mythic_svg, deity art in mythic_art) ---
+  {name:"LIBIDO",sub:"Hormone Performance",comps:["Pt","Ox","Ks"],arch:"seraph",aura:"crimson",lore:"Three arrows of wanting, loosed as one.",tag:"DESIRE UNCHAINED",forged:"PT-141 + Oxytocin + Kisspeptin-10",extras:""},
+  {name:"THE CATALYST",sub:"Hormone Performance",comps:["Gn","Hc"],arch:"alchemist",aura:"bronze",lore:"Strikes the spark that wakes the whole axis.",tag:"FIRE THE AXIS",forged:"Gonadorelin + HCG",extras:""},
+  {name:"EQUILIBRIUM",sub:"Hormone Performance",comps:["Es","Dh"],arch:"alchemist",aura:"rose",lore:"Two forces held in perfect, ancient balance.",tag:"BALANCE RESTORED",forged:"Estradiol + DHEA",extras:""},
+  {name:"SANDMAN",sub:"Recovery / Sleep",comps:["Ds","Ep","Ml"],arch:"sage",aura:"violet",lore:"Pulls you down past dreaming into the deep.",tag:"INTO THE DEEP",forged:"DSIP + Epitalon + Melatonin",extras:""},
+  {name:"BRONZED",sub:"Skin / Recovery",comps:["Mt","Gk"],arch:"seraph",aura:"bronze",lore:"Sun-forged skin, healed and gilded.",tag:"SUN-FORGED",forged:"Melanotan II + GHK-Cu",extras:""},
+  {name:"GUT CHECK",sub:"Gut / Repair",comps:["Kp","Bp"],arch:"warden",aura:"emerald",lore:"Seals the inner wall against the fire.",tag:"SEAL THE LINING",forged:"KPV + BPC-157",extras:""},
+  {name:"FORTRESS",sub:"Immune / Repair",comps:["Ta","Bp"],arch:"warden",aura:"emerald",lore:"Two sentinels holding one unbroken wall.",tag:"HOLD THE WALL",forged:"Thymosin a-1 + BPC-157",extras:""},
+  {name:"SECRETAGOGUE",sub:"Body Composition",comps:["Sr","Gp"],arch:"ascendant",aura:"gold",lore:"Wakes the sleeping gland with a twin call.",tag:"WAKE THE GLAND",forged:"Sermorelin + GHRP-6",extras:""},
+  {name:"PULSE WAVE",sub:"Body Composition",comps:["Hx","Ip"],arch:"ascendant",aura:"gold",lore:"Two pulses stacked to their highest crest.",tag:"MAX AMPLITUDE",forged:"Hexarelin + Ipamorelin",extras:""},
+  {name:"VISCERAL",sub:"Body Composition",comps:["Tm","Ad"],arch:"hunter",aura:"silver",lore:"Burns the hidden weight from deep within.",tag:"BURN THE CORE",forged:"Tesamorelin + AOD-9604",extras:""},
+  {name:"THE LADDER",sub:"Body Composition",comps:["Sr","Tm","Cj"],arch:"ascendant",aura:"gold",lore:"Climbs the axis rung by rung, ever higher.",tag:"CLIMB THE AXIS",forged:"Sermorelin + Tesamorelin + CJC-1295",extras:""},
+  {name:"METABOLIC",sub:"Body Composition",comps:["Tz","T3"],arch:"alchemist",aura:"crimson",lore:"Twin furnaces lit, the engine running hot.",tag:"FURNACE ONLINE",forged:"Tirzepatide + Liothyronine",extras:""}
+];
+DB.evolutions = EXTRA_STACKS.concat(DB.evolutions.filter(e=>!EXTRA_STACKS.some(x=>x.name===e.name)));
+let style = "mythic";
+let activeItem = null;
+let mode = "compound";
+let compoundFilter = "PEP";
+let pickerQuery = "";
+let selectedStackParts = [];
+const featuredNames = ["KLOW","GLOW","WOLVERINE","THE OVERHAUL","WORKHORSE","PRIME","THE VAULT","PHOENIX","ADAMANTIUM"];
+const peptideFirst = ["Bp","Tb","Gk","Kp","Gh","Cj","Ip","Sg","Tz","Re"];
+const ASSET_V = "4"; // bump when card art is regenerated, to bust the 30-day image cache
+const cImg = (sym)=>`mythic_preview/c_${sym}_${style}.png?v=${ASSET_V}`;
+const cSvg = (sym)=>`mythic_svg/c_${sym}_${style}.svg?v=${ASSET_V}`;
+const eImg = (name)=>`mythic_preview/e_${name.replace(/ /g,"_")}_${style}.png?v=${ASSET_V}`;
+const eSvg = (name)=>`mythic_svg/e_${name.replace(/ /g,"_")}_${style}.svg?v=${ASSET_V}`;
+const byEvoName = new Map(DB.evolutions.map(e=>[e.name,e]));
+const byCompoundSym = new Map(DB.compounds.map(c=>[c.sym,c]));
+
+function featuredEvolutions(){
+  const picked = featuredNames.map(n=>byEvoName.get(n)).filter(Boolean);
+  const seen = new Set(picked.map(e=>e.name));
+  return picked.concat(DB.evolutions.filter(e=>!seen.has(e.name))).slice(0,6);
+}
+
+function orderedEvolutions(){
+  const picked = featuredNames.map(n=>byEvoName.get(n)).filter(Boolean);
+  const seen = new Set(picked.map(e=>e.name));
+  return picked.concat(DB.evolutions.filter(e=>!seen.has(e.name)));
+}
+
+function orderedCompounds(){
+  const filtered = DB.compounds.filter(c=>compoundFilter==='ALL' || c.fam===compoundFilter);
+  if(compoundFilter!=='PEP') return filtered;
+  const priority = peptideFirst.map(sym=>byCompoundSym.get(sym)).filter(c=>c && filtered.includes(c));
+  const seen = new Set(priority.map(c=>c.sym));
+  return priority.concat(filtered.filter(c=>!seen.has(c.sym)));
+}
+
+const BLEND_COMPS = {Kl:["Bp","Tb","Gk","Kp"],Gl:["Gk","Bp","Tb"]};
+const compoundAliases = new Map([
+  ["hgh","Gh"],["gh","Gh"],["growthhormone","Gh"],["somatropin","Gh"],
+  ["bpc","Bp"],["bpc157","Bp"],["tb","Tb"],["tb500","Tb"],["ghk","Gk"],["ghkcu","Gk"],["kpv","Kp"],
+  ["reta","Re"],["retatrutide","Re"],["sema","Sg"],["semaglutide","Sg"],["nad","Na"],["nadplus","Na"]
+]);
+function norm(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");}
+function uniqueParts(parts){return [...new Set(parts.filter(Boolean))];}
+function expandParts(parts){return uniqueParts(parts.flatMap(p=>BLEND_COMPS[p]||[p]));}
+function sameSet(a,b){a=expandParts(a);b=expandParts(b);return a.length===b.length && a.every(x=>b.includes(x));}
+function containsAllParts(candidate, required){candidate=expandParts(candidate);return expandParts(required).every(x=>candidate.includes(x));}
+function aliasesForSym(sym){return [...compoundAliases.entries()].filter(([,s])=>s===sym).map(([a])=>a);}
+function compLabel(sym){const c=byCompoundSym.get(sym);return c?c.real:(sym==="Kl"?"KLOW":sym==="Gl"?"GLOW":sym);}
+function partsLabel(parts){return expandParts(parts).map(compLabel).join(" + ");}
+function compoundResultName(c,q){
+  const key=norm(q);
+  const hit=aliasesForSym(c.sym).find(a=>a===key && a!==norm(c.real));
+  return hit ? `${String(q).trim().toUpperCase()} / ${c.real}` : c.real;
+}
+function assetNameFor(kind,item){return kind==='evo'?(item.assetName||item.name):item.sym;}
+function itemKey(kind,item){return kind==='evo'?(item.assetName||item.name):item.sym;}
+function imgFor(kind,item){return kind==='evo'?eImg(assetNameFor(kind,item)):cImg(item.sym);}
+function svgFor(kind,item){return kind==='evo'?eSvg(assetNameFor(kind,item)):cSvg(item.sym);}
+function familyLabel(fam){return fam==='PEP'?'PEPTIDE':(fam==='HOR'?'HORMONE':'MOLECULE');}
+function essenceText(item){return `${item.pval} ${item.fam==='PEP'?'aa':'g/mol'}`;}
+function auraHex(name){return (DB.auras&&DB.auras[name])||'var(--accent)';}
+/* deity name foregrounded; archetype + evolution removed */
+function kickFor(kind,item){return kind==='evo'?(item.custom?`CUSTOM ASCENSION · BASE ${item.assetName}`:'STACK DESIGN'):`${familyLabel(item.fam)} · ESSENCE ${essenceText(item)}`;}
+function nameFor(kind,item){return kind==='evo'?item.name:item.title;}
+function subFor(kind,item){return kind==='evo'?(item.custom?item.forged:item.sub.toUpperCase()):item.real;}
+function matchItem(kind,item,q){
+  if(!q) return true;
+  const key=norm(q), text=q.toLowerCase();
+  return kind==='evo'
+    ? (item.name+" "+item.sub+" "+item.forged).toLowerCase().includes(text)
+    : (item.real+" "+item.sym+" "+item.title+" "+familyLabel(item.fam)+" "+aliasesForSym(item.sym).join(" ")).toLowerCase().includes(text)
+      || aliasesForSym(item.sym).some(a=>a.includes(key));
+}
+
+function resolveCompound(q){
+  const key=norm(q);
+  if(compoundAliases.has(key)) return byCompoundSym.get(compoundAliases.get(key));
+  return DB.compounds.find(c=>[c.sym,c.real,c.title].some(v=>norm(v)===key));
+}
+
+function resolveStack(q){
+  const key=norm(q);
+  return DB.evolutions.find(e=>norm(e.name)===key || norm(e.forged)===key);
+}
+
+function exactStackFor(parts){
+  const expanded=expandParts(parts);
+  return DB.evolutions.find(e=>sameSet(expanded,e.comps));
+}
+
+function closestStackFor(parts){
+  const expanded=expandParts(parts);
+  let best=null, bestScore=-1;
+  DB.evolutions.forEach(e=>{
+    const eparts=expandParts(e.comps);
+    const overlap=eparts.filter(p=>expanded.includes(p)).length;
+    const score=(overlap/Math.max(1,eparts.length))+(overlap*.01);
+    if(overlap && score>bestScore){best=e;bestScore=score;}
+  });
+  return best || byEvoName.get("KLOW") || byEvoName.get("WOLVERINE") || DB.evolutions[0];
+}
+
+function stackFromParts(parts){
+  parts=expandParts(parts);
+  const exact=exactStackFor(parts);
+  if(exact) return exact;
+  const base=closestStackFor(parts);
+  const baseParts=expandParts(base.comps);
+  const added=parts.filter(p=>!baseParts.includes(p));
+  const addedText=added.length?added.map(compLabel).join(" + "):partsLabel(parts);
+  return {...base,custom:true,assetName:base.name,name:`${base.name} + ${addedText}`,
+    sub:"Custom Ascension",comps:parts,forged:partsLabel(parts),
+    lore:`${base.name} is the closest existing deity. The added traits come from ${addedText}.`};
+}
+
+function setSelected(kind,item){
+  if(!item) return;
+  activeItem = {kind,item};
+  const png = imgFor(kind,item), svg = svgFor(kind,item);
+  const fc=document.getElementById('featureCard'); fc.src=png; fc.alt=nameFor(kind,item);
+  document.getElementById('featureKind').textContent = kickFor(kind,item);
+  document.getElementById('featureName').textContent = nameFor(kind,item);
+  document.getElementById('featureSub').textContent = subFor(kind,item);
+  document.getElementById('selectedKind').textContent = kickFor(kind,item);
+  document.getElementById('selectedName').textContent = nameFor(kind,item);
+  document.getElementById('selectedSub').textContent = subFor(kind,item);
+  document.getElementById('selectedChain').innerHTML = item.custom
+    ? `<span class="custom-note">${item.lore}</span>`
+    : '"'+item.lore+'"';
+  renderSelectedChips();
+  markPickerSelection();
+}
+
+function defaultItemForMode(){
+  if(mode==='evo') return byEvoName.get('KLOW') || byEvoName.get('WOLVERINE') || DB.evolutions[0];
+  if(compoundFilter==='PEP' && byCompoundSym.get('Bp')) return byCompoundSym.get('Bp');
+  return DB.compounds.find(c=>compoundFilter==='ALL' || c.fam===compoundFilter) || DB.compounds[0];
+}
+
+function markPickerSelection(){
+  document.querySelectorAll('#pickerGrid .pick-card').forEach(card=>{
+    if(mode==='compound'){
+      card.classList.toggle('on',activeItem && activeItem.kind==='compound' && card.dataset.key===activeItem.item.sym);
+    }else{
+      const key=card.dataset.key;
+      card.classList.toggle('on',
+        (card.dataset.kind==='compound' && selectedStackParts.includes(key)) ||
+        (card.dataset.kind==='evo' && activeItem && activeItem.kind==='evo' && key===assetNameFor('evo',activeItem.item)));
+    }
+  });
+}
+
+function renderSelectedChips(){
+  const box=document.getElementById('selectedChips'); if(!box) return;
+  box.innerHTML="";
+  if(mode==='compound' && activeItem && activeItem.kind==='compound'){
+    const c=activeItem.item;
+    box.innerHTML=`<button class="chip on" type="button">${c.real}</button>`;
+    return;
+  }
+  if(mode==='evo'){
+    selectedStackParts.forEach(sym=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='chip remove';
+      b.innerHTML=`${compLabel(sym)} <span class="xmini">&times;</span>`;
+      b.onclick=()=>removeStackPart(sym);
+      box.appendChild(b);
+    });
+  }
+}
+
+function clearSearchInput(){
+  const input=document.getElementById('mythosSearch');
+  if(input) input.value="";
+  pickerQuery="";
+}
+
+function setBuilderEmpty(){
+  activeItem=null;
+  const fc=document.getElementById('featureCard');
+  if(fc){fc.removeAttribute('src');fc.alt="";}
+  document.getElementById('featureKind').textContent = "STACK BUILDER";
+  document.getElementById('featureName').textContent = "Choose compounds";
+  document.getElementById('featureSub').textContent = "Type HGH, KLOW, BPC-157 or pick below";
+  document.getElementById('selectedKind').textContent = "STACK BUILDER";
+  document.getElementById('selectedName').textContent = "No compounds selected";
+  document.getElementById('selectedSub').textContent = "Add compounds one at a time";
+  document.getElementById('selectedChain').textContent = "Matching stack deities will appear only when they contain every selected compound.";
+  renderSelectedChips();
+  markPickerSelection();
+}
+
+function renderQuickPicks(){
+  const qp=document.getElementById('quickPicks'); if(!qp) return;
+  qp.innerHTML="";
+  const picks = mode==='compound'
+    ? [["HGH","compound","Gh"],["BPC-157","compound","Bp"],["TB-500","compound","Tb"],["GHK-Cu","compound","Gk"],["KPV","compound","Kp"],["Retatrutide","compound","Re"]]
+    : [["KLOW","evo","KLOW"],["GLOW","evo","GLOW"],["Wolverine","evo","WOLVERINE"],["Overhaul","evo","THE OVERHAUL"],["HGH","compound","Gh"],["Retatrutide","compound","Re"]];
+  picks.forEach(([label,kind,key])=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='chip';
+    b.textContent=label;
+    b.onclick=()=> kind==='evo' ? chooseStack(byEvoName.get(key)) : chooseCompound(byCompoundSym.get(key));
+    qp.appendChild(b);
+  });
+}
+
+function chooseCompound(c){
+  if(!c) return;
+  if(mode==='evo'){
+    addStackPart(c.sym);
+    clearSearchInput();
+    renderPicker();
+  }else{
+    setSelected('compound',c);
+    clearSearchInput();
+    renderPicker();
+  }
+}
+
+function chooseStack(e){
+  if(!e) return;
+  selectedStackParts = expandParts(e.comps);
+  setSelected('evo',e);
+  clearSearchInput();
+  renderPicker();
+}
+
+function addStackPart(sym){
+  selectedStackParts = uniqueParts(selectedStackParts.concat(expandParts([sym])));
+  setSelected('evo',stackFromParts(selectedStackParts));
+}
+
+function removeStackPart(sym){
+  selectedStackParts = selectedStackParts.filter(p=>p!==sym);
+  if(!selectedStackParts.length){
+    const def=defaultItemForMode();
+    selectedStackParts=expandParts(def.comps||[]);
+    setSelected('evo',def);
+  }else{
+    setSelected('evo',stackFromParts(selectedStackParts));
+  }
+  renderPicker();
+}
+
+function chooseSearch(){
+  const q=document.getElementById('mythosSearch').value.trim();
+  if(!q) return;
+  const stack=resolveStack(q);
+  const comp=resolveCompound(q);
+  if(mode==='compound'){
+    if(comp) chooseCompound(comp);
+    else if(stack){mode='evo';document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x.dataset.mode==='evo'));chooseStack(stack);}
+  }else{
+    if(stack) chooseStack(stack);
+    else if(comp) addStackPart(comp.sym);
+  }
+  document.getElementById('mythosSearch').value="";
+  pickerQuery="";
+  renderPicker();
+}
+
+function clearChoices(){
+  clearSearchInput();
+  if(mode==='evo'){
+    selectedStackParts=[];
+    setBuilderEmpty();
+    renderPicker();
+  }else{
+    setSelected('compound',defaultItemForMode());
+    renderPicker();
+  }
+}
+
+function renderPicker(){
+  const pg=document.getElementById('pickerGrid');
+  pg.innerHTML="";
+  renderQuickPicks();
+  document.getElementById('compoundFilter').style.display = mode==='compound' ? 'grid' : 'none';
+  const q=pickerQuery.trim();
+  const requiredParts=expandParts(selectedStackParts);
+  const base = mode==='evo'
+    ? (q
+        ? orderedEvolutions()
+            .filter(e=>(!requiredParts.length || containsAllParts(e.comps,requiredParts)))
+            .map(e=>({kind:'evo',item:e}))
+            .concat(DB.compounds.filter(c=>!requiredParts.includes(c.sym)).map(c=>({kind:'compound',item:c})))
+        : (requiredParts.length
+            ? orderedEvolutions().filter(e=>containsAllParts(e.comps,requiredParts)).map(e=>({kind:'evo',item:e}))
+            : ["KLOW","GLOW","WOLVERINE","THE OVERHAUL","WORKHORSE","PRIME"].map(n=>byEvoName.get(n)).filter(Boolean).map(e=>({kind:'evo',item:e}))
+                .concat(["Gh","Bp","Tb","Gk","Kp","Re","Sg"].map(s=>byCompoundSym.get(s)).filter(Boolean).map(c=>({kind:'compound',item:c}))))
+      )
+    : (q ? DB.compounds.slice() : orderedCompounds()).map(c=>({kind:'compound',item:c}));
+  const items = base.filter(entry=>matchItem(entry.kind,entry.item,pickerQuery));
+  if(!items.length){
+    pg.innerHTML=`<div class="pick-empty">${mode==='evo'&&requiredParts.length?'No existing stack contains every selected compound. The closest custom deity is shown above.':'No matches for that search.'}</div>`;
+    if(mode==='evo' && requiredParts.length) setSelected('evo', stackFromParts(requiredParts));
+    else if(mode==='evo') setBuilderEmpty();
+    return;
+  }
+  items.forEach(entry=>{
+    const item=entry.item;
+    const entryKind=entry.kind;
+    const pname=entryKind==='evo'?item.name:compoundResultName(item,pickerQuery);
+    const psub=entryKind==='evo'?`${item.sub.toUpperCase()} · ${partsLabel(item.comps)}`:item.title;
+    const d=document.createElement('div');
+    d.className='pick-card';
+    d.dataset.kind=entryKind;
+    d.dataset.key=itemKey(entryKind,item);
+    d.setAttribute('role','button');d.tabIndex=0;
+    d.innerHTML=`<div class="pname">${pname}</div>
+      <div class="psub">${psub}</div>`;
+    d.onclick=()=> entryKind==='evo' ? chooseStack(item) : chooseCompound(item);
+    d.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();entryKind==='evo'?chooseStack(item):chooseCompound(item);}};
+    pg.appendChild(d);
+  });
+  if(mode==='compound'){
+    const inList = activeItem && activeItem.kind==='compound' && items.some(entry=>entry.kind==='compound'&&entry.item.sym===activeItem.item.sym);
+    if(inList) setSelected(activeItem.kind,activeItem.item);
+    else setSelected('compound', items[0]?.item || defaultItemForMode());
+  }else{
+    if(requiredParts.length) setSelected('evo', stackFromParts(requiredParts));
+    else setBuilderEmpty();
+  }
+  markPickerSelection();
+}
+
+function makeCard(kind,item,featured=false){
+  const d=document.createElement('div');
+  d.className=`card ${kind==='evo'?'evo':''} ${featured?'feature':''}`;
+  if(kind==='evo'){
+    d.innerHTML=`<img loading="lazy" src="${eImg(item.name)}" alt="${item.name}">
+      <div class="cap"><div class="cn">${item.name}</div>
+      <div class="cr">${item.sub.toUpperCase()}</div>
+      <div class="kind">STACK DESIGN</div></div>`;
+    d.onclick=()=>openItem('evo',item);
+  } else {
+    d.innerHTML=`<img loading="lazy" src="${cImg(item.sym)}" alt="${item.real}">
+      <div class="cap"><div class="cn">${item.title}</div>
+      <div class="cr">${item.real} · ${familyLabel(item.fam)}</div>
+      <div class="kind">ESSENCE ${essenceText(item)}</div></div>`;
+    d.onclick=()=>openItem('compound',item);
+  }
+  return d;
+}
+
+function renderGrids(){
+  renderPicker();
+}
+
+function applyLightbox(){
+  if(!activeItem) return;
+  const {kind,item}=activeItem;
+  const isEvo=kind==='evo';
+  document.getElementById('lbImg').src=deityUrl(kind,item);
+  document.getElementById('lbImg').alt=nameFor(kind,item);
+  document.getElementById('lbName').textContent=nameFor(kind,item);
+  document.getElementById('lbSub').textContent=isEvo?item.sub.toUpperCase():`${item.real} · ${familyLabel(item.fam)}`;
+  document.getElementById('lbLore').textContent='"'+item.lore+'"';
+  const essRow=document.getElementById('lbEssRow');
+  if(isEvo){essRow.style.display='none';}
+  else{essRow.style.display='';document.getElementById('lbPval').textContent=essenceText(item);}
+  document.getElementById('lbAura').innerHTML=`<i class="aura-dot" style="color:${auraHex(item.aura)};background:${auraHex(item.aura)}"></i>${item.aura.toUpperCase()}`;
+}
+
+function openItem(kind,item){
+  mode=kind==='evo'?'evo':'compound';
+  if(kind==='compound') compoundFilter=item.fam || 'PEP';
+  if(kind==='evo') selectedStackParts=expandParts(item.comps||[]);
+  pickerQuery=""; const si=document.getElementById('mythosSearch'); if(si) si.value="";
+  document.querySelectorAll('#designMode button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
+  document.querySelectorAll('#compoundFilter button').forEach(b=>b.classList.toggle('on',b.dataset.fam===compoundFilter));
+  activeItem={kind,item};
+  renderPicker();
+  setSelected(kind,item);
+  applyLightbox();
+  document.getElementById('lb').classList.add('show');
+}
+
+document.getElementById('lbX').onclick=()=>document.getElementById('lb').classList.remove('show');
+document.getElementById('lb').onclick=(ev)=>{if(ev.target.id==='lb')document.getElementById('lb').classList.remove('show');};
+document.querySelectorAll('#styleToggle button').forEach(b=>b.onclick=()=>{
+  style=b.dataset.s;
+  document.querySelectorAll('#styleToggle button').forEach(x=>x.classList.toggle('on',x===b));
+  document.body.classList.toggle('arcane',style==='arcane');
+  renderGrids();
+  if(document.getElementById('lb').classList.contains('show')){
+    applyLightbox();
+  }
+});
+document.querySelectorAll('#designMode button').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  selectedStackParts=[];
+  clearSearchInput();
+  if(mode==='evo') setBuilderEmpty();
+  else activeItem=null;
+  document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x===b));
+  renderPicker();
+});
+document.querySelectorAll('#compoundFilter button').forEach(b=>b.onclick=()=>{
+  compoundFilter=b.dataset.fam;
+  document.querySelectorAll('#compoundFilter button').forEach(x=>x.classList.toggle('on',x===b));
+  mode='compound';
+  document.querySelectorAll('#designMode button').forEach(x=>x.classList.toggle('on',x.dataset.mode==='compound'));
+  activeItem=null;
+  selectedStackParts=[];
+  renderPicker();
+});
+document.getElementById('mythosSearch').addEventListener('input',e=>{pickerQuery=e.target.value;renderPicker();});
+document.getElementById('mythosSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chooseSearch();}});
+document.getElementById('featurePanel').onclick=()=>{if(activeItem) openItem(activeItem.kind,activeItem.item);};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('lb').classList.remove('show');});
+document.getElementById('viewDetails').onclick=()=>{if(activeItem) openItem(activeItem.kind,activeItem.item);};
+document.getElementById('clearChoices').onclick=clearChoices;
+
+/* ---------- downloads: deity PNG, self-contained card SVG, card PNG ---------- */
+function baseName(kind,item){return kind==='evo'?assetNameFor(kind,item).replace(/ /g,'_'):item.sym;}
+function artStyle(){return style==='arcane'?'anime':'mythic';}
+function deityUrl(kind,item){return `mythic_art/art_${baseName(kind,item)}_${artStyle()}.png?v=${ASSET_V}`;}
+function triggerDownload(href,name){const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove();}
+async function fetchDataURI(u){const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});}
+async function selfContainedCardSVG(kind,item){
+  const r=await fetch(svgFor(kind,item)); if(!r.ok) throw new Error('HTTP '+r.status);
+  let svg=await r.text();
+  const uri=await fetchDataURI(deityUrl(kind,item));   // inline the deity art so the SVG works offline
+  return svg.replace(/(?:xlink:href|href)="[^"]*mythic_art[^"]*"/g,`href="${uri}"`);
+}
+async function downloadDeityPNG(kind,item){
+  try{const r=await fetch(deityUrl(kind,item));if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();const u=URL.createObjectURL(b);
+    triggerDownload(u,`humanplus_${baseName(kind,item)}_deity_${artStyle()}.png`);setTimeout(()=>URL.revokeObjectURL(u),1500);
+  }catch(e){alert("Deity download failed: "+e.message);}
+}
+async function downloadCardSVG(kind,item){
+  try{const svg=await selfContainedCardSVG(kind,item);const u=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+    triggerDownload(u,`humanplus_${baseName(kind,item)}_card_${style}.svg`);setTimeout(()=>URL.revokeObjectURL(u),1500);
+  }catch(e){alert("Card SVG export failed: "+e.message);}
+}
+async function downloadCardPNG(kind,item){
+  try{const svg=await selfContainedCardSVG(kind,item);const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+    const img=new Image();
+    img.onload=()=>{const W=2000,H=Math.round(W*1400/1200);const c=document.createElement('canvas');c.width=W;c.height=H;
+      c.getContext('2d').drawImage(img,0,0,W,H);
+      c.toBlob(b=>{const u=URL.createObjectURL(b);triggerDownload(u,`humanplus_${baseName(kind,item)}_card_${style}.png`);
+        setTimeout(()=>{URL.revokeObjectURL(u);URL.revokeObjectURL(url);},1500);},'image/png');};
+    img.onerror=()=>{URL.revokeObjectURL(url);alert("Card PNG export failed — try Card SVG.");};
+    img.src=url;
+  }catch(e){alert("Card PNG export failed: "+e.message);}
+}
+function wireDl(id,fn){const el=document.getElementById(id);if(el)el.onclick=()=>{if(activeItem)fn(activeItem.kind,activeItem.item);};}
+wireDl('dlDeityPng',downloadDeityPNG);wireDl('dlCardSvg',downloadCardSVG);wireDl('dlCardPng',downloadCardPNG);
+wireDl('lbDeityPng',downloadDeityPNG);wireDl('lbCardSvg',downloadCardSVG);wireDl('lbCardPng',downloadCardPNG);
+
+renderGrids();
+</script>
+
+<footer class="site-footer">
+  <div class="foot-brand">HUMAN<span>+</span></div>
+  <nav class="foot-nav" aria-label="Footer">
+    <a class="primary" href="index.html">&larr; Periodic table (main line)</a>
+    <a href="home.html">Switch series</a>
+  </nav>
+  <p class="foot-fine">MYTHOS &middot; THE LEGEND LINE &middot; CONCEPT APPAREL</p>
+</footer>
+<script src="logo-kit.js?v=3"></script>
+</body>
+</html>

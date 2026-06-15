@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <!-- HUMAN+ sticker : KPV -->
+  <rect x="90" y="90" width="1020" height="1020" rx="40" fill="none" stroke="#2BE8B0" stroke-width="16"/>
+  <line x1="90" y1="300" x2="1110" y2="300" stroke="#2BE8B0" stroke-width="8" stroke-opacity="0.85"/>
+  <text x="135" y="215" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="96" font-weight="700" fill="#2BE8B0">3</text>
+  <text x="140" y="270" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="34" font-weight="700" letter-spacing="3" fill="#FFFFFF" fill-opacity="0.85">AMINO ACIDS</text>
+  <text x="1070" y="160" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="36" font-weight="700" letter-spacing="3" text-anchor="end" fill="#FFFFFF" fill-opacity="0.85">PEPTIDE</text>
+  
+  <text x="600.0" y="630" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="360" font-weight="800" text-anchor="middle" fill="#FFFFFF">Kp</text>
+  <text x="600.0" y="768" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="88" font-weight="800" text-anchor="middle" fill="#2BE8B0">KPV</text>
+  <text x="600.0" y="820" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.85">A-MSH FRAGMENT</text>
+  <text x="600.0" y="880" font-family="DejaVu Sans Mono, Liberation Mono, monospace" font-size="38" font-weight="700" letter-spacing="4" text-anchor="middle" fill="#FFFFFF">INFLAMMATION OFF</text>
+</svg>
