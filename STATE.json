@@ -1,0 +1,12 @@
+{
+  "iteration": 13,
+  "status": "finalized",
+  "approach": "single-part reclined lip-cradle (no cover): pens nestle in, lift out the front over an integral lip",
+  "features": ["integral continuous front-lip curbs", "solid base (no knife-edge toe)", "end caps both ends (anti-tip)", "finger scoop per cradle", "dial-relief pocket at one end"],
+  "retention": "geometric/gravity: lip rises to the pen centerline; no snap, nothing tolerance-critical; one connected solid piece",
+  "designs": {
+    "lc4_secure": {"pens": 4, "ramp_deg": 36, "in": [6.77, 3.09, 2.61], "watertight": true, "pieces": 1, "overhang": 0.028, "note": "4-pen secure (depth 3.09in, over old 2.5in spec by choice)"},
+    "lc3_shallow": {"pens": 3, "ramp_deg": 36, "in": [6.77, 2.38, 2.09], "watertight": true, "pieces": 1, "overhang": 0.028, "note": "3-pen, fits the 2.5in width"},
+    "lc4_steep":  {"pens": 4, "ramp_deg": 56, "in": [6.77, 2.43, 3.40], "watertight": true, "pieces": 1, "overhang": 0.047, "note": "4-pen within 2.5in width but taller, lighter hold"}
+  }
+}

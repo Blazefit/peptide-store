@@ -1,0 +1,532 @@
+{
+  "pass_count": 30,
+  "results": [
+    {
+      "id": "d1_cradle",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.4,
+      "H": 22.4,
+      "watertight": true,
+      "overhang": 0.0,
+      "note": ""
+    },
+    {
+      "id": "d2_capsule",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.4,
+      "H": 28.31,
+      "watertight": true,
+      "overhang": 0.1231,
+      "note": ""
+    },
+    {
+      "id": "d3_modular",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 28.0,
+      "H": 22.4,
+      "watertight": true,
+      "overhang": 0.0,
+      "note": ""
+    },
+    {
+      "id": "d4_magnetic",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 49.4,
+      "H": 38.0,
+      "watertight": true,
+      "overhang": 0.0008,
+      "note": ""
+    },
+    {
+      "id": "d5_vialcombo",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 42.6,
+      "H": 24.0,
+      "watertight": true,
+      "overhang": 0.0,
+      "note": ""
+    },
+    {
+      "id": "f1_body",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 61.79,
+      "H": 92.0,
+      "watertight": true,
+      "overhang": 0.0439,
+      "note": ""
+    },
+    {
+      "id": "f1_gate",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 3.0,
+      "H": 111.3,
+      "watertight": true,
+      "overhang": 0.0175,
+      "note": ""
+    },
+    {
+      "id": "f2_body",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 62.35,
+      "H": 116.42,
+      "watertight": true,
+      "overhang": 0.0573,
+      "note": ""
+    },
+    {
+      "id": "f2_gate",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 3.0,
+      "H": 133.8,
+      "watertight": true,
+      "overhang": 0.0153,
+      "note": ""
+    },
+    {
+      "id": "f3_body",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 55.39,
+      "H": 94.98,
+      "watertight": true,
+      "overhang": 0.0551,
+      "note": ""
+    },
+    {
+      "id": "f3_gate",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 3.0,
+      "H": 111.3,
+      "watertight": true,
+      "overhang": 0.0175,
+      "note": ""
+    },
+    {
+      "id": "g1_diag4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 60.0,
+      "H": 85.31,
+      "watertight": true,
+      "overhang": 0.1189,
+      "note": ""
+    },
+    {
+      "id": "g2_column4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 58.0,
+      "H": 133.4,
+      "watertight": true,
+      "overhang": 0.1402,
+      "note": ""
+    },
+    {
+      "id": "g3_diag5",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 62.0,
+      "H": 110.31,
+      "watertight": true,
+      "overhang": 0.1392,
+      "note": ""
+    },
+    {
+      "id": "lc3_shallow",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 60.41,
+      "H": 53.17,
+      "watertight": true,
+      "overhang": 0.0285,
+      "note": ""
+    },
+    {
+      "id": "lc4_secure",
+      "status": "FAIL",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": false,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 78.61,
+      "H": 66.39,
+      "watertight": true,
+      "overhang": 0.0283,
+      "note": ""
+    },
+    {
+      "id": "lc4_steep",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 61.75,
+      "H": 86.36,
+      "watertight": true,
+      "overhang": 0.0467,
+      "note": ""
+    },
+    {
+      "id": "q1_grid4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.4,
+      "H": 57.84,
+      "watertight": true,
+      "overhang": 0.1468,
+      "note": ""
+    },
+    {
+      "id": "q2_tower4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.0,
+      "H": 111.26,
+      "watertight": true,
+      "overhang": 0.145,
+      "note": ""
+    },
+    {
+      "id": "q3_diag4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 60.0,
+      "H": 87.43,
+      "watertight": true,
+      "overhang": 0.1169,
+      "note": ""
+    },
+    {
+      "id": "q4_hybrid4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.4,
+      "H": 49.11,
+      "watertight": true,
+      "overhang": 0.0889,
+      "note": ""
+    },
+    {
+      "id": "q5_rack4",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.83,
+      "H": 87.64,
+      "watertight": true,
+      "overhang": 0.0395,
+      "note": ""
+    },
+    {
+      "id": "r1_ends",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.83,
+      "H": 87.64,
+      "watertight": true,
+      "overhang": 0.0383,
+      "note": ""
+    },
+    {
+      "id": "r2_scoop",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.83,
+      "H": 87.64,
+      "watertight": true,
+      "overhang": 0.0383,
+      "note": ""
+    },
+    {
+      "id": "r3_clinic",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 62.21,
+      "H": 85.01,
+      "watertight": true,
+      "overhang": 0.0323,
+      "note": ""
+    },
+    {
+      "id": "r4_compact",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 45.91,
+      "H": 92.06,
+      "watertight": true,
+      "overhang": 0.0526,
+      "note": ""
+    },
+    {
+      "id": "r5_max5",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 55.06,
+      "H": 112.62,
+      "watertight": true,
+      "overhang": 0.0531,
+      "note": ""
+    },
+    {
+      "id": "r6_snap",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 58.14,
+      "H": 87.64,
+      "watertight": true,
+      "overhang": 0.0487,
+      "note": ""
+    },
+    {
+      "id": "s1_compact",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 46.85,
+      "H": 92.06,
+      "watertight": true,
+      "overhang": 0.0528,
+      "note": ""
+    },
+    {
+      "id": "s2_clinic",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 60.94,
+      "H": 86.36,
+      "watertight": true,
+      "overhang": 0.0408,
+      "note": ""
+    },
+    {
+      "id": "s3_max5",
+      "status": "PASS",
+      "checks": {
+        "L<=177.8": true,
+        "W<=63.5": true,
+        "H<=152.4": true,
+        "watertight": true,
+        "overhang<=0.15": true
+      },
+      "L": 172.0,
+      "W": 56.0,
+      "H": 112.62,
+      "watertight": true,
+      "overhang": 0.0527,
+      "note": ""
+    }
+  ]
+}
