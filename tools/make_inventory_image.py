@@ -46,7 +46,6 @@ ITEMS = [
     ("Tesamorelin", "20mg"),
     ("Thymosin Alpha-1", "10mg"),
     ("Vilon", "20mg"),
-    ("BAC Water", "10mL"),
 ]
 
 # Layout — two columns to keep it compact and screenshot-friendly
