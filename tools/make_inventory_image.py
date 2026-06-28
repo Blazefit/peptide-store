@@ -18,7 +18,6 @@ ITEMS = [
     ("KLOW", "80mg"),
     ("KPV", "10mg"),
     ("LL-37", "5mg"),
-    ("Melatonin", "10mg"),
     ("MOTS-c", "10mg"),
     ("MOTS-c", "40mg"),
     ("MT-2", "10mg"),
