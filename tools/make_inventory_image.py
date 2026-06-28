@@ -34,7 +34,6 @@ ITEMS = [
     ("Selank", "11mg"),
     ("Semax", "5mg"),
     ("SLU-PP-322", "5mg"),
-    ("Somatropin (HGH)", "15IU"),
     ("Somatropin (HGH)", "24IU"),
     ("Somatropin (HGH)", "36IU"),
     ("SS-31", "10mg"),
