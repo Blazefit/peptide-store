@@ -13,7 +13,6 @@ ITEMS = [
     ("DSIP", "5mg"),
     ("Epithalon", "10mg"),
     ("GHK-Cu", "50mg"),
-    ("GLOW", "70mg"),
     ("Glutathione", "1500mg"),
     ("Ipamorelin", "10mg"),
     ("KLOW", "80mg"),
